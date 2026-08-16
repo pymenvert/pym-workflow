@@ -1,0 +1,19 @@
+# Secrets — ne doivent jamais entrer dans ce repo
+.env
+.env.*
+*.pem
+*.key
+*.p12
+
+# Python
+__pycache__/
+*.pyc
+
+# Système
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Éditeurs
+.vscode/
+.idea/

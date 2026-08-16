@@ -1,0 +1,15 @@
+{
+  "name": "pym",
+  "owner": {
+    "name": "Pym",
+    "url": "https://github.com/pymenvert"
+  },
+  "description": "Marketplace perso — workflow de dev solo pour Claude Code",
+  "plugins": [
+    {
+      "name": "flow",
+      "source": "./plugins/flow",
+      "description": "Workflow de dev solo : /flow:init-project, /flow:new-feature, /flow:ship, agent code-reviewer, hook de formatage"
+    }
+  ]
+}
