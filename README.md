@@ -59,9 +59,13 @@ Chacun a l'ordre explicite de ne rien dire quand il ne trouve rien. Un rapport v
 
 Un hook PostToolUse formate chaque fichier modifié — `ruff` ou `black` pour le Python, `prettier` pour le reste. Si aucun formateur n'est installé, le hook ne fait rien et ne bloque jamais.
 
-Pour le rendre actif : `npm install -g prettier`, et `pip install ruff` si tu fais du Python.
+**Il ne se déclenche que si le projet a adopté le formateur** — `.prettierrc` (ou une clé `prettier` dans `package.json`), `ruff.toml` ou `[tool.ruff]` dans `pyproject.toml`. Sans configuration, il ne touche à rien.
 
-Deux choix volontaires dans ce hook :
+C'est délibéré : ce hook est installé en scope utilisateur, donc actif dans *tous* tes projets, y compris ceux écrits avant lui. Reformater aux réglages par défaut un projet qui n'a jamais demandé prettier produirait un diff énorme et parasite. Le style d'un projet appartient au projet.
+
+Pour l'activer quelque part : `npm install -g prettier` (une fois sur la machine), puis un `.prettierrc` dans le projet concerné.
+
+Deux autres choix volontaires :
 
 - **Les `.md` sont exclus.** Reformater de la prose (`CLAUDE.md`, `README`) à chaque écriture réaligne les tableaux et rebrasse les puces : plus pénible qu'utile.
 - **Le script est en PowerShell**, pas en bash ni en Python. Sous Windows le `bash` du PATH est le lanceur WSL (souvent cassé), `jq` est absent, et le Python de l'alias WindowsApps tourne en conteneur applicatif avec `%APPDATA%` virtualisé — il ne voit donc pas les outils installés par `npm install -g`. Sur un poste non-Windows, remplacer la commande de `hooks/hooks.json` par un équivalent shell.

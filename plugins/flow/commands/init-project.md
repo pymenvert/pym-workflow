@@ -4,6 +4,18 @@ description: Initialise le projet — détecte la stack, écrit le profil que to
 
 Mets ce projet au standard. L'objectif n'est pas de créer des fichiers, c'est qu'à la fin **une machine vérifie le code à ma place** et que les autres commandes `/flow:*` sachent comment travailler ici.
 
+## Règle absolue : ne rien écraser
+
+Cette commande sera souvent lancée sur un projet qui existe déjà et qui marche. **Tu n'écrases aucun fichier existant.** Pour chacun de ceux que tu voudrais créer — `CLAUDE.md`, `.gitignore`, `.github/workflows/ci.yml`, configuration de tests —, s'il est déjà là :
+
+1. lis-le,
+2. montre-moi le diff exact de ce que tu ajouterais,
+3. attends mon accord.
+
+Un `CLAUDE.md` écrit à la main contient des choses que tu ne peux pas deviner. Complète-le, ne le remplace pas. En cas de doute, demande — c'est moins coûteux que de reconstituer un fichier perdu.
+
+Vérifie aussi `git status` en début de commande : si le worktree n'est pas propre, signale-le-moi et attends avant d'écrire quoi que ce soit. Un dépôt propre, c'est ma garantie de pouvoir tout annuler.
+
 1. **Explore et constate.** Langages, frameworks, gestionnaire de paquets, scripts déjà définis, tests existants. Ne suppose rien : ouvre les fichiers de configuration. Détermine le **type de projet** — `cli`, `desktop`, `web`, `service` ou `script` — car c'est lui qui décidera plus tard s'il faut juger une interface, et laquelle.
 
 2. **Git.** `git init` et commit initial si ce n'est pas déjà un dépôt.
