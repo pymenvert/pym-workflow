@@ -9,7 +9,7 @@ claude plugin marketplace add pymenvert/pym-workflow
 claude plugin install flow@pym --scope user
 ```
 
-`--scope user` = disponible dans tous les projets. Le repo étant privé, vérifier une fois que `gh auth setup-git` a été exécuté (Claude Code utilise les credentials git existants).
+`--scope user` = disponible dans tous les projets. Le repo est privé : Claude Code réutilise les identifiants git déjà en place. Sous Windows, le gestionnaire d'identifiants installé par GitHub Desktop suffit — rien à configurer, et `gh` n'est pas nécessaire pour cette étape.
 
 ## Utilisation
 
@@ -19,7 +19,14 @@ claude plugin install flow@pym --scope user
 | `/flow:new-feature <desc>` | Branche dédiée (ou worktree sur demande), exploration du code, plan court à valider, puis implémentation |
 | `/flow:ship` | Checks (format/lint/typecheck/tests), review du diff par l'agent `code-reviewer`, commit atomique, push, PR |
 
-S'y ajoutent : l'agent `code-reviewer` (review indépendante du diff) et un hook PostToolUse qui formate chaque fichier modifié (ruff/black/prettier s'ils sont présents, sinon il ne fait rien).
+S'y ajoutent : l'agent `code-reviewer` (review indépendante du diff) et un hook PostToolUse qui formate chaque fichier modifié — `ruff` ou `black` pour le Python, `prettier` pour le reste. Si aucun formateur n'est installé, le hook ne fait rien et ne bloque jamais.
+
+Pour le rendre actif : `npm install -g prettier`, et `pip install ruff` si tu fais du Python.
+
+Deux choix volontaires dans ce hook :
+
+- **Les `.md` sont exclus.** Reformater de la prose (`CLAUDE.md`, `README`) à chaque écriture réaligne les tableaux et rebrasse les puces : plus pénible qu'utile.
+- **Le script est en PowerShell**, pas en bash ni en Python. Sous Windows le `bash` du PATH est le lanceur WSL (souvent cassé), `jq` est absent, et le Python de l'alias WindowsApps tourne en conteneur applicatif avec `%APPDATA%` virtualisé — il ne voit donc pas les outils installés par `npm install -g`. Sur un poste non-Windows, remplacer la commande de `hooks/hooks.json` par un équivalent shell.
 
 Cycle type : `/flow:init-project` → `/flow:new-feature …` → dev → `/flow:ship`. Entre deux tâches sans rapport : `/clear`.
 
@@ -35,14 +42,20 @@ Modifier ce repo, commit, push. Puis dans Claude Code : `/plugin marketplace upd
 {
   "permissions": {
     "deny": [
-      "Read(./.env)",
-      "Read(./.env.*)",
-      "Edit(./.env)",
-      "Edit(./.env.*)"
+      "Read(**/.env)",
+      "Read(**/.env.*)",
+      "Edit(**/.env)",
+      "Edit(**/.env.*)"
     ]
   }
 }
 ```
+
+Trois précisions qui comptent :
+
+- Écrire `Read(./.env)` serait une erreur : la forme `./` est ancrée au dossier courant et ne bloquerait ni `config/.env` ni `packages/api/.env`. La forme `**/.env` suit la syntaxe gitignore et couvre toutes les profondeurs.
+- Une règle `deny` sur `Read` bloque aussi `Edit` et `Write` sur le même chemin. Les règles `Edit` restent utiles : elles couvrent `NotebookEdit`, que `Read` ne couvre pas.
+- Ces règles s'appliquent aux outils fichiers de Claude et aux commandes Bash reconnues (`cat`, `head`, `sed`…). Elles ne bloquent pas un script Python ou Node qui ouvrirait le fichier lui-même.
 
 `~/.claude/CLAUDE.md` — règles universelles :
 
