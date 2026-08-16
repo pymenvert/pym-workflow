@@ -1,7 +1,7 @@
 {
   "name": "flow",
-  "version": "0.2.0",
-  "description": "Workflow de dev solo standardisé : branche dédiée, plan court, implémentation, review, PR",
+  "version": "0.3.0",
+  "description": "Workflow de dev solo : spec → design → implémentation → vérification bloquante → livraison, avec quatre agents de revue",
   "author": {
     "name": "Pym"
   }
