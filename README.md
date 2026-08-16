@@ -82,7 +82,14 @@ Ce que ce cycle ne promet pas : « zéro bug ». Ça n'existe pas. Ce qu'il chan
 
 ## Mettre à jour le workflow
 
-Modifier ce repo, commit, push. Puis dans Claude Code : `/plugin marketplace update pym`, et `/reload-plugins` si les hooks ont changé. (L'auto-update en arrière-plan peut échouer sur un repo privé en HTTPS ; la mise à jour manuelle utilise tes credentials et fonctionne toujours.)
+Quatre étapes, dans cet ordre. Les deux premières sont contre-intuitives et sautent silencieusement si on les oublie.
+
+1. **Modifier le repo, puis bumper `version` dans `plugins/flow/.claude-plugin/plugin.json`.** Ce champ **épingle** le plugin : tant qu'il ne change pas, aucune mise à jour n'est proposée, même si le dépôt distant a changé. Sans bump, tout le reste est sans effet.
+2. **Commit et push.**
+3. **`/plugin marketplace update pym`**, puis `/plugin update flow@pym`. (L'auto-update en arrière-plan peut échouer sur un dépôt privé en HTTPS ; la mise à jour manuelle utilise tes identifiants et fonctionne toujours.)
+4. **Ouvrir une NOUVELLE conversation.** Les plugins sont lus au démarrage d'une conversation, une fois pour toutes. Une discussion déjà ouverte gardera pour toujours la liste de commandes qu'elle avait à sa naissance — redémarrer l'application n'y change rien, elle reste accrochée à sa session d'origine.
+
+Pour vérifier qu'une mise à jour a bien pris, taper `/flow:` dans une conversation neuve : les six commandes doivent apparaître dans l'autocomplétion.
 
 ## Réglages globaux recommandés (une fois)
 
