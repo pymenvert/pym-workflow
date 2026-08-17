@@ -14,7 +14,7 @@ Cette commande sera souvent lancée sur un projet qui existe déjà et qui march
 
 Un `CLAUDE.md` écrit à la main contient des choses que tu ne peux pas deviner. Complète-le, ne le remplace pas. En cas de doute, demande — c'est moins coûteux que de reconstituer un fichier perdu.
 
-Vérifie aussi `git status` en début de commande : si le worktree n'est pas propre, signale-le-moi et attends avant d'écrire quoi que ce soit. Un dépôt propre, c'est ma garantie de pouvoir tout annuler.
+Vérifie aussi `git status` en début de commande : si des fichiers sont déjà modifiés et pas encore enregistrés, signale-le-moi et attends avant d'écrire quoi que ce soit. Un dossier propre — aucune modification en attente dans GitHub Desktop — c'est ma garantie de pouvoir tout annuler d'un clic.
 
 1. **Explore et constate.** Langages, frameworks, gestionnaire de paquets, scripts déjà définis, tests existants. Ne suppose rien : ouvre les fichiers de configuration. Détermine le **type de projet** — `cli`, `desktop`, `web`, `service` ou `script` — car c'est lui qui décidera plus tard s'il faut juger une interface, et laquelle.
 
