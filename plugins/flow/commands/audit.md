@@ -1,0 +1,60 @@
+---
+description: Audit de fond de tout le programme — la dérive, les angles morts, ce qui est devenu faux. Rare et cher.
+argument-hint: (rien), ou un périmètre à examiner
+---
+
+Audit de fond : $ARGUMENTS
+
+Ce n'est pas `/flow:verify`. La porte examine **ce qui vient de changer** ; toi tu examines **tout le programme**, et tu cherches ce qu'aucun diff ne peut révéler : la dérive lente, les angles morts, et les affirmations devenues fausses.
+
+Commande **chère et rare** : à lancer entre deux versions, jamais à chaque tâche. Annonce-moi sa durée avant de commencer.
+
+## Mesure avant de juger
+
+Établis des faits avec Bash et Grep avant d'émettre le moindre avis : fichiers les plus gros, fonctions les plus longues, modules importés partout, duplication, code exporté jamais utilisé, dépendances circulaires. Un audit qui commence par une opinion ne vaut rien.
+
+## Les cinq questions
+
+1. **Qu'est-ce qui est testé contre une doublure et jamais contre la réalité ?** C'est l'angle mort le plus coûteux qui existe : une doublure accepte exactement ce qu'on l'a écrite pour accepter, donc elle valide ta compréhension du service, pas le service. Un projet peut avoir trois cents tests verts et n'avoir jamais rien fait fonctionner pour de vrai. Liste ce qui n'a jamais rencontré le vrai service, le vrai binaire, la vraie machine de destination.
+
+2. **Quels tests ne protègent rien ?** Un test qui reste vert quand on casse le code qu'il couvre est une illusion de couverture — et elle est pire que l'absence de test, parce qu'on s'y fie. Si le projet a un outil de mutation, lance-le. Sinon, casse délibérément deux ou trois lignes critiques et vérifie que la suite tombe. Rends compte de ce qui n'est pas tombé.
+
+3. **Qu'est-ce que le programme dit de lui-même qui est devenu faux ?** Textes d'interface, messages d'erreur, README, aide en ligne, notice. Une explication vieillit sans qu'aucun test ne s'en aperçoive — et c'est précisément ce que l'utilisateur lit.
+
+4. **Quelle partie sera la plus pénible à modifier dans six mois ?** Nomme-la, avec la raison. Une seule.
+
+5. **Qu'est-ce qui a été corrigé sans que la cause soit écrite ?** Un défaut réglé dont la leçon n'est consignée nulle part reviendra sous une autre forme.
+
+## Les agents, sur le fond
+
+Lance `architect` en mode dérive structurelle, `test-engineer` sur les chemins critiques du projet entier, et `ux-reviewer` sur l'interface complète — pas seulement les écrans récemment touchés. Préviens-moi : plusieurs minutes.
+
+## Rendu
+
+Trois sections, hiérarchisées :
+
+- **À corriger avant la prochaine version** — avec la conséquence concrète si on ne le fait pas
+- **Dette assumable** — à noter, à supporter sciemment
+- **Ce que cet audit n'a pas pu voir** — obligatoire, en citant nommément les conditions réelles qui manquent
+
+Puis **écris tout dans `docs/reste-a-faire.md`**, sous un titre daté. Un audit qui ne survit pas à la conversation n'a servi à rien.
+
+Et si l'audit dégage une leçon générale — pas un défaut, une règle —, propose-moi de l'ajouter au `CLAUDE.md` du projet. C'est ce qui évite de la réapprendre au prix fort.
+
+---
+
+## Arrêts et attentes
+
+**Chaque fois que tu t'arrêtes pour attendre ma réponse**, commence par « **J'attends ta réponse.** » Puis la question en clair, la conséquence de chaque réponse possible, et les options quand il y en a. N'enchaîne jamais sur la suite sans avoir la réponse. Et ne me dis pas que rien n'a été écrit si des fichiers l'ont déjà été — dis exactement où on en est.
+
+**Avant tout passage long et muet** — agents de revue, suite de tests, surveillance de la CI —, annonce-le en une ligne, avec sa durée approximative. Un silence long ressemble à un plantage, et ma réaction sera de taper une autre commande.
+
+## Fin de réponse — obligatoire
+
+Termine toujours ta dernière réponse par ces trois lignes. Les titres ne changent jamais ; le contenu décrit ce qui s'est réellement passé. **Si tu t'es arrêté en route, dis-le ici** — n'annonce jamais un travail qui n'a pas eu lieu.
+
+**Où on en est** — un fait constaté, puis sa conséquence. Deux lignes maximum.
+**Ensuite** — UNE seule chose : une commande à lancer, ou une phrase à me répondre. Jamais deux options que tu pourrais trancher toi-même en regardant le projet — tu l'as lu, moi non. En revanche, quand la réponse ne dépend que de moi (« est-ce que je considère ce travail comme fini ? », « laquelle de ces deux formes je préfère ? »), demande — mais constate d'abord, et présente ce que tu as vu en même temps que ta question.
+**Si tu hésites** — `/flow:guide` : il regarde où j'en suis et me donne la seule chose à faire ensuite. Il ne modifie rien, ne lance aucun test, et coûte trois secondes.
+
+Aucun terme technique sans sa traduction dans la même phrase. Je travaille dans GitHub Desktop : « branche », « commit », « CI », « pull request », « diff » demandent trois mots d'explication au passage, pas un renvoi à la documentation.

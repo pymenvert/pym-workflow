@@ -26,6 +26,17 @@ claude plugin install flow@pym --scope user
 
 Les étapes intermédiaires savent s'effacer : sur une faute de frappe, `/flow:spec` te dira d'aller directement à `/flow:new-feature` plutôt que de produire de la paperasse.
 
+## Hors cycle — plus rare, plus cher
+
+Deux commandes ne servent pas à une tâche mais à une version :
+
+| Commande | Rôle | Quand |
+|---|---|---|
+| `/flow:audit` | Audit de fond de **tout** le programme : dérive lente, angles morts, ce que l'app dit d'elle-même qui est devenu faux | Entre deux versions |
+| `/flow:release` | Cohérence de tous les numéros de version, CI verte exigée, puis le tag qui publie | Au moment de livrer une version |
+
+Fusionner une pull request **ne publie rien**. Dans ce type de projet, c'est le tag `vX.Y.Z` qui déclenche la publication — et le workflow qui publie ne rejoue généralement pas les tests. Le tag est donc le point de non-retour : `/flow:release` existe pour que rien ne le franchisse sans avoir été vérifié.
+
 ## Ne jamais rester sans savoir quoi faire
 
 Le cycle ne sert à rien si on ne sait pas où on en est. Trois mécanismes s'en occupent, et aucun ne coûte cher :
