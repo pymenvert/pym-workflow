@@ -16,7 +16,7 @@ Faire le point doit coûter quelques secondes. **Jamais d'agent de revue, jamais
 Sinon, **un seul appel groupé**. Ne le découpe jamais : chaque appel d'outil relit toute la conversation, c'est là que part l'argent — pas dans la longueur des sorties.
 
 ```
-git branch --show-current; git status --short; git rev-list --count HEAD --not main 2>/dev/null; ls docs/specs docs/decisions docs/reste-a-faire.md 2>/dev/null; grep -c "Profil projet" CLAUDE.md 2>/dev/null
+git branch --show-current; git status --short; git rev-list --count HEAD --not main 2>/dev/null; ls docs/specs docs/decisions docs/reste-a-faire.md 2>/dev/null; grep -c "Profil projet" CLAUDE.md 2>/dev/null; cat .git/flow-depot-ouvert 2>/dev/null
 ```
 
 **Deuxième appel seulement si rien n'est modifié** : `gh pr list --state open`. Si des fichiers sont modifiés, l'état des pull requests ne change pas la réponse — inutile de payer l'appel réseau.
@@ -25,6 +25,7 @@ git branch --show-current; git status --short; git rev-list --count HEAD --not m
 
 | Constat | Où il en est | La seule chose à lancer |
 |---|---|---|
+| **`.git/flow-depot-ouvert` existe** | **le dépôt est ouvert au public** — passe avant tout le reste, quelle que soit la suite du tableau | `/flow:visibilite fermer` |
 | pas de bloc « Profil projet » dans le CLAUDE.md | le projet n'est pas encore équipé | `/flow:init-project` |
 | tout propre, sur la branche par défaut | au repos, rien en cours | `/flow:spec <son idée>` |
 | des fichiers modifiés, sur la branche par défaut | du travail en cours au mauvais endroit | le prévenir, puis `/flow:verify` — il posera la question de la branche |

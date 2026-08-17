@@ -35,7 +35,11 @@ Dis-moi ces quatre points **avant** de me demander quoi que ce soit. Ils ne sont
 
 4. **Ouvre** : `gh repo edit <dépôt> --visibility public --accept-visibility-change-consequences`, puis **vérifie** que c'est bien fait.
 
-5. **Note l'échéance.** Rappelle-moi dans ta réponse que le dépôt est ouvert et qu'il faudra le refermer. Répète-le à chaque réponse tant qu'il l'est : un dépôt ouvert et oublié est le seul vrai échec possible de cette commande.
+5. **Pose le témoin.** Écris `.git/flow-depot-ouvert` contenant la date d'ouverture et la raison, en une ligne. Ce fichier est le seul mécanisme qui survit à la fermeture de la conversation : `.git/` n'est jamais suivi par git, donc rien ne peut partir dans un commit, et le témoin disparaît avec le dossier.
+
+   Une phrase de rappel dans une réponse peut être manquée ou oubliée d'un jour à l'autre. Un fichier, non — c'est lui que `/flow:guide` et `/flow:release` iront lire.
+
+6. **Rappelle-moi** dans ta réponse que le dépôt est ouvert, et répète-le tant qu'il l'est. Un dépôt ouvert et oublié est le seul vrai échec possible de cette commande.
 
 ## Fermer
 
@@ -43,7 +47,8 @@ C'est la partie qui compte, et elle n'est jamais optionnelle.
 
 1. `gh repo edit <dépôt> --visibility private --accept-visibility-change-consequences`
 2. **Vérifie** : `gh repo view <dépôt> --json visibility` doit rendre `PRIVATE`. Montre-moi la sortie brute, ne me dis pas simplement que c'est fait.
-3. Si la commande échoue, **dis-le en gros et donne-moi le lien du réglage à basculer à la main** : Settings → General → Danger Zone. Ne passe à aucune autre tâche tant que ce n'est pas réglé.
+3. **Retire le témoin `.git/flow-depot-ouvert`** — et seulement après que la vérification a rendu `PRIVATE`. Dans cet ordre : un témoin retiré alors que le dépôt est resté ouvert serait pire que pas de témoin du tout.
+4. Si la commande échoue, **dis-le en gros, laisse le témoin en place, et donne-moi le lien du réglage à basculer à la main** : Settings → General → Danger Zone. Ne passe à aucune autre tâche tant que ce n'est pas réglé.
 
 **Si quoi que ce soit échoue pendant la fenêtre ouverte — une construction, un test, une release —, refermer passe avant de comprendre pourquoi.** On diagnostique sur un dépôt privé.
 

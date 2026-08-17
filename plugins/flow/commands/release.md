@@ -25,6 +25,8 @@ Publication de version : $ARGUMENTS
 
 8. **Surveille la publication** jusqu'à son verdict, et donne-moi le lien de la release. Si elle échoue, le tag existe déjà sur le dépôt distant : dis-moi exactement quoi supprimer avant de recommencer, sinon je serai bloqué.
 
+9. **Le dépôt est-il resté ouvert ?** Si `.git/flow-depot-ouvert` existe, le dépôt a été rendu public pour cette campagne et **ne l'a pas encore été refermé**. Dis-le-moi en premier, avant le bilan, et propose `/flow:visibilite fermer`. C'est le moment exact où on oublie : la release est publiée, le travail semble fini, et le dépôt reste ouvert pour la nuit.
+
 ---
 
 ## Arrêts et attentes
