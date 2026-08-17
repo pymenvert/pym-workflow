@@ -17,7 +17,7 @@ Commande **chère et rare** : à lancer entre deux versions, jamais à chaque t�
 
 1. **Qu'est-ce qui est testé contre une doublure et jamais contre la réalité ?** C'est l'angle mort le plus coûteux qui existe : une doublure accepte exactement ce qu'on l'a écrite pour accepter, donc elle valide ta compréhension du service, pas le service. Un projet peut avoir trois cents tests verts et n'avoir jamais rien fait fonctionner pour de vrai. Liste ce qui n'a jamais rencontré le vrai service, le vrai binaire, la vraie machine de destination.
 
-2. **Quels tests ne protègent rien ?** Un test qui reste vert quand on casse le code qu'il couvre est une illusion de couverture — et elle est pire que l'absence de test, parce qu'on s'y fie. Si le projet a un outil de mutation, lance-le. Sinon, casse délibérément deux ou trois lignes critiques et vérifie que la suite tombe. Rends compte de ce qui n'est pas tombé.
+2. **Quels tests ne protègent rien ?** Ne l'éprouve pas ici : `/flow:mutation` est écrit pour ça, avec les garde-fous qu'exige une commande qui casse du code exprès — cet audit, lui, ne modifie rien. Regarde simplement si cette épreuve a déjà été passée sur ce projet (un outil de mutation, une trace dans `docs/reste-a-faire.md`). Si non, dis-le et propose-la : un audit qui fait confiance à une suite de tests jamais éprouvée repose sur du sable.
 
 3. **Qu'est-ce que le programme dit de lui-même qui est devenu faux ?** Textes d'interface, messages d'erreur, README, aide en ligne, notice. Une explication vieillit sans qu'aucun test ne s'en aperçoive — et c'est précisément ce que l'utilisateur lit.
 

@@ -1,0 +1,77 @@
+---
+description: Vérifie que les tests protègent vraiment — casse le code exprès et exige que la suite tombe
+argument-hint: un module à éprouver, ou rien pour les chemins critiques du profil
+---
+
+Épreuve des tests : $ARGUMENTS
+
+Toutes les autres commandes font confiance à la suite de tests. Celle-ci la met en doute.
+
+Le principe : **casser le code exprès, un cassage à la fois, et exiger que la suite tombe.** Un test qui reste vert alors que le code qu'il couvre est cassé ne protège rien — et c'est pire qu'une absence de test, parce qu'on s'y fie. Une suite verte n'est pas une preuve : c'est une affirmation à vérifier.
+
+## Sécurité — la partie qui compte le plus
+
+Cette commande **modifie délibérément du code source**. Trois règles non négociables :
+
+1. **Exige un dossier de travail propre avant de commencer.** `git status --short` doit être vide. Si ce n'est pas le cas, arrête-toi : tes modifications en cours seraient indiscernables des cassages volontaires.
+2. **Git est le filet, pas ta mémoire.** Restaure chaque cassage par `git checkout -- <fichier>`, jamais en réécrivant ce que tu crois avoir lu. Un fichier restauré de mémoire peut différer d'un espace ou d'une fin de ligne.
+3. **Termine par une preuve.** Relance `git status --short` en fin de commande et montre-moi le résultat. S'il n'est pas vide, dis-le en toutes lettres et **n'affirme pas que tout est restauré** — c'est le seul moment où cette commande peut faire des dégâts.
+
+## Si le projet a déjà un outil
+
+Cherche-le d'abord (`tests/mutation.js`, `npm run test:mutation`, un outil déclaré dans le profil). S'il existe, lance-le au lieu de réinventer : il connaît les particularités du projet. Contente-toi d'interpréter son résultat et de vérifier qu'il a bien restauré.
+
+## Méthode, si tu dois le faire à la main
+
+**Choisis les cibles.** Le champ `critique` du bloc « Profil projet » les nomme. À défaut, prends ce qui manipule des fichiers, des données utilisateur, des permissions, ou ce dont l'échec est silencieux. **Cinq à dix cassages, pas cinquante** — c'est une commande lente, chaque cassage relance des tests.
+
+**Montre-moi la liste avant de commencer**, et attends mon accord. Annonce aussi la durée : sur un projet dont la suite prend une minute, dix cassages font dix minutes.
+
+**Les cassages qui trouvent réellement quelque chose :**
+
+- inverser une condition (`if (x)` → `if (!x)`)
+- déplacer une borne (`<` → `<=`, `0` → `1`)
+- faire rendre une constante à une fonction de calcul
+- supprimer un appel dont l'effet est attendu ailleurs
+- échanger deux arguments de même type
+- neutraliser une gestion d'erreur — remplacer le traitement par un silence
+
+**Un cassage à la fois.** Applique, lance **seulement la suite concernée** si le projet permet de la cibler (pas toute la suite : c'est là que part le temps), note si elle tombe, restaure par git, passe au suivant.
+
+**Prouve d'abord que ton dispositif fonctionne.** Avant de conclure que « tous les cassages sont attrapés », vérifie qu'un cassage manifestement fatal fait bien tomber la suite. Un dispositif qui ne lance pas vraiment les tests rapporte un sans-faute parfait et mensonger.
+
+## Interpréter un cassage qui survit
+
+Un cassage non détecté a exactement trois causes possibles, et il faut dire laquelle :
+
+- **un test manque** — le cas le plus fréquent, et le résultat utile : écris-le
+- **le code est mort** — personne ne l'exécute, donc rien ne le protège : propose-moi de le supprimer
+- **le cassage ne change rien** — deux écritures équivalentes ; ce n'est pas un défaut, dis-le et écarte-le
+
+Ne compte jamais un cassage survivant comme un échec des tests sans avoir tranché entre ces trois.
+
+## Rendu
+
+- **Cassages non détectés** — pour chacun : le fichier, la ligne, ce que tu as cassé, laquelle des trois causes, et le test à écrire (donne le code, pas une description)
+- **Cassages détectés** — un décompte suffit, avec les tests qui les ont attrapés
+- **Preuve de restauration** — la sortie de `git status --short`
+
+Puis écris les cassages non détectés dans `docs/reste-a-faire.md`, sous un titre daté. Ce sont des trous de couverture prouvés, pas des soupçons : ils méritent de survivre à la conversation.
+
+---
+
+## Arrêts et attentes
+
+**Chaque fois que tu t'arrêtes pour attendre ma réponse**, commence par « **J'attends ta réponse.** » Puis la question en clair, la conséquence de chaque réponse possible, et les options quand il y en a. N'enchaîne jamais sur la suite sans avoir la réponse. Et ne me dis pas que rien n'a été écrit si des fichiers l'ont déjà été — dis exactement où on en est.
+
+**Avant tout passage long et muet** — agents de revue, suite de tests, surveillance de la CI —, annonce-le en une ligne, avec sa durée approximative. Un silence long ressemble à un plantage, et ma réaction sera de taper une autre commande.
+
+## Fin de réponse — obligatoire
+
+Termine toujours ta dernière réponse par ces trois lignes. Les titres ne changent jamais ; le contenu décrit ce qui s'est réellement passé. **Si tu t'es arrêté en route, dis-le ici** — n'annonce jamais un travail qui n'a pas eu lieu.
+
+**Où on en est** — un fait constaté, puis sa conséquence. Deux lignes maximum.
+**Ensuite** — UNE seule chose : une commande à lancer, ou une phrase à me répondre. Jamais deux options que tu pourrais trancher toi-même en regardant le projet — tu l'as lu, moi non. En revanche, quand la réponse ne dépend que de moi (« est-ce que je considère ce travail comme fini ? », « laquelle de ces deux formes je préfère ? »), demande — mais constate d'abord, et présente ce que tu as vu en même temps que ta question.
+**Si tu hésites** — `/flow:guide` : il regarde où j'en suis et me donne la seule chose à faire ensuite. Il ne modifie rien, ne lance aucun test, et coûte trois secondes.
+
+Aucun terme technique sans sa traduction dans la même phrase. Je travaille dans GitHub Desktop : « branche », « commit », « CI », « pull request », « diff » demandent trois mots d'explication au passage, pas un renvoi à la documentation.

@@ -33,7 +33,10 @@ Deux commandes ne servent pas à une tâche mais à une version :
 | Commande | Rôle | Quand |
 |---|---|---|
 | `/flow:audit` | Audit de fond de **tout** le programme : dérive lente, angles morts, ce que l'app dit d'elle-même qui est devenu faux | Entre deux versions |
+| `/flow:mutation` | Casse le code exprès et exige que la suite tombe. La seule commande qui met en doute **les tests** plutôt que le code | Après une grosse vague de tests |
 | `/flow:release` | Cohérence de tous les numéros de version, CI verte exigée, puis le tag qui publie | Au moment de livrer une version |
+
+`/flow:mutation` mérite un mot : toutes les autres commandes font confiance à la suite de tests. Une suite verte n'est pourtant pas une preuve, c'est une affirmation. Casser le code délibérément est le seul moyen de la vérifier — et sur un projet où cette épreuve a été passée, elle a révélé que la suite était **aveugle à quatre cassages réels**. Comme la commande modifie du code source, git sert de filet : dossier propre exigé au départ, restauration par `git checkout`, et preuve par `git status` à l'arrivée.
 
 Fusionner une pull request **ne publie rien**. Dans ce type de projet, c'est le tag `vX.Y.Z` qui déclenche la publication — et le workflow qui publie ne rejoue généralement pas les tests. Le tag est donc le point de non-retour : `/flow:release` existe pour que rien ne le franchisse sans avoir été vérifié.
 
