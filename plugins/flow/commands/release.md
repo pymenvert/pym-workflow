@@ -15,7 +15,9 @@ Publication de version : $ARGUMENTS
 
 4. **Cohérence des numéros — l'erreur la plus fréquente.** Cherche **tous** les endroits où la version est inscrite : `package.json`, mais aussi les fichiers de plateforme (`Info.plist`, manifestes, en-têtes, scripts d'installation). Un projet en a souvent plusieurs, et ils doivent être identiques. Un seul oublié produit un paquet qui s'annonce sous un mauvais numéro — et le workflow de publication ne le verra pas. Liste-les-moi avant de les modifier.
 
-5. **CHANGELOG.** Une section pour cette version, écrite pour quelqu'un qui l'installe : ce qui change **pour lui**. Ce qui est corrigé, ce qui est ajouté, ce qui casse. Pas la liste des commits.
+5. **CHANGELOG — l'erreur la plus coûteuse de toutes.** Une section pour cette version, écrite pour quelqu'un qui l'installe : ce qui change **pour lui**. Ce qui est corrigé, ce qui est ajouté, ce qui casse. Pas la liste des commits.
+
+   **Vérifie que cette section décrit bien TOUT ce que le tag va contenir.** S'il reste une section « Non publié » ou « Unreleased », son contenu appartient à cette version : intègre-le, ne le laisse pas de côté. Quand la description de la release est générée depuis le CHANGELOG — c'est fréquent —, ce qui n'y figure pas devient invisible pour ceux qui installent. Compare la section à `git log <dernier-tag>..HEAD` et dis-moi ce que tu as dû rapatrier.
 
 6. **Commit et pousse ces changements. Puis attends que la CI redevienne verte** sur ce commit précis. C'est le dernier filet avant le tag, et le seul qui teste vraiment ce qui va être publié.
 

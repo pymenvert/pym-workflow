@@ -29,6 +29,14 @@ Cette commande **modifie délibérément du code source**. Trois règles non né
 2. **Git est le filet, pas ta mémoire.** Restaure chaque cassage par `git checkout -- <fichier>`, jamais en réécrivant ce que tu crois avoir lu. Un fichier restauré de mémoire peut différer d'un espace ou d'une fin de ligne.
 3. **Termine par une preuve.** Relance `git status --short` en fin de commande et montre-moi le résultat. S'il n'est pas vide, dis-le en toutes lettres et **n'affirme pas que tout est restauré** — c'est le seul moment où cette commande peut faire des dégâts.
 
+### Campagne complète : travaille dans une copie
+
+Une campagne de plusieurs dizaines de cassages peut durer **une heure**. Pendant tout ce temps, le code source est modifié en place — et un commit parti à ce moment-là emporterait un mutant. C'est arrivé sur un projet réel : commit passé, suite verte, une fonctionnalité morte en silence pendant des jours.
+
+Donc : au-delà d'une dizaine de cassages, **clone le dépôt dans un dossier temporaire, lance la campagne là-bas, et ne me rapporte que les résultats.** Le dépôt de travail n'est jamais touché. Pour une campagne ciblée de cinq à dix cassages, la règle du dossier propre suffit.
+
+Et si le projet possède un test qui vérifie qu'**aucun mutant n'est resté** dans le code source, dis-le-moi : c'est le meilleur filet qui existe contre cette erreur, et il mérite d'être recopié dans les projets qui n'en ont pas.
+
 ## Si le projet a déjà un outil
 
 Cherche-le d'abord (`tests/mutation.js`, `npm run test:mutation`, un outil déclaré dans le profil). S'il existe, lance-le au lieu de réinventer : il connaît les particularités du projet. Contente-toi d'interpréter son résultat et de vérifier qu'il a bien restauré.
