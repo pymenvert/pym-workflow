@@ -22,4 +22,6 @@ Ton rôle ici n'est pas de coder ni de proposer une solution technique. C'est d'
 
 4. **Montre-moi la spec et attends ma validation.** Ne passe pas à `/flow:design` de toi-même.
 
-Reste court : une spec d'une page qu'on lit vaut mieux que cinq pages qu'on survole. Si la demande est vraiment triviale — une faute de frappe, un libellé —, dis-le et propose d'aller directement à `/flow:new-feature` plutôt que de produire de la paperasse.
+**Vise 60 lignes, plafond 80.** Une spec qu'on lit en entier vaut mieux que trois pages qu'on survole. Si tu dépasses, relis-toi avant de me la montrer : c'est presque toujours que du *comment* a glissé dans les critères — le choix d'une bibliothèque, la forme d'un module, la façon d'écrire un format. Ça appartient à `/flow:design`. Ici, les critères disent **quoi**, et à quoi on reconnaîtra que c'est fait.
+
+Si la demande est vraiment triviale — une faute de frappe, un libellé —, dis-le et propose d'aller directement à `/flow:new-feature` plutôt que de produire de la paperasse.
