@@ -9,6 +9,16 @@ Ce n'est pas `/flow:verify`. La porte examine **ce qui vient de changer** ; toi 
 
 Commande **chère et rare** : à lancer entre deux versions, jamais à chaque tâche. Annonce-moi sa durée avant de commencer.
 
+## S'il existe déjà un rapport d'audit, confronte-le
+
+Cherche-le avant toute chose : `docs/`, un dossier d'audits gardé hors du dépôt, tout fichier nommé `*AUDIT*` ou `*reste*`. S'il en existe un, **ne recommence pas de zéro : confronte-le.**
+
+Pour chaque constat encore listé comme non traité, va voir dans le code s'il est toujours vrai, et classe-le en trois piles : **toujours ouvert**, **déjà corrigé**, ou **devenu faux** (le code a changé de forme, le constat ne décrit plus rien).
+
+C'est beaucoup moins cher qu'un audit neuf, et bien plus utile : **un constat périmé est pire qu'aucun constat**, parce qu'il fait croire qu'on connaît ses risques. Un rapport de plusieurs semaines sur un projet qui a publié une version depuis est périmé par défaut.
+
+Commence par les constats les plus graves, et ne confronte pas les cosmétiques tant que les majeurs ne sont pas tranchés. Rends d'abord le décompte : combien encore ouverts, combien déjà réglés.
+
 ## Mesure avant de juger
 
 Établis des faits avec Bash et Grep avant d'émettre le moindre avis : fichiers les plus gros, fonctions les plus longues, modules importés partout, duplication, code exporté jamais utilisé, dépendances circulaires. Un audit qui commence par une opinion ne vaut rien.
