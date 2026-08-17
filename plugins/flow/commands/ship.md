@@ -16,7 +16,9 @@ Livraison du travail en cours sur cette branche.
 
 5. **Commit.** Un commit atomique, dont le message explique **le pourquoi** — le quoi se lit dans le diff. Plusieurs commits uniquement si le travail couvre des changements réellement distincts.
 
-6. **Push**, puis ouvre une pull request avec `gh pr create` :
+6. **Push.** Vérifie d'abord si une pull request est déjà ouverte sur cette branche (`gh pr list --head <branche>`). Si oui, **n'en crée pas une seconde** : le push la met à jour tout seul. Dis-le-moi, ajoute en commentaire ce que ce nouveau commit change, et passe directement à la surveillance de la CI.
+
+   Sinon, ouvre-la avec `gh pr create` :
    - l'objectif, et le lien vers la spec si elle existe
    - les changements, en trois points maximum
    - **les vérifications réellement effectuées** — reprends le tableau de `/flow:verify`, sans embellir
