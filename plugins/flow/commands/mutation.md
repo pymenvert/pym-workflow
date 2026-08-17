@@ -9,6 +9,18 @@ Toutes les autres commandes font confiance à la suite de tests. Celle-ci la met
 
 Le principe : **casser le code exprès, un cassage à la fois, et exiger que la suite tombe.** Un test qui reste vert alors que le code qu'il couvre est cassé ne protège rien — et c'est pire qu'une absence de test, parce qu'on s'y fie. Une suite verte n'est pas une preuve : c'est une affirmation à vérifier.
 
+## Quand la lancer — et quand surtout pas
+
+**Pas avant `/flow:ship`.** Trois raisons, dont une rédhibitoire :
+
+- Cette commande exige un dossier de travail propre. Avant de livrer, il ne l'est jamais : le travail attend d'être enregistré. Les deux ne peuvent pas coexister.
+- Elle éprouve **la suite de tests**, qui appartient au projet entier — pas au changement en cours. La relancer à chaque tâche revient à réexaminer chaque fois la même chose.
+- Elle est lente : cinq à dix cassages, chacun relançant des tests.
+
+**Le bon déclencheur est une vague de tests, pas une vague de code.** Lance-la quand la suite vient de grossir nettement — après une tâche qui a ajouté trente tests, ou avant une version. Ce sont ces tests-là qui n'ont encore jamais prouvé qu'ils détectent quoi que ce soit.
+
+Elle appartient à la famille des commandes rares, avec `/flow:audit` et `/flow:release` — pas au cycle d'une tâche.
+
 ## Sécurité — la partie qui compte le plus
 
 Cette commande **modifie délibérément du code source**. Trois règles non négociables :

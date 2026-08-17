@@ -45,6 +45,8 @@ Rassemble tout et tranche, sans diplomatie :
 - **À traiter plus tard** — liste-les-moi ; ne les corrige pas silencieusement, ça brouille le diff. **Puis écris-les dans `docs/reste-a-faire.md`**, sous un titre daté portant le nom de la tâche (crée le fichier s'il n'existe pas, ajoute à la suite s'il existe). Une liste qui ne vit que dans cette conversation disparaîtra avec elle — et je te demanderai le lendemain si le projet est fini, sans que personne puisse répondre.
 - **Non vérifié** — ce que tu n'as pas pu contrôler et pourquoi. Cette section est obligatoire : une porte qui cache ses angles morts ne protège de rien.
 
+Si le diff a ajouté beaucoup de tests — plus d'une dizaine —, signale-le en une ligne et propose `/flow:mutation` **pour plus tard**, une fois ce travail livré : des tests neufs n'ont encore jamais prouvé qu'ils détectent quoi que ce soit. Ne bloque jamais là-dessus, et ne le lance pas maintenant — il exige un dossier de travail propre, ce qui n'est pas le cas ici.
+
 Termine par une seule ligne : **PASSE** ou **BLOQUÉ**, suivie du nombre de bloquants restants.
 
 ---
