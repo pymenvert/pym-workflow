@@ -39,6 +39,12 @@ Utilise les outils navigateur disponibles pour naviguer réellement dans les pag
 - **Clavier** : les actions principales sont-elles atteignables sans souris ? Le focus est-il visible ?
 - **Console** : relève les erreurs JavaScript et les requêtes en échec.
 
+## Deux règles qui valent pour les trois grilles
+
+**Déclare avec quoi tu as regardé.** Nomme le navigateur ou le moteur de rendu, et les tailles. Si la machine de destination n'est pas celle où tu regardes — développer sous Windows pour livrer sur un Mac, par exemple —, dis-le franchement : Safari n'est pas Chrome, et un rendu validé ici peut casser là-bas. Un rapport qui ne dit pas avec quoi il a regardé n'est pas vérifiable.
+
+**Le sens doit arriver à l'écran, pas seulement dans le code.** Une distinction juste dans la feuille de style mais invisible à taille réelle n'est pas livrée : un carré de 5 px de rayon sur 16 px de côté ressemble à un rond. Mesure à la taille réelle, jamais sur une capture agrandie. Si une forme, une couleur ou un écart ne se lit pas, dis-le et propose ce qui porterait vraiment l'intention — une coche plutôt qu'un carré, par exemple. L'intention ne compte pas, seul le rendu compte.
+
 ## Forme du rapport
 
 - **Ce que j'ai lancé** — la commande ou l'écran exact, et ce que tu as observé. Sans cette section, le reste n'est pas crédible.

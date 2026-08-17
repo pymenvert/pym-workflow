@@ -5,13 +5,17 @@ argument-hint: description de la feature ou du bug, ou nom d'une spec
 
 Tâche : $ARGUMENTS
 
-1. **État des lieux.** `git status` — si le worktree n'est pas propre, montre-moi ce qui traîne et demande quoi en faire avant de continuer.
+1. **État des lieux.** `git status`. Si des fichiers sont modifiés, **ne te contente pas de me demander quoi en faire : regarde d'abord ce que c'est.** Lis le diff, et dis-moi ce que tu constates. « Ce sont les treize styles en ligne retirés et la politique de sécurité unifiée, donc le chantier annoncé semble terminé » vaut infiniment mieux que « treize fichiers modifiés, qu'en fais-tu ? ». Puis pose ta question — elle reste légitime : savoir si je considère ce travail comme fini n'appartient qu'à moi. Mais constate avant de demander.
+
+   **Puis tranche le sujet.** Si ce que je demande maintenant est une retouche du travail en cours, reste sur la branche actuelle et ne crée rien — c'est le même sujet. Si c'est autre chose, il faut d'abord livrer l'existant : **une pull request est un sujet, pas un panier.** Mélanger deux sujets rend le diff illisible, et dans six mois « pourquoi ce changement ? » n'a plus de réponse.
 
 2. **Contexte.** Lis le `CLAUDE.md` du projet, en particulier son bloc « Profil projet ». Si une spec (`docs/specs/`) ou une décision d'architecture (`docs/decisions/`) correspond à cette tâche, lis-la : elle fait autorité sur ce qu'il faut construire.
 
    Si la tâche est structurante et qu'aucune spec n'existe, dis-le et propose `/flow:spec`. Ne cadre pas toi-même en douce ce qui mérite d'être décidé explicitement.
 
-3. **Branche.** Mets `main` à jour, puis crée `feature/<slug>` ou `fix/<slug>` selon la nature de la tâche. Si je demande du travail en parallèle, crée plutôt un worktree `../wt-<slug>`.
+3. **Branche.** Mets la branche par défaut à jour, puis crée `feature/<slug>` ou `fix/<slug>` selon la nature de la tâche. Je n'ai rien à préparer avant : c'est toi qui crées la branche, dis-le-moi au passage.
+
+   **Jamais de worktree** — pas de second dossier de travail. Je travaille dans GitHub Desktop, qui ne les montre pas, et `/flow:guide` ne saurait pas les voir : il me dirait « rien en cours » alors que mon travail vit ailleurs sur le disque.
 
 4. **Exploration.** Lis le code concerné avant de proposer quoi que ce soit. Ne suppose pas l'architecture : vérifie-la. Si ce que tu découvres contredit la spec, arrête-toi et signale-le — c'est exactement le moment où ça coûte le moins cher.
 
@@ -40,7 +44,7 @@ Ne conclus pas par un commit : la suite est `/flow:verify`, puis `/flow:ship`.
 Termine toujours ta dernière réponse par ces trois lignes. Les titres ne changent jamais ; le contenu décrit ce qui s'est réellement passé. **Si tu t'es arrêté en route, dis-le ici** — n'annonce jamais un travail qui n'a pas eu lieu.
 
 **Où on en est** — un fait constaté, puis sa conséquence. Deux lignes maximum.
-**Ensuite** — UNE seule chose : une commande à lancer, ou une phrase à me répondre. Jamais deux options, jamais de « si » : tu as lu le projet, moi non — tranche.
+**Ensuite** — UNE seule chose : une commande à lancer, ou une phrase à me répondre. Jamais deux options que tu pourrais trancher toi-même en regardant le projet — tu l'as lu, moi non. En revanche, quand la réponse ne dépend que de moi (« est-ce que je considère ce travail comme fini ? », « laquelle de ces deux formes je préfère ? »), demande — mais constate d'abord, et présente ce que tu as vu en même temps que ta question.
 **Si tu hésites** — `/flow:guide` : il regarde où j'en suis et me donne la seule chose à faire ensuite. Il ne modifie rien, ne lance aucun test, et coûte trois secondes.
 
 Aucun terme technique sans sa traduction dans la même phrase. Je travaille dans GitHub Desktop : « branche », « commit », « CI », « pull request », « diff » demandent trois mots d'explication au passage, pas un renvoi à la documentation.
