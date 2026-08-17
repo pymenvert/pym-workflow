@@ -26,6 +26,18 @@ claude plugin install flow@pym --scope user
 
 Les étapes intermédiaires savent s'effacer : sur une faute de frappe, `/flow:spec` te dira d'aller directement à `/flow:new-feature` plutôt que de produire de la paperasse.
 
+## Ne jamais rester sans savoir quoi faire
+
+Le cycle ne sert à rien si on ne sait pas où on en est. Trois mécanismes s'en occupent, et aucun ne coûte cher :
+
+**Chaque commande finit par trois lignes** — *Où on en est*, *Ensuite*, *Si tu hésites*. Une seule action proposée, jamais deux options, jamais de « si » à arbitrer soi-même. Et si la commande s'est arrêtée en route, elle le dit là plutôt que d'annoncer un travail qui n'a pas eu lieu.
+
+**`/flow:guide`** fait le point quand on est perdu ou qu'on reprend un projet trois semaines plus tard. Il lit l'état du dépôt en un seul appel groupé et nomme la seule commande à lancer. Il lui est interdit de lancer un test, un agent, un lint ou un build — c'est la commande gratuite du lot. Là où git ne permet pas de trancher, il pose une question au lieu de deviner : deviner enverrait relancer la porte, qui est la commande chère.
+
+**Le bloc « Boussole »**, écrit par `/flow:init-project` dans le `CLAUDE.md` du projet, capte les questions posées en français — « et maintenant ? », « je fais quoi ? », « c'est fini ? » — et y répond comme `/flow:guide`. C'est le mécanisme le plus utile des trois, parce que c'est ainsi qu'on demande son chemin en vrai : pas en tapant le nom d'une septième commande.
+
+Deux règles complètent l'ensemble : chaque arrêt commence par « **J'attends ta réponse** », et tout passage long et muet — agents, tests, surveillance de la CI — est annoncé avec sa durée. Un silence long ressemble à un plantage, et le réflexe est alors de taper une autre commande.
+
 ## Le profil projet — comment flow s'adapte
 
 `/flow:init-project` écrit dans le `CLAUDE.md` du projet un bloc que toutes les autres commandes lisent :

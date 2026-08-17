@@ -33,3 +33,21 @@ Cette étape existe parce qu'une erreur de structure corrigée maintenant coûte
 7. **Montre-moi la conception finale et attends ma validation** avant toute implémentation.
 
 Si la tâche ne touche à aucune structure — corriger une condition, ajuster un libellé —, dis-le et passe directement à `/flow:new-feature`. Cette commande sert aux décisions qu'on regrette, pas aux modifications qu'on oublie.
+
+---
+
+## Arrêts et attentes
+
+**Chaque fois que tu t'arrêtes pour attendre ma réponse**, commence par « **J'attends ta réponse.** » Puis la question en clair, la conséquence de chaque réponse possible, et les options quand il y en a. N'enchaîne jamais sur la suite sans avoir la réponse. Et ne me dis pas que rien n'a été écrit si des fichiers l'ont déjà été — dis exactement où on en est.
+
+**Avant tout passage long et muet** — agents de revue, suite de tests, surveillance de la CI —, annonce-le en une ligne, avec sa durée approximative. Un silence long ressemble à un plantage, et ma réaction sera de taper une autre commande.
+
+## Fin de réponse — obligatoire
+
+Termine toujours ta dernière réponse par ces trois lignes. Les titres ne changent jamais ; le contenu décrit ce qui s'est réellement passé. **Si tu t'es arrêté en route, dis-le ici** — n'annonce jamais un travail qui n'a pas eu lieu.
+
+**Où on en est** — un fait constaté, puis sa conséquence. Deux lignes maximum.
+**Ensuite** — UNE seule chose : une commande à lancer, ou une phrase à me répondre. Jamais deux options, jamais de « si » : tu as lu le projet, moi non — tranche.
+**Si tu hésites** — `/flow:guide` : il regarde où j'en suis et me donne la seule chose à faire ensuite. Il ne modifie rien, ne lance aucun test, et coûte trois secondes.
+
+Aucun terme technique sans sa traduction dans la même phrase. Je travaille dans GitHub Desktop : « branche », « commit », « CI », « pull request », « diff » demandent trois mots d'explication au passage, pas un renvoi à la documentation.

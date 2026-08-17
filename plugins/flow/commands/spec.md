@@ -20,8 +20,28 @@ Ton rôle ici n'est pas de coder ni de proposer une solution technique. C'est d'
    - **Cas limites** — entrées vides, valeurs extrêmes, échecs, interruptions. Ce que le logiciel doit faire dans chacun.
    - **Risques et inconnues** — ce qui pourrait rendre le travail beaucoup plus long que prévu.
 
-4. **Montre-moi la spec et attends ma validation.** Ne passe pas à `/flow:design` de toi-même.
+4. **Montre-moi la spec et attends ma validation.** Ne passe pas à `/flow:design` de toi-même. Je réponds dans la discussion, en français — je n'ai aucune commande à relancer pour valider.
+
+   Si c'est ma première tâche sur ce projet, précise-moi au passage que `/flow:new-feature` créera la branche de travail tout seul : je n'ai rien à préparer avant.
 
 **Vise 60 lignes, plafond 80.** Une spec qu'on lit en entier vaut mieux que trois pages qu'on survole. Si tu dépasses, relis-toi avant de me la montrer : c'est presque toujours que du *comment* a glissé dans les critères — le choix d'une bibliothèque, la forme d'un module, la façon d'écrire un format. Ça appartient à `/flow:design`. Ici, les critères disent **quoi**, et à quoi on reconnaîtra que c'est fait.
 
 Si la demande est vraiment triviale — une faute de frappe, un libellé —, dis-le et propose d'aller directement à `/flow:new-feature` plutôt que de produire de la paperasse.
+
+---
+
+## Arrêts et attentes
+
+**Chaque fois que tu t'arrêtes pour attendre ma réponse**, commence par « **J'attends ta réponse.** » Puis la question en clair, la conséquence de chaque réponse possible, et les options quand il y en a. N'enchaîne jamais sur la suite sans avoir la réponse. Et ne me dis pas que rien n'a été écrit si des fichiers l'ont déjà été — dis exactement où on en est.
+
+**Avant tout passage long et muet** — agents de revue, suite de tests, surveillance de la CI —, annonce-le en une ligne, avec sa durée approximative. Un silence long ressemble à un plantage, et ma réaction sera de taper une autre commande.
+
+## Fin de réponse — obligatoire
+
+Termine toujours ta dernière réponse par ces trois lignes. Les titres ne changent jamais ; le contenu décrit ce qui s'est réellement passé. **Si tu t'es arrêté en route, dis-le ici** — n'annonce jamais un travail qui n'a pas eu lieu.
+
+**Où on en est** — un fait constaté, puis sa conséquence. Deux lignes maximum.
+**Ensuite** — UNE seule chose : une commande à lancer, ou une phrase à me répondre. Jamais deux options, jamais de « si » : tu as lu le projet, moi non — tranche.
+**Si tu hésites** — `/flow:guide` : il regarde où j'en suis et me donne la seule chose à faire ensuite. Il ne modifie rien, ne lance aucun test, et coûte trois secondes.
+
+Aucun terme technique sans sa traduction dans la même phrase. Je travaille dans GitHub Desktop : « branche », « commit », « CI », « pull request », « diff » demandent trois mots d'explication au passage, pas un renvoi à la documentation.

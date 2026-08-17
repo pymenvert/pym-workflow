@@ -9,7 +9,7 @@
     {
       "name": "flow",
       "source": "./plugins/flow",
-      "description": "Workflow de dev solo : /flow:spec, /flow:design, /flow:new-feature, /flow:verify, /flow:ship, quatre agents de revue, hook de formatage"
+      "description": "Workflow de dev solo guidé : /flow:spec, /flow:design, /flow:new-feature, /flow:verify, /flow:ship, /flow:guide, quatre agents de revue, hook de formatage"
     }
   ]
 }
