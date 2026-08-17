@@ -26,6 +26,46 @@ claude plugin install flow@pym --scope user
 
 Les étapes intermédiaires savent s'effacer : sur une faute de frappe, `/flow:spec` te dira d'aller directement à `/flow:new-feature` plutôt que de produire de la paperasse.
 
+## Le déroulé d'une tâche, concrètement
+
+**La règle de base : les commandes marquent des moments, elles ne remplacent pas la conversation.** Entre deux commandes, on parle normalement — c'est même là que se prennent les décisions.
+
+| # | Tu tapes | Ce qui se passe | Tes fichiers | Il t'attend ? |
+|---|---|---|---|---|
+| 1 | `/flow:spec <ton idée>` | Il lit ton code, pose **trois questions maximum**, écrit un document dans `docs/specs/` | 1 fichier créé | **oui** |
+| 2 | `/flow:design <nom de la spec>` | Il propose une architecture et la fait **attaquer** par l'agent `architect`, puis écrit la décision dans `docs/decisions/` | 1 fichier créé | **oui** |
+| 3 | `/flow:new-feature <ta tâche>` | Il crée la branche tout seul, explore le code, montre un plan court | rien encore | **oui** |
+| 4 | *tu réponds « ok »* | Il implémente, par petits lots | **il écrit ton code** | non |
+| 5 | `/flow:verify` | Tests, puis les quatre agents. Corrige les bloquants. Rend **PASSE** ou **BLOQUÉ** | il peut corriger | non |
+| 6 | `/flow:ship` | Enregistre, envoie, ouvre la pull request, surveille la CI | il enregistre | non |
+| 7 | *sur GitHub* | Tu fusionnes, tu supprimes la branche, tu fais *Pull* dans GitHub Desktop | — | — |
+
+### Les trois arrêts — c'est là qu'on se plante
+
+Aux étapes 1, 2 et 3, la commande **s'arrête et attend**. Elle commence toujours par « **J'attends ta réponse.** »
+
+À ce moment-là, **tu réponds dans la discussion, en français.** Tu ne relances pas une commande. Répondre `/flow:verify` à un plan qui attend validation ne construit rien : le travail n'a pas commencé, et la porte n'a rien à vérifier.
+
+### Ce qui coûte cher, ce qui ne coûte rien
+
+`/flow:verify` est **la seule commande chère** : elle lance toute la suite de tests et jusqu'à quatre relecteurs automatiques. Plusieurs minutes.
+
+Tout le reste répond en quelques secondes. `/flow:guide` est gratuit — il ne lance ni test ni agent — et c'est le bon réflexe quand on ne sait pas où on en est.
+
+### Quand sauter des étapes
+
+Le cycle complet sert aux tâches qui comptent. Pour le reste :
+
+- **Une faute de frappe, un libellé** → directement `/flow:new-feature`. `/flow:spec` te le dira lui-même plutôt que de produire de la paperasse.
+- **Un défaut dont la définition de « terminé » est évidente** → `/flow:new-feature` suffit. Une spec ne sert qu'à écrire ce qu'on ne sait pas encore.
+- **Rien ne touche à la structure** → saute `/flow:design`. Il sert aux décisions qu'on regrette, pas aux modifications qu'on oublie.
+
+En revanche, `/flow:verify` et `/flow:ship` ne se sautent jamais : ce sont eux qui empêchent de livrer du cassé.
+
+### Où vit ton travail
+
+Rien de ton travail ne vit dans la conversation. Le code est sur ton disque, la branche et la pull request sont sur GitHub. Ouvrir une conversation neuve ne perd que **le fil de la discussion** — jamais le travail. Il suffit de redire le contexte en trois lignes, ou de lancer `/flow:guide`, qui le reconstitue tout seul.
+
 ## Hors cycle — plus rare, plus cher
 
 Deux commandes ne servent pas à une tâche mais à une version :
