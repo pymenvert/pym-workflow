@@ -28,7 +28,7 @@ Vérifie aussi `git status` en début de commande : si des fichiers sont déjà 
    ## Profil projet
    - type : cli | desktop | web | service | script
    - stack : <langage + framework principal>
-   - format : <commande, ou "aucun">
+   - format : <commande qui **vérifie** le format sans écrire, ou "aucun">
    - lint : <commande, ou "aucun">
    - typecheck : <commande, ou "aucun">
    - test : <commande, ou "aucun">
@@ -36,6 +36,8 @@ Vérifie aussi `git status` en début de commande : si des fichiers sont déjà 
    - run : <commande pour lancer le logiciel>
    - critique : <modules dont une panne fait mal ; à couvrir en priorité par les tests>
    ```
+
+   **`format` est la seule ligne où la forme compte** : écris la variante qui **contrôle** (`prettier --check`, `ruff format --check`), jamais celle qui écrit. `/flow:verify` la lance en tête de sa chaîne de checks, et il le fait avant d'avoir tranché la question de la branche — parce qu'un check ne modifie rien. Une commande qui écrirait déposerait des modifications sur la branche par défaut sans accord, et ne rendrait jamais rouge.
 
    **Chaque commande listée doit avoir été lancée par toi et fonctionner.** Une commande écrite au jugé rend le profil nuisible : `/flow:verify` déclarerait vert quelque chose qui n'a jamais tourné. Si un outil manque, écris « aucun » et propose-moi de l'installer.
 

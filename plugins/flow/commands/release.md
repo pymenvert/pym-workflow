@@ -11,6 +11,8 @@ Publication de version : $ARGUMENTS
 
 2. **La CI de la branche par défaut est-elle verte ?** `gh run list --branch <défaut> --limit 3`, en te fondant sur le code de sortie ou la sortie JSON — jamais sur du texte découpé en colonnes. **Rouge ou en cours : tu t'arrêtes.**
 
+   **Une sortie vide n'est pas une CI verte.** Sur un dépôt sans intégration continue, ou dont la branche n'a jamais été construite, `gh run list` rend **zéro ligne et un code de sortie 0** — mesuré. Lu comme « pas de rouge », ça fait franchir la porte à une version que rien n'a testée. Compte les exécutions : **aucune exécution = arrête-toi et dis-le-moi**, exactement comme un rouge. « Non configuré » n'est jamais « OK ».
+
 3. **Numéro de version.** Si je ne l'ai pas donné, propose-le en lisant le CHANGELOG et `git log <dernier-tag>..HEAD --oneline` : corrections seules → version corrective, ajouts → version mineure, rupture d'usage → version majeure. Dis-moi sur quoi tu te fondes, et attends mon accord.
 
 4. **Cohérence des numéros — l'erreur la plus fréquente.** Cherche **tous** les endroits où la version est inscrite : `package.json`, mais aussi les fichiers de plateforme (`Info.plist`, manifestes, en-têtes, scripts d'installation). Un projet en a souvent plusieurs, et ils doivent être identiques. Un seul oublié produit un paquet qui s'annonce sous un mauvais numéro — et le workflow de publication ne le verra pas. Liste-les-moi avant de les modifier.
@@ -25,7 +27,7 @@ Publication de version : $ARGUMENTS
 
 8. **Surveille la publication** jusqu'à son verdict, et donne-moi le lien de la release. Si elle échoue, le tag existe déjà sur le dépôt distant : dis-moi exactement quoi supprimer avant de recommencer, sinon je serai bloqué.
 
-9. **Le dépôt est-il resté ouvert ?** Demande-le à GitHub, pas à un fichier : `gh repo view <dépôt> --json visibility`. Si la réponse est `PUBLIC` alors que le dépôt est censé être privé, dis-le-moi **en premier, avant le bilan**, et propose `/flow:visibilite fermer`.
+9. **Le dépôt est-il resté ouvert ?** Demande-le à GitHub, pas à un fichier : `gh repo view --json visibility -q .visibility`, sans argument de dépôt — il se déduit du dossier courant. Si la réponse est `PUBLIC` alors que le dépôt est censé être privé, dis-le-moi **en premier, avant le bilan**, et propose `/flow:visibilite fermer`.
 
    **Ne te fie pas au seul témoin `.git/flow-depot-ouvert`** : il vit dans un clone, donc il ne traverse pas les machines. Un dépôt ouvert depuis un poste puis repris depuis un autre n'a aucun témoin de ce côté-là — et le seul endroit qui détient la vérité est GitHub. Le témoin reste utile, il dit *pourquoi* et *depuis quand* ; mais c'est la réponse de GitHub qui tranche.
 

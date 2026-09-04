@@ -22,6 +22,10 @@ Lis le bloc « Profil projet » du `CLAUDE.md` pour connaître les commandes exa
 
 Lance dans cet ordre, en t'arrêtant de corriger seulement quand tout est vert : **format → lint → typecheck → tests → build**.
 
+**`format` vérifie, elle n'écrit pas.** C'est la forme qui contrôle (`prettier --check`, `ruff format --check`) qui est déclarée dans le Profil projet — et c'est elle qui rend vraie la phrase du dessus, « lancer les checks ne modifie rien ». C'est cette phrase qui t'autorise à démarrer sans rien demander, avant même d'avoir tranché la question de la branche : un formateur qui écrirait déposerait des modifications sur la branche par défaut sans mon accord, à l'étape 1 de la porte censée l'interdire. Et il ne rendrait jamais rouge — il occuperait une ligne du tableau en étant vert par construction.
+
+Si `format` est rouge, la correction est de lancer la variante qui écrit (`prettier --write`, `ruff format`). C'est une **correction**, pas un check : elle tombe sous la règle de branche ci-dessus, et elle doit apparaître comme telle dans ton tableau.
+
 Présente le résultat sous forme de tableau, une ligne par check, avec la commande réellement exécutée et son état. Une commande absente du projet se note « non configuré » — jamais « OK ».
 
 **Si un check échoue après tes corrections : verdict BLOQUÉ, tu t'arrêtes là.** Inutile de lancer les agents sur du code qui ne compile pas.

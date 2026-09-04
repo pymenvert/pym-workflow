@@ -18,9 +18,30 @@ Dis-moi ces quatre points **avant** de me demander quoi que ce soit. Ils ne sont
 3. **Les fichiers joints aux releases deviennent téléchargeables sans compte**, y compris ceux des versions précédentes.
 4. **Un fork créé pendant la fenêtre reste public** et hors de ton contrôle.
 
+## Les appels, à écrire exactement ainsi
+
+Cette commande bascule la visibilité par l'**API REST**, jamais par la sous-commande d'édition de dépôt de `gh`. Raison mesurée : celle-ci exige, depuis `gh` 2.61.0, un drapeau de confirmation qui **n'existait pas** avant — donc elle échoue des deux côtés, pour deux raisons opposées, selon la version installée. Les deux machines ne portent pas la même. L'API, elle, se comporte pareil partout.
+
+```
+gh repo view --json visibility -q .visibility
+gh api --method PATCH "repos/{owner}/{repo}" -f visibility=public  -q .visibility
+gh api --method PATCH "repos/{owner}/{repo}" -f visibility=private -q .visibility
+```
+
+Quatre règles qui vont avec, et dont chacune a déjà produit une panne :
+
+- **`{owner}` et `{repo}` sont littéraux.** Ne les remplace par rien : `gh` les substitue lui-même depuis le dépôt du dossier courant. Un nom court comme `pym-workflow` donnerait un `404 Not Found` sur un dépôt qui existe — le pire message possible pendant que le dépôt est resté ouvert.
+- **N'ajoute aucun argument de dépôt** aux commandes ci-dessus, pour la même raison.
+- **`-q .visibility` n'est pas cosmétique.** Sans lui, l'API déverse 6 000 octets de JSON dans la conversation, à l'endroit précis où je dois lire un seul mot.
+- **L'API répond en minuscules (`public`, `private`), `gh repo view` en majuscules (`PUBLIC`, `PRIVATE`).** Ne compare jamais les deux directement.
+
+Et une règle d'échec : **`gh api` écrit son message d'erreur sur la sortie standard, sous une forme qui ressemble à une réponse normale.** Le seul juge est le code de sortie : non nul = échec, quoi qu'il y ait été affiché. Un droit insuffisant remonte d'ailleurs en `404 Not Found`, pas en « accès refusé ».
+
 ## Ouvrir
 
-1. **Vérifie l'état actuel** : `gh repo view <dépôt> --json visibility`. S'il est déjà public, arrête-toi et dis-le-moi — il n'y a rien à faire, et surtout rien à refermer.
+1. **Vérifie l'état actuel** : `gh repo view --json visibility -q .visibility`. S'il est déjà public, arrête-toi et dis-le-moi — il n'y a rien à faire, et surtout rien à refermer.
+
+   **S'il rend `INTERNAL`, arrête-toi aussi** et dis-le-moi : refermer écrirait `private` et retirerait l'accès à toute l'organisation, sans que rien ne le signale. Ce cas se règle à la main, pas par cette commande.
 
 2. **Fouille l'historique complet, pas seulement les fichiers actuels.** C'est l'étape qui justifie la commande :
 
@@ -33,7 +54,7 @@ Dis-moi ces quatre points **avant** de me demander quoi que ce soit. Ils ne sont
 
 3. **Demande-moi confirmation explicite**, en une phrase qui nomme le dépôt et la raison de l'ouverture. N'ouvre jamais sans ma réponse.
 
-4. **Ouvre** : `gh repo edit <dépôt> --visibility public --accept-visibility-change-consequences`, puis **vérifie** que c'est bien fait.
+4. **Ouvre** : `gh api --method PATCH "repos/{owner}/{repo}" -f visibility=public -q .visibility`. Code de sortie non nul, ou réponse autre que `public` : **tu n'as rien ouvert** — dis-le-moi et arrête-toi. Sinon **vérifie** avec `gh repo view --json visibility -q .visibility`, qui doit rendre `PUBLIC`.
 
 5. **Pose le témoin.** Écris `.git/flow-depot-ouvert` contenant la date d'ouverture et la raison, en une ligne. Ce fichier est le seul mécanisme qui survit à la fermeture de la conversation : `.git/` n'est jamais suivi par git, donc rien ne peut partir dans un commit, et le témoin disparaît avec le dossier.
 
@@ -45,10 +66,13 @@ Dis-moi ces quatre points **avant** de me demander quoi que ce soit. Ils ne sont
 
 C'est la partie qui compte, et elle n'est jamais optionnelle.
 
-1. `gh repo edit <dépôt> --visibility private --accept-visibility-change-consequences`
-2. **Vérifie** : `gh repo view <dépôt> --json visibility` doit rendre `PRIVATE`. Montre-moi la sortie brute, ne me dis pas simplement que c'est fait.
-3. **Retire le témoin `.git/flow-depot-ouvert`** — et seulement après que la vérification a rendu `PRIVATE`. Dans cet ordre : un témoin retiré alors que le dépôt est resté ouvert serait pire que pas de témoin du tout.
-4. Si la commande échoue, **dis-le en gros, laisse le témoin en place, et donne-moi le lien du réglage à basculer à la main** : Settings → General → Danger Zone. Ne passe à aucune autre tâche tant que ce n'est pas réglé.
+1. **Regarde d'abord où on en est** : `gh repo view --json visibility -q .visibility`. S'il rend déjà `PRIVATE`, ne bascule rien — passe directement à l'étape 4 pour nettoyer un éventuel témoin périmé, et dis-moi que le dépôt était déjà fermé. Envoyer une écriture inutile sur un dépôt déjà privé, c'est m'apprendre à me méfier de cette commande.
+2. **Ferme** : `gh api --method PATCH "repos/{owner}/{repo}" -f visibility=private -q .visibility`.
+3. **Vérifie** : `gh repo view --json visibility -q .visibility` doit rendre `PRIVATE`. Montre-moi la sortie brute, ne me dis pas simplement que c'est fait.
+4. **Retire le témoin `.git/flow-depot-ouvert`** — et seulement après que la vérification a rendu `PRIVATE`. Dans cet ordre : un témoin retiré alors que le dépôt est resté ouvert serait pire que pas de témoin du tout.
+5. Si la commande échoue, **dis-le en gros, laisse le témoin en place, et donne-moi le lien du réglage à basculer à la main** : Settings → General → Danger Zone. Ne passe à aucune autre tâche tant que ce n'est pas réglé.
+
+   Trois pannes se ressemblent à l'écran et ne se réparent pas pareil, alors nomme celle que tu constates : **`gh` absent** (installe-le), **jeton sans le droit d'écriture** (`gh auth refresh -s repo`, et l'API répond `404` et non « refusé »), **réseau muet** (réessaie). Dans les trois cas, le dépôt est **resté ouvert** : ne dis jamais autre chose.
 
 **Si quoi que ce soit échoue pendant la fenêtre ouverte — une construction, un test, une release —, refermer passe avant de comprendre pourquoi.** On diagnostique sur un dépôt privé.
 

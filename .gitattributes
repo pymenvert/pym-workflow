@@ -1,0 +1,18 @@
+# Fins de ligne : LF partout, y compris sur une machine Windows.
+#
+# Deux raisons mesurées, pas théoriques.
+#
+# 1. Git Bash refuse d'exécuter un script dont les lignes finissent par CRLF :
+#    il rend « $'\r': command not found » sur la première ligne utile. Sans ce
+#    fichier, l'installeur Git for Windows (core.autocrlf=true par défaut)
+#    convertit les .sh à la récupération, et scripts/verifier-le-plugin.sh ne
+#    démarre pas sur la seule machine qu'il est censé prouver.
+#
+# 2. Le contrôle 1 du vérificateur compare le bloc partagé « à l'octet » entre
+#    les fichiers de commandes. Une conversion de fins de ligne le ferait
+#    diverger d'une machine à l'autre, pour une raison invisible à la lecture.
+
+*.sh   text eol=lf
+*.md   text eol=lf
+*.json text eol=lf
+*.yml  text eol=lf
