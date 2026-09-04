@@ -7,43 +7,11 @@ vivent dans `docs/decisions/`, les cadrages dans `docs/specs/`. Ne rien
 dupliquer entre les trois.
 
 Dernière mise à jour : 4 septembre 2026, après la porte de la tâche
-« portabilité double machine ».
+« trous du vérificateur ».
 
 ---
 
 ## Défauts constatés
-
-### Cinq trous du vérificateur, mesurés par la porte du 4 septembre
-
-Aucun n'est urgent — chacun a été reproduit sur une copie du dépôt, et pour
-chacun la portée réelle du trou est bornée. Ils sont ici parce qu'un contrôle
-qui ne couvre pas ce qu'il prétend couvrir est pire qu'un contrôle absent.
-
-1. **Le contrôle 5 ne lit pas la clé `source` de `marketplace.json`.** Mesuré :
-   `"source": "./plugins/flow-v2"` passe au vert. Atténuation : un déplacement
-   réel du dossier rend déjà cinq autres contrôles rouges ; il ne reste que la
-   retouche à la main de cette seule chaîne.
-2. **Le contrôle 4 ne regarde que la ligne `tools:` des agents.** Mesuré : un
-   agent privé de sa ligne `description:` passe au vert (Claude Code ne sait
-   alors plus quand le convoquer), et un agent **supprimé** aussi — le compte
-   affiché tombe de 4 à 3 sans être comparé à quoi que ce soit. Le contrôle 3
-   fait déjà ce travail pour les commandes ; il suffirait de le recopier.
-3. **`.gitattributes` n'est gardé par aucun contrôle.** Mesuré : le supprimer
-   laisse le script au vert. Or la décision `0002` en fait la garantie unique
-   que le script démarre sous Git Bash, et s'en sert pour justifier l'absence
-   de job Windows. Ne pas contrôler la rédaction du fichier mais la **propriété
-   effective**, en la demandant à git — sinon une réécriture plus protectrice
-   (`* text=auto eol=lf`) rendrait le contrôle rouge à tort.
-4. **Le contrôle 2 se satisfait d'une sous-chaîne** : `/flow:mutationX` dans le
-   README vaudrait `/flow:mutation`.
-5. **Le mot « neuf » est écrit en dur** dans le README et dans le nom du job de
-   la CI. Un dixième contrôle les rendra faux tous les deux. (La conclusion du
-   script, elle, ne l'écrit plus.)
-
-### Le script n'a ni `--help` ni gestion de ses arguments
-
-Il les ignore en silence. Pour un auteur non développeur, `verifier-le-plugin.sh
---aide` ne produit rien de compréhensible.
 
 ### Trois affirmations du README que rien ne vérifie
 
@@ -51,6 +19,21 @@ Signalées par la porte du 4 septembre, non corrigées faute de mécanisme : le
 README décrit des comportements du plugin qu'aucun contrôle ne relie au contenu
 réel des commandes. Le contrôle 2 couvre les **noms** des commandes, pas ce que
 le README dit qu'elles font.
+
+### Deux limites connues du banc de mutation
+
+Mesurées par la porte du 4 septembre, laissées ouvertes parce que leur portée
+est bornée et qu'aucune ne produit de faux vert :
+
+1. **Un cas n'exige que le rouge du contrôle visé**, jamais que les autres
+   restent verts. Une mutation qui ferait rougir toute la porte serait comptée
+   « ok ». Les quatre cas réciproques couvrent l'essentiel du risque — un
+   contrôle qui rougit sur un changement légitime est attrapé — mais pas le cas
+   d'un défaut qui déborde sur un contrôle voisin.
+2. **Une sortie envoyée dans `head` ou `less` laisse une copie du dépôt dans le
+   dossier temporaire.** Le nettoyage passe par un piège sur la sortie du
+   script ; interrompu par un tuyau fermé, il peut ne pas s'exécuter. Sans
+   conséquence sur le verdict, mais ça encombre.
 
 ### `/flow:audit` et l'agent `architect` se recouvrent
 
@@ -96,9 +79,9 @@ faudra alors recopier les sorties brutes dans la décision `0002`. À ne pas
 provoquer exprès : rouvrir un dépôt est l'acte irréversible que la commande
 existe pour encadrer.
 
-### Rien de la 0.12.0 n'a tourné sous Windows
+### Rien de la 0.12.0 ni de la 0.13.0 n'a tourné sous Windows
 
-Tout ce lot a été écrit et vérifié sur la tour Ubuntu. La version de `gh` du
+Les deux lots ont été écrits et vérifiés sur la tour Ubuntu. La version de `gh` du
 poste Windows reste **inconnue** — c'est précisément pour ça que plus rien ne
 dépend d'une version. Restent deux choses à constater là-bas : que
 `sh scripts/verifier-le-plugin.sh` tourne sous Git Bash, et que `.gitattributes`
@@ -131,6 +114,66 @@ emploiera une capacité récente fera renaître le besoin intact.
 ---
 
 ## Relevés datés
+
+### 4 septembre 2026 — les trous du vérificateur (0.13.0)
+
+Les cinq trous mesurés par la porte de la 0.12.0 sont bouchés, et le
+vérificateur a désormais son propre banc d'essai.
+
+**Le test a été écrit avant la correction, et il échouait.**
+`scripts/eprouver-le-verificateur.sh` injecte les défauts un par un dans des
+copies jetables du dépôt, et exige que le bon contrôle passe au rouge. Au
+premier lancement — avant toute correction — **six cas sur vingt-deux passaient
+au vert**, exactement les trous consignés.
+
+**Puis la porte a trouvé que ce test-là était creux, et c'est la leçon du lot.**
+Dans la fonction qui lit le verdict d'un contrôle, une variable awk n'était pas
+initialisée. En awk, une variable jamais affectée vaut la chaîne vide — qui est
+**égale à zéro** dans une comparaison numérique. La fonction répondait donc
+« rouge » à tout : les vingt-quatre cas passaient au vert sans rien prouver, y
+compris sur une porte cassée. Le banc a été refait, puis soumis à sa propre
+contre-épreuve : quatre affaiblissements délibérés de la porte — contrôle des
+fins de ligne réécrit naïvement, contrôle des agents rendu aveugle à la forme
+liste, garde anti-retour retirée, compteur de rouges débranché — le font
+désormais échouer, chacun d'une façon distincte.
+
+Quatre disciplines en sont sorties, chacune apprise d'un faux verdict constaté :
+un cas qui n'a pas **tourné** n'est jamais compté réussi (ni une copie ratée, ni
+un Ctrl-C) · une mutation qui n'a rien **changé** est signalée, pas comptée · un
+contrôle **IGNORÉ** n'est ni un rouge ni un trou, mais un cas non concluant —
+sans quoi le banc devenait rouge sur un dépôt sain dès que `python3` manque,
+c'est-à-dire sur le poste Windows · et le banc lit le **code de sortie** de la
+porte autant que son texte, parce que c'est lui, et lui seul, que la CI regarde.
+
+Il pose enfin la **réciproque** : un changement légitime doit laisser la porte
+verte. Sans ces contre-exemples, un contrôle qui rougirait sur tout passerait
+chaque cas avec les félicitations.
+
+Ce qui a été bouché : la citation d'une commande est vérifiée **entière**
+(`/flow:mutationX` ne vaut plus `/flow:mutation`) · les agents sont contrôlés
+comme les commandes — frontmatter renseigné —, et **ceux que `/flow:verify`
+convoque doivent exister**, ce qu'une suppression pure et simple ne déclenchait
+pas · la clé `source` de `marketplace.json` doit pointer vers un plugin réel ·
+un dixième contrôle interroge **git** sur la fin de ligne effective des scripts,
+plutôt que de lire `.gitattributes` — la propriété survit ainsi à toute
+réécriture du fichier · le décompte des contrôles est **compté à l'exécution**,
+plus jamais écrit en dur, ni dans le script, ni dans le README, ni dans le nom
+du job d'intégration continue.
+
+Deux vrais défauts de la porte ont aussi été trouvés par cette revue, et
+corrigés : le contrôle des agents ne connaissait qu'une écriture de la ligne
+`tools:` — un agent qui réclamait `Edit` sous la forme d'une liste à tirets
+passait au vert · et le contrôle de version, qui compare le dossier de travail à
+la branche par défaut, ne voyait **pas les fichiers non suivis**, c'est-à-dire
+précisément l'ajout d'un fichier neuf, au moment précis où `/flow:verify` tourne
+— avant le commit de `/flow:ship`.
+
+Au passage : les deux scripts acceptent `--aide` et refusent un argument inconnu
+avec un code de sortie distinct, au lieu de l'ignorer en silence.
+
+Le banc tourne aussi dans l'intégration continue, à côté de la porte. Sans lui,
+« tous les contrôles sont verts » ne dit rien de ce que ces contrôles savent
+détecter.
 
 ### 4 septembre 2026 — portabilité double machine (0.12.0)
 

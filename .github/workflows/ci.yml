@@ -28,7 +28,7 @@ permissions:
 
 jobs:
   verifier:
-    name: Les neuf contrôles
+    name: La porte, puis le banc qui l'éprouve
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
@@ -37,5 +37,11 @@ jobs:
           # celle de la branche par défaut. Sans ça, il n'a rien à comparer.
           fetch-depth: 0
 
-      - name: sh scripts/verifier-le-plugin.sh
+      - name: La porte — sh scripts/verifier-le-plugin.sh
         run: sh scripts/verifier-le-plugin.sh
+
+      # Le banc de mutation : il casse le dépôt exprès, dans des copies, et exige
+      # que la porte tombe à chaque fois. Sans lui, « tous les contrôles sont
+      # verts » ne dit rien de ce que ces contrôles savent détecter.
+      - name: Le banc — sh scripts/eprouver-le-verificateur.sh
+        run: sh scripts/eprouver-le-verificateur.sh
