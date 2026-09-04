@@ -1,6 +1,6 @@
 {
   "name": "flow",
-  "version": "0.10.1",
+  "version": "0.11.0",
   "description": "Workflow de dev solo guidé : spec → design → implémentation → vérification bloquante → livraison, avec quatre agents de revue et /flow:guide pour ne jamais rester sans savoir quoi faire",
   "author": {
     "name": "Pym"

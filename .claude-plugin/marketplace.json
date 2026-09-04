@@ -9,7 +9,7 @@
     {
       "name": "flow",
       "source": "./plugins/flow",
-      "description": "Workflow de dev solo guidé : /flow:spec, /flow:design, /flow:new-feature, /flow:verify, /flow:ship, /flow:guide, plus /flow:audit et /flow:release ; quatre agents de revue, hook de formatage"
+      "description": "Workflow de dev solo guidé : /flow:init-project, /flow:spec, /flow:design, /flow:new-feature, /flow:verify, /flow:ship, /flow:guide, plus /flow:audit, /flow:mutation, /flow:release et /flow:visibilite ; quatre agents de revue. Windows et Linux."
     }
   ]
 }
