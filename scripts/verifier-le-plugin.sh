@@ -349,6 +349,111 @@ else
     fin "$(ls scripts/*.sh 2>/dev/null | wc -l | tr -d ' ') scripts, fin de ligne LF garantie par git"
 fi
 
+# ---------------------------------------------------------------- 11
+titre "11. Une préoccupation, un propriétaire"
+
+# Garde de la décision 0003. Une préoccupation partagée entre deux agents produit
+# deux mesures pour un seul fait, et deux avis qu'on ne sait pas départager.
+#
+# Deux règles :
+#   (a) le terme doit exister chez son propriétaire — sinon la préoccupation a
+#       disparu du plugin ;
+#   (b) ailleurs, il n'est toléré que sur une ligne qui CITE le propriétaire
+#       ENTRE ACCENTS GRAVES. Sans les accents, « duplication d'une architecture
+#       inutile » passerait pour un renvoi à `architect` — mesuré.
+#
+# Périmètre : agents ET commandes. Aveugle aux commandes, cette garde ratait
+# trois doublons sur cinq, dont celui d'audit.md qui a motivé la décision.
+# `docs/` est exclu pour la même raison que le contrôle 8 : la spec et les
+# décisions ont le droit de nommer ces termes en prose.
+#
+# Limite assumée : une PARAPHRASE échappe au grep. audit.md disait « code exporté
+# jamais utilisé » pour « code mort ». Cette garde couvre quatre recouvrements
+# sur cinq — seule une relecture attrape le cinquième.
+
+BT=$(printf '\140')   # un accent grave, littéral
+
+# Une commande n'attribue du travail de revue que si elle convoque un relecteur.
+# Les autres emploient ces mots en prose ordinaire — mutation.md parle de code
+# « mort » tout à fait légitimement. Le périmètre se calcule donc, il n'est pas
+# écrit en dur : les noms d'agents viennent des fichiers d'agents.
+COMMANDES_ARBITRES=""
+for c in plugins/flow/commands/*.md; do
+    [ -e "$c" ] || continue
+    for a in plugins/flow/agents/*.md; do
+        [ -e "$a" ] || continue
+        if grep -qF -- "$BT$(basename "$a" .md)$BT" "$c"; then
+            COMMANDES_ARBITRES="$COMMANDES_ARBITRES $c"
+            break
+        fi
+    done
+done
+
+cat > "$TMP/garde" <<'FIN_GARDE'
+duplication|architect
+code mort|architect
+dépendances circulaires|architect
+doublure|test-engineer
+FIN_GARDE
+
+NB_TERMES=0
+while IFS='|' read -r terme prop; do
+    [ -z "$terme" ] && continue
+    NB_TERMES=$((NB_TERMES + 1))
+    FPROP="plugins/flow/agents/$prop.md"
+    if [ ! -f "$FPROP" ]; then
+        rate "« $terme » est attribué à $prop, dont le fichier n'existe pas"
+        continue
+    fi
+    # La présence se juge HORS du bloc « Ce que tu ne fais pas ». Sans ça, un
+    # propriétaire qui a perdu la préoccupation reste vert grâce au seul mot
+    # laissé dans son propre renvoi aux autres — mesuré.
+    CORPS=$(sansCR "$FPROP" | awk '
+        /^## Ce que tu ne fais pas/ { saute = 1; next }
+        /^## /                      { saute = 0 }
+        !saute')
+    if ! printf '%s\n' "$CORPS" | grep -qiF -- "$terme"; then
+        rate "« $terme » a disparu du corps de son propriétaire ($prop) — la préoccupation n'est plus couverte"
+        continue
+    fi
+    for f in plugins/flow/agents/*.md $COMMANDES_ARBITRES; do
+        [ "$f" = "$FPROP" ] && continue
+        [ -e "$f" ] || continue
+        # La maille est la PHRASE, pas la ligne. Exempter la ligne entière
+        # laissait greffer un doublon sur une ligne qui cite déjà le
+        # propriétaire — mesuré sur audit.md:24, la ligne même du renvoi.
+        FAUTIVES=$(sansCR "$f" | awk -v t="$terme" -v pat="$BT$prop$BT" '
+            { n = $0; gsub(/\. /, ".\n", n); k = split(n, ph, "\n")
+              for (i = 1; i <= k; i++)
+                  if (index(tolower(ph[i]), tolower(t)) && !index(ph[i], pat))
+                      printf "%d:%s\n", FNR, ph[i] }')
+        if [ -n "$FAUTIVES" ]; then
+            rate "« $terme » appartient à $prop, et $(basename "$f") le reprend sans le nommer entre accents graves"
+            printf '%s\n' "$FAUTIVES" | cut -c1-100 | sed 's/^/          /'
+        fi
+    done
+done < "$TMP/garde"
+[ "$NB_TERMES" -eq 0 ] && rate "la table terme → propriétaire est vide : ce contrôle ne garde plus rien"
+fin "$NB_TERMES préoccupations, chacune chez un seul propriétaire"
+
+# ---------------------------------------------------------------- 12
+titre "12. Chaque agent dit ce qu'il ne fait pas"
+
+# Critère 4 de la spec, et socle du contrôle 11 : celui-ci juge la présence HORS
+# du bloc « Ce que tu ne fais pas », qu'il exclut par son TITRE LITTÉRAL. Un bloc
+# supprimé — ou dont le titre passe en ### — rend cette règle inerte en silence,
+# et le contrôle 11 redevient la passoire que le banc avait trouvée. Même
+# discipline que le contrôle 1, qui protège l'ancre « ## Fin de réponse ».
+NB_AG=0
+for f in plugins/flow/agents/*.md; do
+    [ -e "$f" ] || continue
+    NB_AG=$((NB_AG + 1))
+    sansCR "$f" | grep -q '^## Ce que tu ne fais pas' ||
+        rate "$(basename "$f") n'a pas de bloc « Ce que tu ne fais pas » — et le contrôle 11 juge la présence hors d'un bloc qui n'existe plus"
+done
+[ "$NB_AG" -eq 0 ] && rate "plus aucun agent"
+fin "$NB_AG agents, chacun nomme ce qu'il laisse aux autres"
+
 # ----------------------------------------------------------------
 printf '\n'
 # Un contrôle IGNORÉ n'est pas un contrôle vert. Le dire est la seule règle que

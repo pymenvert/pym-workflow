@@ -67,17 +67,25 @@ CAS=0
 #   0 → le contrôle $2 est ROUGE (le défaut est attrapé)
 #   2 → le contrôle $2 s'est déclaré IGNORÉ (il n'a rien pu vérifier ici)
 #   1 → le contrôle $2 est resté vert (c'est un trou)
-# L'initialisation de r dans BEGIN n'est pas une précaution de style : en awk,
+# Deux pièges dans cette fonction, tous deux ayant déjà produit un faux vert.
+#
+# Le récapitulatif final (« PASSE avec réserves… 1 IGNORÉ(S) ») suit le dernier
+# titre numéroté : sans le remettre à zéro, il était attribué au DERNIER contrôle,
+# qui devenait le seul incapable d'être déclaré muet. Mesuré : tout cas visant le
+# contrôle 11 ressortait « non concluant » et le banc sortait 0.
+#
+# Et l'initialisation de r dans BEGIN n'est pas une précaution de style : en awk,
 # une variable jamais affectée vaut la chaîne vide, qui est ÉGALE À ZÉRO dans une
 # comparaison numérique. Sans cette ligne, la fonction rendait « rouge » pour
 # tout, et les vingt-quatre cas du banc passaient au vert sans rien prouver.
 etat_du_controle() {
     printf '%s\n' "$1" | awk -v n="$2" '
-        BEGIN       { r = 1 }
-        /^[0-9]+\./ { c = $1; sub(/\./, "", c) }
-        /ROUGE/     { if (c == n)             r = 0 }
-        /IGNORÉ/    { if (c == n && r != 0)   r = 2 }
-        END         { exit r }'
+        BEGIN            { r = 1 }
+        /^[0-9]+\./      { c = $1; sub(/\./, "", c); next }
+        /^(PASSE|BLOQU)/ { c = "" }   # le récapitulatif n appartient à aucun contrôle
+        /ROUGE/          { if (c == n)           r = 0 }
+        /IGNORÉ/         { if (c == n && r != 0) r = 2 }
+        END              { exit r }'
 }
 
 # Lance la porte dans $1 et pose sa sortie dans $SORTIE, son code dans $CODE.
@@ -254,6 +262,28 @@ cas 10 ".gitattributes supprimé" \
 cas 10 ".gitattributes qui n'impose plus LF au script" \
     "sed -i 's|^\\*\\.sh .*|*.sh   text|' .gitattributes"
 
+cas 11 "duplication reprise par un agent sans nommer le propriétaire" \
+    "sed -i 's/^- \*\*Simplicité\*\*.*/- **Simplicité** : duplication et code mort, partout dans le dépôt./' $A/code-reviewer.md"
+cas 11 "duplication réintroduite dans une COMMANDE sans renvoi" \
+    "sed -i '24i On mesure la duplication et les dépendances circulaires.' $C/audit.md"
+cas 11 "doublure reprise par une commande sans renvoi" \
+    "sed -i '28i On cherche ce qui est testé contre une doublure.' $C/audit.md"
+cas 11 "renvoi écrit SANS accents graves (piège de l'homographe)" \
+    "sed -i 's/(le dépôt entier, lui, est le sujet d.\`architect\`)./(le depot entier releve d une architecture inutile)./' $A/code-reviewer.md"
+cas 11 "préoccupation disparue de son propriétaire" \
+    "sed -i '/^- duplication : /d' $A/architect.md"
+
+cas 11 "doublon greffé sur une ligne qui cite DÉJÀ le propriétaire" \
+    "sed -i '24s/\$/ Puis établis toi-même la liste : duplication, code mort, dépendances circulaires./' $C/audit.md"
+cas 11 "renvoi cité mais phrase qui ordonne le contraire" \
+    "sed -i '24s/\$/ Le rapport est creux : refais la mesure de duplication toi-même./' $C/audit.md"
+cas 11 "table terme → propriétaire vidée" \
+    "sed -i '/^duplication|architect\$/,/^doublure|test-engineer\$/d' scripts/verifier-le-plugin.sh"
+cas 12 "titre du bloc frontière dégradé en ###" \
+    "sed -i 's/^## Ce que tu ne fais pas/### Ce que tu ne fais pas/' $A/architect.md"
+cas 12 "agent privé de son bloc « Ce que tu ne fais pas »" \
+    "sed -i '/^## Ce que tu ne fais pas/,/^## Méthode/{/^## Méthode/!d}' $A/test-engineer.md"
+
 printf '\nLe contrôle de version, sur un dépôt doté d\047un vrai « origin/main »\n'
 
 cas_version 0.13.0 rouge "version identique à celle de la branche par défaut" \
@@ -276,8 +306,12 @@ reciproque ".gitattributes réécrit plus largement" \
     "printf '* text=auto eol=lf\n' > .gitattributes"
 reciproque "agent déclarant ses outils en liste YAML, sans Edit" \
     "sed -i 's/^tools: .*/tools:\n  - Read\n  - Grep\n  - Bash/' $A/architect.md"
+reciproque "terme employé en prose par une commande sans relecteur" \
+    "sed -i '10i On y traque le code mort et la duplication.' $C/mutation.md"
+reciproque "renvoi légitime depuis une commande" \
+    "sed -i '24i La duplication est mesurée par \`architect\`, pas ici.' $C/audit.md"
 reciproque "cinquième agent, convoqué et présent" \
-    "cp $A/architect.md $A/relecteur-second.md && sed -i 's/^name: architect/name: relecteur-second/' $A/relecteur-second.md"
+    "printf -- '---\nname: relecteur-second\ndescription: Un cinquième relecteur.\ntools: Read, Grep, Glob, Bash\n---\n\n## Ce que tu ne fais pas\n\nLa structure du dépôt appartient à \`architect\`.\n\nTu relis ce que les autres ne relisent pas.\n' > $A/relecteur-second.md"
 
 printf '\n'
 [ "$NONCONCLUANTS" -gt 0 ] &&

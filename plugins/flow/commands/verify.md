@@ -37,9 +37,9 @@ Une fois les checks verts, lance en parallèle ceux qui s'appliquent :
 - **`code-reviewer`** — toujours
 - **`test-engineer`** — dès que du code de logique a changé
 - **`architect`** — dès qu'un fichier a été créé, déplacé, ou a nettement grossi ; il travaille alors en mode dérive structurelle
-- **`ux-reviewer`** — uniquement si l'interface visible a changé. Il doit lancer le logiciel pour de vrai.
+- **`ux-reviewer`** — si l'interface visible a changé, **ou si ce qui construit l'exécutable a changé** : script d'empaquetage, dépendance embarquée, assets livrés. Un logiciel qui ne démarre plus sur une machine nue est un défaut d'interface avant d'être un défaut de build. Il doit lancer le logiciel pour de vrai.
 
-Lance aussi `/security-review` si le diff touche à des entrées utilisateur, des fichiers, du réseau, des permissions ou des secrets.
+Lance aussi `/security-review` si le diff touche à des entrées utilisateur, des fichiers, du réseau, des permissions ou des secrets — **ou si `code-reviewer` te tend la main** : il signale ce qui se voit dans le diff et s'arrête là, l'analyse approfondie lui appartient. Une main tendue sans receveur ne protège de rien.
 
 ## 3. Verdict
 
@@ -48,6 +48,8 @@ Rassemble tout et tranche, sans diplomatie :
 - **Bloquants** — ce qui doit être corrigé avant `/flow:ship`. Corrige-les, puis relance les checks concernés.
 - **À traiter plus tard** — liste-les-moi ; ne les corrige pas silencieusement, ça brouille le diff. **Puis écris-les dans `docs/reste-a-faire.md`**, sous un titre daté portant le nom de la tâche (crée le fichier s'il n'existe pas, ajoute à la suite s'il existe). Une liste qui ne vit que dans cette conversation disparaîtra avec elle — et je te demanderai le lendemain si le projet est fini, sans que personne puisse répondre.
 - **Non vérifié** — ce que tu n'as pas pu contrôler et pourquoi. Cette section est obligatoire : une porte qui cache ses angles morts ne protège de rien.
+
+  **`ux-reviewer` y a sa place réservée.** Il est le seul dont un rapport court peut vouloir dire « je n'ai pas pu lancer le logiciel » et non « je n'ai rien trouvé ». S'il dit qu'il n'a pas pu, recopie-le ici : ne le compte jamais comme un feu vert.
 
 Si le diff a ajouté beaucoup de tests — plus d'une dizaine —, signale-le en une ligne et propose `/flow:mutation` **pour plus tard**, une fois ce travail livré : des tests neufs n'ont encore jamais prouvé qu'ils détectent quoi que ce soit. Ne bloque jamais là-dessus, et ne le lance pas maintenant — il exige un dossier de travail propre, ce qui n'est pas le cas ici.
 

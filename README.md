@@ -120,16 +120,20 @@ Règle d'or : chaque commande du profil doit avoir été **exécutée avec succ�
 
 ## Les quatre agents
 
-| Agent | Angle | Quand |
+| Agent | Son objet | Quand |
 |---|---|---|
-| `architect` | Point de rupture, couplage, dérive structurelle | `/flow:design`, puis dès qu'un fichier grossit |
-| `code-reviewer` | Correction, sécurité, conventions du diff | Toujours |
-| `test-engineer` | Cas limites non couverts, tests fragiles | Dès que de la logique change |
-| `ux-reviewer` | L'interface réelle, logiciel lancé et regardé | Si l'interface visible a changé |
+| `architect` | **Le dépôt entier** : point de rupture, couplage, dérive | `/flow:design`, puis dès qu'un fichier grossit |
+| `code-reviewer` | **Ce que ce lot introduit** : correction, textes, secrets visibles | Toujours |
+| `test-engineer` | **Ce qui n'est pas couvert**, et la tenue en conditions réelles | Dès que de la logique change |
+| `ux-reviewer` | **L'interface rendue**, celle qui n'existe qu'une fois lancée | Si l'interface ou ce qui construit l'exécutable a changé |
 
-Chacun a l'ordre explicite de ne rien dire quand il ne trouve rien. Un rapport vide est un résultat.
+**Ils se partagent le travail par objet, pas par vocabulaire.** Deux agents peuvent regarder la duplication sans faire doublon : `code-reviewer` celle que ce lot ajoute, `architect` celle du dépôt. Chacun porte un bloc « Ce que tu ne fais pas » qui nomme le propriétaire des sujets voisins, et deux contrôles du vérificateur les tiennent : l'un exige que ce bloc existe, l'autre refuse qu'un sujet réservé soit repris ailleurs **sans citer son propriétaire dans la même phrase**. C'est une vérification de forme, pas de sens : elle attrape le doublon qui revient par distraction, pas celui qu'on écrirait exprès. C'est l'objet de `docs/decisions/0003-un-proprietaire-par-preoccupation.md`.
 
-`/flow:verify` appelle aussi `/security-review`, livré avec Claude Code, quand le diff touche à des entrées, des fichiers, du réseau ou des secrets.
+Chacun a l'ordre explicite de ne rien dire quand il ne trouve rien. Un rapport vide est un résultat — **sauf pour `ux-reviewer`**, seul dont un rapport court peut vouloir dire « je n'ai pas pu lancer le logiciel ». Il doit alors le dire en toutes lettres, et `/flow:verify` le porte dans sa section « non vérifié » plutôt que de le prendre pour un feu vert.
+
+Deux choses que personne ne regardait, et que la version 0.14.0 a rattachées à leur propriétaire naturel : la **tenue en conditions réelles** (l'appareil qui disparaît en cours de route, la reprise sans redémarrage, l'arrêt d'urgence) va à `test-engineer` · la **première exécution sur une machine nue** et **ce que l'opérateur voit quand ça casse en direct** vont à `ux-reviewer`. Sans agent supplémentaire : le coût par session est inchangé.
+
+`/flow:verify` appelle aussi `/security-review`, livré avec Claude Code, quand le diff touche à des entrées, des fichiers, du réseau ou des secrets — **ou quand `code-reviewer` lui tend la main**. Une main tendue sans receveur ne protège de rien.
 
 ## Le formatage
 

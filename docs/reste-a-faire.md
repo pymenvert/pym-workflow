@@ -7,11 +7,33 @@ vivent dans `docs/decisions/`, les cadrages dans `docs/specs/`. Ne rien
 dupliquer entre les trois.
 
 Dernière mise à jour : 4 septembre 2026, après la porte de la tâche
-« trous du vérificateur ».
+« passe sur les quatre agents ».
 
 ---
 
 ## Défauts constatés
+
+### Trois écritures contournent encore la garde des préoccupations
+
+Mesurées par la porte du 4 septembre, laissées ouvertes : le terme **coupé par un
+retour à la ligne**, écrit avec une **espace insécable**, ou portant du **gras à
+l'intérieur** (`code **mort**`) passe tous les trois. La normalisation de la
+ligne — insécables et astérisques retirés avant la recherche — les fermerait ;
+elle n'a pas été faite dans ce lot pour ne pas empiler une quatrième
+transformation sur une garde déjà refaite deux fois le même jour.
+
+### La garde du contrôle 11 ne rattrape ni une paraphrase, ni les deux préoccupations neuves
+
+Deux limites assumées, écrites dans la décision `0003`.
+
+`audit.md` disait « code exporté jamais utilisé » là où `architect` dit « code
+mort » : aucun grep par termes n'attrape une reformulation. Le compte honnête est
+que la garde couvre **quatre recouvrements sur cinq** — le cinquième ne se voit
+qu'à la relecture.
+
+Et la table ne protège que des sujets anciens : « tenue en conditions réelles » et
+« première exécution » n'ont pas de terme gardé. Elles peuvent se dédoubler demain
+sans que rien ne le dise.
 
 ### Trois affirmations du README que rien ne vérifie
 
@@ -114,6 +136,74 @@ emploiera une capacité récente fera renaître le besoin intact.
 ---
 
 ## Relevés datés
+
+### 4 septembre 2026 — un propriétaire par préoccupation (0.14.0)
+
+Conception attaquée par cinq angles, dix-huit objections passées à la réfutation
+adverse, **dix retenues** — dont trois qui ont démoli des pans entiers de la
+proposition initiale.
+
+**Ce qui est tombé, et pourquoi c'est le plus utile de ce lot :**
+
+- *Répartir par terme* — chaque mot à un seul agent. Mesuré : `code-reviewer` est
+  le **seul agent convoqué à chaque porte**, les trois autres sont
+  conditionnels. Lui retirer « duplication » aurait supprimé toute détection sur
+  la majorité des passages. Le partage se fait donc **par objet** : le lot en
+  cours pour lui, le dépôt entier pour `architect`.
+- *La garde limitée aux agents* — elle ratait **trois doublons sur cinq**, dont
+  celui d'`audit.md` qui a motivé la spec. Mesuré : agents seuls → 2 rouges,
+  agents + commandes → 5.
+- *Le renvoi reconnu à la co-occurrence* — « duplication d'une **architecture**
+  inutile » passait pour un renvoi à `architect`. Il faut les accents graves,
+  exactement la parade déjà inventée pour `/flow:mutationX`.
+- *Le motif « un cinquième agent coûte des tokens »* — écarté comme argument
+  principal : le dépôt ne s'est jamais donné de budget en tokens, et le brandir
+  ici aurait été un critère inventé pour l'occasion. Le vrai motif est que les
+  deux préoccupations neuves sont de **même nature** que ce que possèdent déjà
+  `test-engineer` et `ux-reviewer`.
+
+**Un trou trouvé par le banc, dans le contrôle neuf lui-même :** `architect`
+gardait le mot « duplication » dans son propre bloc « Ce que tu ne fais pas », ce
+qui suffisait à faire croire qu'il possédait encore la préoccupation. La règle de
+présence ignore désormais ce bloc.
+
+**Coût, chiffré comme le critère 7 l'exige.** Toujours actif : **strictement
+inchangé** — aucune description de frontmatter modifiée, pas de cinquième agent.
+À la convocation : **+36 %** si les quatre tirent (13 133 → 17 865 octets ;
+architect +17 %, code-reviewer +37 %, test-engineer +51 %, ux-reviewer +37 %).
+`ux-reviewer` tirera un peu plus souvent, sa convocation s'étendant à ce qui
+construit l'exécutable.
+
+Le banc passe de 32 à **44 cas**, dont dix neufs sur les deux gardes et deux
+réciproques : un renvoi légitime écrit depuis une commande, et un terme employé
+en prose ordinaire par une commande qui ne convoque aucun relecteur.
+
+**Ce que la porte a trouvé, et fait corriger avant la livraison.** Cinq
+relecteurs — les quatre agents jugeant leur propre refonte, plus un critique de
+complétude — ont rendu 45 constats ; 18 sont passés à une réfutation adverse,
+dont 10 ont été réfutés. Les sept retenus sont tous corrigés. Les trois qui
+comptent :
+
+- **Le banc était structurellement incapable de signaler un trou dans le contrôle
+  11.** Sa fonction de lecture suivait le numéro de section, et le récapitulatif
+  final (« PASSE avec réserves… 1 IGNORÉ ») était attribué au **dernier**
+  contrôle. Tout cas visant le 11 et resté vert ressortait « non concluant », avec
+  un motif inventé (« outil absent »), et le banc sortait 0. C'est la **deuxième
+  fois** que cette même fonction ment par sa lecture.
+- **La garde exemptait la ligne entière.** `audit.md` écrit un paragraphe par
+  ligne, et sa ligne 24 cite légitimement `architect` : tout ce qu'on y greffait
+  devenait invisible. La maille est devenue la **phrase** — ce qui a fermé du
+  même coup l'angle mort qu'on croyait irréductible, celui d'une phrase citant le
+  propriétaire pour ordonner le contraire.
+- **La règle de présence reposait sur un titre que rien ne protégeait.** Renommer
+  « ## Ce que tu ne fais pas » rendait l'exclusion inopérante, et le mot laissé
+  dans un renvoi suffisait alors à prouver une couverture disparue. D'où le
+  contrôle 12.
+
+Deux faux positifs introduits par ces corrections ont été trouvés par le banc
+lui-même et réparés : un renvoi de `code-reviewer` coupé entre deux phrases, et
+une commande sans relecteur rougie pour un emploi innocent — d'où un périmètre
+désormais **calculé** plutôt qu'écrit en dur.
 
 ### 4 septembre 2026 — les trous du vérificateur (0.13.0)
 

@@ -21,17 +21,19 @@ Commence par les constats les plus graves, et ne confronte pas les cosmétiques 
 
 ## Mesure avant de juger
 
-Établis des faits avec Bash et Grep avant d'émettre le moindre avis : fichiers les plus gros, fonctions les plus longues, modules importés partout, duplication, code exporté jamais utilisé, dépendances circulaires. Un audit qui commence par une opinion ne vaut rien.
+Un audit qui commence par une opinion ne vaut rien. Mais ne refais pas la mesure structurelle toi-même : la duplication, le code mort et les dépendances circulaires sont mesurés par `architect`. Tu lis son rapport, tu ne le doubles pas.
+
+**Lance donc les agents maintenant** — section « Les agents, sur le fond » plus bas — et attends leurs rapports avant de répondre aux questions : trois des cinq en dépendent. Préviens-moi de la durée.
 
 ## Les cinq questions
 
-1. **Qu'est-ce qui est testé contre une doublure et jamais contre la réalité ?** C'est l'angle mort le plus coûteux qui existe : une doublure accepte exactement ce qu'on l'a écrite pour accepter, donc elle valide ta compréhension du service, pas le service. Un projet peut avoir trois cents tests verts et n'avoir jamais rien fait fonctionner pour de vrai. Liste ce qui n'a jamais rencontré le vrai service, le vrai binaire, la vraie machine de destination.
+1. **Qu'est-ce qui n'a jamais rencontré la réalité ?** L'inventaire des doublures est établi par `test-engineer` — ne le refais pas. Ta question à toi est celle qu'il ne peut pas poser : ce que son inventaire révèle du **projet entier**. Un projet peut avoir trois cents tests verts et n'avoir jamais rien fait fonctionner pour de vrai ; si c'est le cas, c'est le premier constat du rapport, avant tous les autres.
 
 2. **Quels tests ne protègent rien ?** Ne l'éprouve pas ici : `/flow:mutation` est écrit pour ça, avec les garde-fous qu'exige une commande qui casse du code exprès — cet audit, lui, ne modifie rien. Regarde simplement si cette épreuve a déjà été passée sur ce projet (un outil de mutation, une trace dans `docs/reste-a-faire.md`). Si non, dis-le et propose-la : un audit qui fait confiance à une suite de tests jamais éprouvée repose sur du sable.
 
 3. **Qu'est-ce que le programme dit de lui-même qui est devenu faux ?** Textes d'interface, messages d'erreur, README, aide en ligne, notice. Une explication vieillit sans qu'aucun test ne s'en aperçoive — et c'est précisément ce que l'utilisateur lit.
 
-4. **Quelle partie sera la plus pénible à modifier dans six mois ?** Nomme-la, avec la raison. Une seule.
+4. **Quelle partie sera la plus pénible à modifier ?** Ne réponds pas toi-même : c'est la question centrale d'`architect`, avec son horizon à lui. Reprends sa réponse et dis si tu la partages. Deux horizons différents pour la même question ne donnent pas deux avis, ils donnent un doute.
 
 5. **Qu'est-ce qui a été corrigé sans que la cause soit écrite ?** Un défaut réglé dont la leçon n'est consignée nulle part reviendra sous une autre forme.
 
