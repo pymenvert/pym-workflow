@@ -7,78 +7,68 @@ vivent dans `docs/decisions/`, les cadrages dans `docs/specs/`. Ne rien
 dupliquer entre les trois.
 
 Dernière mise à jour : 4 septembre 2026, après la porte de la tâche
-« portabilité Ubuntu ».
+« portabilité double machine ».
 
 ---
 
 ## Défauts constatés
 
-### Le plugin n'a aucune vérification sur lui-même
+### Cinq trous du vérificateur, mesurés par la porte du 4 septembre
 
-C'est le point de rupture, et l'agent `architect` a tranché sans hésiter : ce
-dépôt est passé de 3 à 11 commandes en huit jours, et **100 % des défauts
-relevés aujourd'hui étaient détectables mécaniquement**. Un plugin qui prêche
-« une porte qui a le droit de dire non » et n'en a aucune sur lui-même.
+Aucun n'est urgent — chacun a été reproduit sur une copie du dépôt, et pour
+chacun la portée réelle du trou est bornée. Ils sont ici parce qu'un contrôle
+qui ne couvre pas ce qu'il prétend couvrir est pire qu'un contrôle absent.
 
-Cinq contrôles suffiraient, dans un script et un workflow d'une soixantaine de
-lignes : le bloc partagé identique à l'octet dans les dix fichiers qui le
-portent · chaque commande citée dans le README · chaque agent doté d'une ligne
-`tools:` · les deux JSON valides et la version bumpée par rapport à `main` ·
-chaque chemin relatif du README existant réellement.
+1. **Le contrôle 5 ne lit pas la clé `source` de `marketplace.json`.** Mesuré :
+   `"source": "./plugins/flow-v2"` passe au vert. Atténuation : un déplacement
+   réel du dossier rend déjà cinq autres contrôles rouges ; il ne reste que la
+   retouche à la main de cette seule chaîne.
+2. **Le contrôle 4 ne regarde que la ligne `tools:` des agents.** Mesuré : un
+   agent privé de sa ligne `description:` passe au vert (Claude Code ne sait
+   alors plus quand le convoquer), et un agent **supprimé** aussi — le compte
+   affiché tombe de 4 à 3 sans être comparé à quoi que ce soit. Le contrôle 3
+   fait déjà ce travail pour les commandes ; il suffirait de le recopier.
+3. **`.gitattributes` n'est gardé par aucun contrôle.** Mesuré : le supprimer
+   laisse le script au vert. Or la décision `0002` en fait la garantie unique
+   que le script démarre sous Git Bash, et s'en sert pour justifier l'absence
+   de job Windows. Ne pas contrôler la rédaction du fichier mais la **propriété
+   effective**, en la demandant à git — sinon une réécriture plus protectrice
+   (`* text=auto eol=lf`) rendrait le contrôle rouge à tort.
+4. **Le contrôle 2 se satisfait d'une sous-chaîne** : `/flow:mutationX` dans le
+   README vaudrait `/flow:mutation`.
+5. **Le mot « neuf » est écrit en dur** dans le README et dans le nom du job de
+   la CI. Un dixième contrôle les rendra faux tous les deux. (La conclusion du
+   script, elle, ne l'écrit plus.)
 
-Mesuré : ces cinq contrôles attrapent **six des huit défauts** trouvés ce jour.
+### Le script n'a ni `--help` ni gestion de ses arguments
 
-### `ux-reviewer` peut écrire dans le code
+Il les ignore en silence. Pour un auteur non développeur, `verifier-le-plugin.sh
+--aide` ne produit rien de compréhensible.
 
-`plugins/flow/agents/ux-reviewer.md` est le seul agent sans ligne `tools:`.
-`architect`, `code-reviewer` et `test-engineer` déclarent tous
-`tools: Read, Grep, Glob, Bash`. Sans cette ligne, l'agent hérite de tout,
-`Edit` et `Write` compris — donc **le seul agent à qui son propre prompt
-interdit de commenter le code source est le seul qui peut le réécrire**.
+### Trois affirmations du README que rien ne vérifie
 
-### La commande `format` du Profil projet n'est spécifiée nulle part
-
-Aucun fichier ne dit si `format` **écrit** ou **vérifie**, et les deux lectures
-cassent une règle :
-
-- si elle écrit, `verify.md:17` devient faux (« lancer les checks ne modifie
-  rien ») et un formateur qui écrit ne rend jamais d'échec — il sera toujours
-  vert, donc jamais contraignant ;
-- si elle vérifie, rien n'est formaté et le README promet plus qu'il ne tient.
-
-C'est le défaut que la décision `0001` reproche au hook supprimé — déplacé, pas
-résolu. Correction estimée : deux phrases, dans `init-project.md:31` et
-`verify.md:17-23`.
-
-### `/flow:guide` ne voit pas un dépôt laissé ouvert depuis une autre machine
-
-Le témoin `.git/flow-depot-ouvert` vit dans un clone. Ouvrir le dépôt depuis
-Windows puis reprendre depuis la tour Ubuntu rend `guide` aveugle : il dira
-« rien en cours » alors que le dépôt est public.
-
-`/flow:release` a été corrigé le 4 septembre — il interroge désormais GitHub, la
-seule source qui détienne la vérité. `guide`, lui, ne le fait pas encore : un
-appel `gh repo view --json visibility` fermerait le trou, au prix d'un appel
-réseau dans une commande vendue comme gratuite. À arbitrer.
+Signalées par la porte du 4 septembre, non corrigées faute de mécanisme : le
+README décrit des comportements du plugin qu'aucun contrôle ne relie au contenu
+réel des commandes. Le contrôle 2 couvre les **noms** des commandes, pas ce que
+le README dit qu'elles font.
 
 ### `/flow:audit` et l'agent `architect` se recouvrent
 
-`audit.md:24` recopie presque mot pour mot la liste de mesures de
-`architect.md:26-33`, puis `audit.md:40` lance `architect` pour refaire la même
+`audit.md`:24 recopie presque mot pour mot la liste de mesures de
+`architect.md`:26-33, puis `audit.md`:40 lance `architect` pour refaire la même
 mesure — sur la commande la plus chère du lot. Et la question centrale existe en
 double avec **deux horizons contradictoires** : « dans six mois » côté audit,
 « dans trois mois » côté architecte.
 
-### Le README paraphrase les onze commandes à la main
+Reporté sciemment le 4 septembre. Les deux horizons se corrigent en un mot, mais
+la duplication de fond demande une **décision** : `/flow:audit` mesure lui-même,
+ou il délègue — il ne peut pas faire les deux. Ça mérite son propre cadrage, pas
+un coin d'un autre lot. Et le défaut ne facture que lorsque `/flow:audit` tourne,
+c'est-à-dire « rare, entre deux versions ».
 
-197 lignes qui redonnent le bloc « Profil projet » dans une seconde forme,
-redécrivent les trois arrêts, les quatre agents, le coût de `/flow:verify`.
-Chaque modification d'une commande exige une retouche du README que rien
-n'impose — et quatre écarts avaient déjà été mesurés après huit jours.
-
-C'est le fichier le plus coûteux à maintenir, parce que c'est le seul endroit où
-un non-développeur relit comment fonctionne son propre outil : quand il est
-faux, il n'y a pas de seconde source.
+**Règle de tri appliquée ce jour, et qui vaut d'être retenue :** on prend dans un
+lot ouvert ce qui vit dans un fichier que le lot ouvre déjà **et** qui se corrige
+sans décision nouvelle. Ce point échoue au second critère.
 
 ---
 
@@ -90,39 +80,135 @@ Aucun.
 
 ## Angles morts
 
-### Le plugin n'a jamais tourné sur Ubuntu
+### La bascule de visibilité n'a jamais été constatée de bout en bout
 
-Tout ce qui a été fait pour la portabilité est vérifié **sur Windows
-uniquement**. Le critère 1 de `docs/specs/plugin-sur-ubuntu.md` — aucune erreur
-ni avertissement à l'usage — ne peut être constaté que sur la tour.
+Seul point où la 0.12.0 repose sur une mesure partielle. Détaillé dans
+`docs/decisions/0002-visibilite-par-api-et-porte-du-plugin.md`, section « Ce qui
+n'est pas prouvé ».
 
-### `sudo apt install gh` n'a pas été vérifié
+Mesuré : l'appel `PATCH` atteint le bon endpoint, le champ `visibility` est
+accepté, l'écriture aboutit, aucun effet de bord. **Pas** mesuré : une
+transition réelle — l'essai a écrit `public` sur un dépôt déjà public, donc une
+transition nulle.
 
-Le README recommande cette commande pour l'installation sur Ubuntu. Ni la
-disponibilité ni la fraîcheur du paquet dans les dépôts de la version d'Ubuntu
-de la tour n'ont été contrôlées. Le dépôt apt officiel de GitHub est le recours
-documenté si le paquet manque ou est trop ancien.
+Le constat manquant se fera au premier usage réel de `/flow:visibilite` ; il
+faudra alors recopier les sorties brutes dans la décision `0002`. À ne pas
+provoquer exprès : rouvrir un dépôt est l'acte irréversible que la commande
+existe pour encadrer.
 
-### Ce dépôt n'a ni `CLAUDE.md` ni bloc « Profil projet »
+### Rien de la 0.12.0 n'a tourné sous Windows
 
-Conséquence directe et fâcheuse : `/flow:guide` lancé ici conseillera
-`/flow:init-project`, qui tentera d'installer une infrastructure de tests et une
-chaîne d'intégration de stack sur un dépôt fait de markdown. À traiter en même
-temps que la vérification du plugin sur lui-même.
+Tout ce lot a été écrit et vérifié sur la tour Ubuntu. La version de `gh` du
+poste Windows reste **inconnue** — c'est précisément pour ça que plus rien ne
+dépend d'une version. Restent deux choses à constater là-bas : que
+`sh scripts/verifier-le-plugin.sh` tourne sous Git Bash, et que `.gitattributes`
+fait bien arriver le script en LF.
+
+### `/flow:guide` dira « ce dépôt est public » sur un dépôt volontairement public
+
+Cinq des onze dépôts le sont. Choix assumé, argumenté dans la décision `0002` :
+une ligne de texte de temps en temps, contre une mécanique déclarative d'un ordre
+de grandeur plus chère. Si elle agace à l'usage, la ligne `visibilité attendue`
+du Profil projet reviendra comme **silencieux d'alerte** — avec le droit de
+rétrograder une alarme en mention, jamais celui d'empêcher la question d'être
+posée.
+
+### Le critère 4 de la spec est satisfait par construction, jamais constaté
+
+Il demandait que `/flow:guide`, lancé sur ce dépôt de markdown, ne conseille pas
+`/flow:init-project`. Le `CLAUDE.md` écrit par ce lot contient un bloc « Profil
+projet », donc la ligne du tableau qui déclenchait ce conseil ne s'active plus.
+C'est mécaniquement vrai — mais `/flow:guide` n'a pas été lancé sur ce dépôt
+après le lot pour le voir. Une conversation neuve suffira à le constater.
+
+### Le critère 2 de la spec est satisfait par élimination, pas par construction
+
+Il demandait qu'une commande s'arrête proprement sur un `gh` trop ancien. Plus
+aucune commande n'emploie de capacité récente : le cas n'existe plus, et le
+contrôle 8 du vérificateur en garde la porte. Mais la première commande qui
+emploiera une capacité récente fera renaître le besoin intact.
 
 ---
 
 ## Relevés datés
 
-### 4 septembre 2026 — portabilité Ubuntu
+### 4 septembre 2026 — portabilité double machine (0.12.0)
 
-Retrait du hook de formatage (décision `0001`), 16 reformulations dans 12
-fichiers, README et `marketplace.json` remis à jour, version `0.11.0`.
+Conception attaquée par six angles indépendants, puis douze objections passées à
+une réfutation adverse : six retenues, six réfutées. Renversement principal : la
+décision « déclarer la visibilité attendue dans le Profil projet » a été
+**abandonnée** — quatre angles ont montré que le compromis de coût qui la
+justifiait n'existait pas (le budget de `/flow:guide` se compte en appels
+d'outils, et l'appel se replie dans la ligne groupée existante : zéro appel de
+plus).
 
-Corrigé pendant la porte, à la demande des agents : `docs/` n'était pas suivi
-par git alors que le README y renvoie · quatre décomptes faux dans le README
-(« six commandes » pour onze, « deux commandes » pour quatre) ·
-`/flow:visibilite` n'était documentée nulle part alors que c'est la seule
-commande qui expose irréversiblement un historique · `/flow:init-project`
-manquait à la description de la marketplace · `/flow:release` se fiait à un
-témoin local pour juger si un dépôt était resté public.
+Livré : bascule de visibilité par l'API REST · `/flow:guide` interroge GitHub ·
+`format` spécifiée comme commande de vérification · `scripts/verifier-le-plugin.sh`
+(neuf contrôles) et sa CI · `.gitattributes` · le `CLAUDE.md` du dépôt ·
+`ux-reviewer` doté d'une ligne `tools:`.
+
+**Cinq défauts du registre fermés :**
+
+- *La commande `format` n'est spécifiée nulle part* → elle **vérifie**.
+  `verify.md`, `init-project.md` et le README le disent désormais.
+- *`/flow:guide` ne voit pas un dépôt laissé ouvert depuis une autre machine* →
+  il le demande à GitHub, et la précédence GitHub / témoin est écrite noir sur
+  blanc.
+- *Le plugin n'a aucune vérification sur lui-même* → neuf contrôles, soit deux de
+  plus que les cinq envisagés : le frontmatter de chaque commande (sans lui, la
+  commande disparaît de l'autocomplétion — panne totale, invisible, et qui
+  n'était couverte par rien) et l'interdiction de la sous-commande d'édition de
+  dépôt de `gh`.
+- *`ux-reviewer` peut écrire dans le code* → **le défaut était mal formulé.** Les
+  quatre agents peuvent écrire : `Bash` y suffit (`sed -i`, une redirection), et
+  les prompts des trois autres leur **ordonnent** de s'en servir. Une ligne
+  `tools:` déclare une intention, elle ne construit pas de barrière. Corrigé
+  quand même — `ux-reviewer` a sa ligne, sans `Edit` ni `Write`, et le contrôle 4
+  l'exige des quatre — mais la vraie garantie est ailleurs, et elle est
+  maintenant écrite dans l'agent : le travail se fait sur une branche dédiée, et
+  `git status` à la porte montre tout ce qui a bougé.
+- *Le README paraphrase les onze commandes à la main* → **fermé sans toucher au
+  README.** Le diagnostic était faux : ce qui avait été mesuré, ce sont quatre
+  **écarts** entre le README et les commandes — un problème de cohérence, que le
+  contrôle 2 attrape mécaniquement dans les deux sens pour trois lignes de
+  script. La longueur, elle, n'a jamais rien cassé. Et le registre écrivait
+  lui-même l'argument qui condamnait sa conclusion : « c'est le seul endroit où
+  un non-développeur relit comment fonctionne son propre outil ; quand il est
+  faux, il n'y a pas de seconde source. » Un document dont on dépend à ce point
+  doit être redondant — la redondance y est une fonctionnalité, pas une dette.
+
+**Ce que la porte a trouvé et fait corriger avant la livraison.** Six relecteurs
+— les quatre agents du plugin plus un angle sécurité et un critique de
+complétude — ont rendu 63 constats ; 24 sont passés à une réfutation adverse,
+dont 11 ont été réfutés. Les quatre corrections qui comptent, toutes reproduites
+sur des copies avant et après :
+
+- **Le vérificateur mentait à chaque exécution.** `ignore()` ne comptait rien,
+  donc la conclusion annonçait « les neuf contrôles sont verts » alors que le
+  contrôle 6 était IGNORÉ. Et il l'était **à chaque passage de la porte** : le
+  contrôle comparait `HEAD` à `origin/main`, or `/flow:verify` tourne avant le
+  commit de `/flow:ship`. Le contrôle qui garde la panne silencieuse du bump
+  était donc inerte exactement quand on le lançait. Corrigé deux fois : la
+  question devient « le dépôt diffère-t-il de la branche par défaut ? », et un
+  contrôle ignoré est désormais dit comme tel (« PASSE avec réserves »).
+- **Le vérificateur amputait l'historique.** `git fetch --depth=1`, dans la
+  commande `test` que `/flow:verify` lance « parce qu'un check ne modifie
+  rien », posait `.git/shallow` sur un clone privé de la ref `origin/main` :
+  24 commits ramenés à 1. Mesuré, corrigé, revérifié (23 avant, 23 après).
+- **Le contrôle 1 était auto-réalisateur** : il comparait les dix blocs entre
+  eux, jamais à un contenu. Vider les dix de la même façon passait au vert.
+- **Le contrôle 6 acceptait une version qui recule** — `0.10.0` face à `0.11.0`
+  sur la branche par défaut passait au vert, alors que l'effet est identique à
+  une absence de bump.
+
+**Les neuf contrôles ont ensuite été éprouvés par mutation** : treize défauts
+injectés un par un dans des copies du dépôt, treize attrapés par le bon
+contrôle — dont les deux qui passaient au vert avant les corrections ci-dessus.
+Plus le recul de version, l'ignoré compté, et l'historique préservé, vérifiés
+séparément. C'est l'épreuve que `/flow:mutation` exige, appliquée d'avance.
+
+**Corrigé en passant, hors registre :** `/flow:release` étape 2 traitait une
+sortie vide de `gh run list` comme une CI verte — mesuré : zéro ligne, code de
+sortie 0. Sur un dépôt sans intégration continue, la porte de publication
+laissait passer une version que rien n'avait testée. Ce lot publiant justement
+depuis ce dépôt-là, le défaut allait être rencontré immédiatement.

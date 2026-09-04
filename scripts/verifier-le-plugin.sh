@@ -1,0 +1,292 @@
+#!/bin/sh
+# La porte du plugin sur lui-même.
+#
+# Neuf contrôles mécaniques, en sh POSIX pour rendre le même verdict sur la tour
+# Ubuntu et sous Git Bash (Windows). Sortie 0 si tout est vert, 1 sinon.
+#
+# Deux règles de conception, apprises de la porte qu'il imite :
+#
+#   - Il lance TOUS les contrôles avant de conclure. S'arrêter au premier rouge
+#     obligerait à relancer neuf fois pour découvrir neuf défauts, et c'est le
+#     meilleur moyen de faire abandonner à la troisième.
+#   - Il ne rend rouge que sur un défaut réel. Un contrôle qui crie faux dès sa
+#     naissance est désactivé dans la semaine — et le jour où il a raison,
+#     personne ne l'écoute. « IGNORÉ » existe pour ça : ni vert, ni rouge.
+#
+# Lancer : sh scripts/verifier-le-plugin.sh
+
+set -u
+
+RACINE=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd) || exit 1
+cd "$RACINE" || exit 1
+
+TOTAL=0   # contrôles rouges, toutes sections confondues
+SECTION=0 # contrôles rouges de la section en cours
+IGNORES=0 # contrôles qui n'ont rien pu vérifier — ni verts, ni rouges
+
+TMP=${TMPDIR:-/tmp}/verif-plugin-$$
+mkdir -p "$TMP" || exit 1
+# shellcheck disable=SC2064
+trap "rm -rf '$TMP'" EXIT HUP INT TERM
+
+titre()  { SECTION=0; printf '\n%s\n' "$1"; }
+ok()     { printf '  ok      %s\n' "$1"; }
+ignore() { printf '  IGNORÉ  %s\n' "$1"; IGNORES=$((IGNORES + 1)); }
+rate()   { printf '  ROUGE   %s\n' "$1"; SECTION=$((SECTION + 1)); TOTAL=$((TOTAL + 1)); }
+# Conclut une section : le récapitulatif vert n'apparaît que si rien n'a raté.
+fin()    { [ "$SECTION" -eq 0 ] && ok "$1"; return 0; }
+
+# Retire les retours chariot Windows : aucune comparaison ne doit dépendre du
+# système sur lequel le dépôt a été récupéré. (.gitattributes impose LF, ce
+# filtre est la ceinture qui va avec les bretelles.)
+sansCR() { tr -d '\r' < "$1"; }
+
+version_de() { sed -n 's/.*"version"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p' | head -1; }
+
+# Vrai si $1 est STRICTEMENT supérieure à $2. Une simple inégalité de chaînes ne
+# suffit pas : elle laisserait passer un numéro qui RECULE — ce qui arrive pour
+# de bon en résolvant un conflit de fusion sur plugin.json, et qui a exactement
+# le même effet qu'une absence de bump.
+# Vérifié : 1.0.0 > 0.99.0 · 0.10.0 > 0.9.0 · 1.2.10 > 1.2.9 · égalité = faux.
+plus_grande() {
+    [ "$1" != "$2" ] &&
+    [ "$(printf '%s\n%s\n' "$1" "$2" | sort -t. -k1,1n -k2,2n -k3,3n | head -1)" = "$2" ]
+}
+
+PLUGIN_JSON=plugins/flow/.claude-plugin/plugin.json
+MARKET_JSON=.claude-plugin/marketplace.json
+COMMANDES=plugins/flow/commands
+
+# ---------------------------------------------------------------- 1
+titre "1. Le bloc partagé : présent partout, et identique à l'octet"
+
+# guide.md est la seule exception, et elle est écrite en dur ici volontairement :
+# c'est la commande de dernier recours, elle ne peut pas se citer elle-même.
+# Aucun décompte de fichiers n'est codé en dur — une douzième commande demain
+# est contrôlée sans que ce script bouge.
+REF=""
+NB=0
+for f in "$COMMANDES"/*.md; do
+    case "$(basename "$f")" in guide.md) continue ;; esac
+    if ! sansCR "$f" | grep -q '^## Arrêts et attentes'; then
+        rate "$(basename "$f") ne porte pas le bloc partagé — la fin de réponse obligatoire a disparu"
+        continue
+    fi
+    # Le reste du contrôle compare les fichiers ENTRE EUX : dix blocs vidés de
+    # la même façon resteraient identiques, donc verts. Cette ligne est la seule
+    # ancre à un contenu réel — sans elle, le contrôle est auto-réalisateur.
+    sansCR "$f" | grep -q '^## Fin de réponse' ||
+        rate "$(basename "$f") a perdu « ## Fin de réponse » — le bloc partagé a été vidé de sa substance"
+    NB=$((NB + 1))
+    sansCR "$f" | sed -n '/^## Arrêts et attentes/,$p' > "$TMP/bloc"
+    if [ -z "$REF" ]; then
+        REF=$(basename "$f")
+        cp "$TMP/bloc" "$TMP/reference"
+    elif ! diff -q "$TMP/reference" "$TMP/bloc" >/dev/null 2>&1; then
+        rate "$(basename "$f") porte un bloc qui diverge de $REF"
+    fi
+done
+[ "$NB" -eq 0 ] && rate "plus aucune commande ne porte le bloc partagé"
+fin "$NB commandes, bloc présent et identique (guide.md exempté)"
+
+# ---------------------------------------------------------------- 2
+titre "2. README et commandes se citent mutuellement"
+
+for f in "$COMMANDES"/*.md; do
+    n=$(basename "$f" .md)
+    grep -q -- "/flow:$n" README.md 2>/dev/null ||
+        rate "/flow:$n existe mais n'est nulle part dans le README"
+done
+
+grep -o -- '/flow:[a-z][a-z-]*' README.md 2>/dev/null | sed 's|/flow:||' | sort -u > "$TMP/cites"
+while read -r n; do
+    [ -z "$n" ] && continue
+    [ -f "$COMMANDES/$n.md" ] || printf '%s\n' "$n" >> "$TMP/fantomes"
+done < "$TMP/cites"
+if [ -f "$TMP/fantomes" ]; then
+    while read -r n; do rate "le README cite /flow:$n, qui n'existe pas"; done < "$TMP/fantomes"
+fi
+# La description de marketplace.json énumère les commandes à la main : c'est le
+# champ le plus dérivant du dépôt, et le défaut s'y est DÉJÀ produit — le relevé
+# du 4 septembre note que /flow:init-project y manquait. Rien ne le lisait.
+# Sens aller seulement : les écarts observés ont toujours été des absences.
+# Garde conditionnelle : le jour où la description cessera d'énumérer, le
+# contrôle se taira au lieu de crier faux.
+if grep -q '/flow:' "$MARKET_JSON" 2>/dev/null; then
+    for f in "$COMMANDES"/*.md; do
+        n=$(basename "$f" .md)
+        grep -q -- "/flow:$n" "$MARKET_JSON" 2>/dev/null ||
+            rate "/flow:$n manque à la description de marketplace.json, qui énumère les commandes"
+    done
+fi
+
+fin "$(wc -l < "$TMP/cites" | tr -d ' ') commandes, citées par le README et par la marketplace"
+
+# ---------------------------------------------------------------- 3
+titre "3. Chaque commande a un frontmatter exploitable"
+
+# C'est lui qui décide si une commande existe pour Claude Code. Un `description:`
+# perdu, et la commande disparaît de l'autocomplétion : panne totale, invisible,
+# et qu'aucun autre contrôle n'attrape.
+for f in "$COMMANDES"/*.md; do
+    n=$(basename "$f")
+    if [ "$(sansCR "$f" | head -1)" != "---" ]; then
+        rate "$n ne commence pas par un frontmatter"
+        continue
+    fi
+    sansCR "$f" | sed -n '2,/^---$/p' | grep -q '^description:[[:space:]]*[^[:space:]]' ||
+        rate "$n n'a pas de ligne « description: » renseignée — la commande disparaîtrait de l'autocomplétion"
+done
+fin "$(ls "$COMMANDES"/*.md 2>/dev/null | wc -l | tr -d ' ') commandes, frontmatter renseigné"
+
+# ---------------------------------------------------------------- 4
+titre "4. Chaque agent déclare ses outils, sans Edit ni Write"
+
+for f in plugins/flow/agents/*.md; do
+    n=$(basename "$f")
+    ligne=$(sansCR "$f" | grep -m1 '^tools:')
+    if [ -z "$ligne" ]; then
+        rate "$n n'a pas de ligne « tools: » — il hérite de tout, Edit et Write compris"
+        continue
+    fi
+    case "$ligne" in
+        *Edit*|*Write*) rate "$n déclare Edit ou Write : un relecteur rapporte, il ne répare pas" ;;
+    esac
+done
+fin "$(ls plugins/flow/agents/*.md 2>/dev/null | wc -l | tr -d ' ') agents, outils déclarés"
+
+# ---------------------------------------------------------------- 5
+titre "5. Les manifestes sont valides et se répondent"
+
+if command -v python3 >/dev/null 2>&1; then
+    for m in $PLUGIN_JSON $MARKET_JSON; do
+        python3 -c 'import json,sys; json.load(open(sys.argv[1]))' "$m" 2>/dev/null ||
+            rate "$m n'est pas un JSON valide — le plugin serait ininstallable"
+    done
+    fin "les deux manifestes parsent"
+else
+    for m in $PLUGIN_JSON $MARKET_JSON; do
+        grep -q '"name"' "$m" 2>/dev/null || rate "$m : clé « name » absente"
+    done
+    ignore "python3 absent — validation JSON réduite à une recherche de clés"
+fi
+
+NOM_PLUGIN=$(sed -n 's/.*"name"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p' "$PLUGIN_JSON" 2>/dev/null | head -1)
+if [ -z "$NOM_PLUGIN" ]; then
+    rate "aucun nom lisible dans $PLUGIN_JSON"
+elif ! grep -q "\"$NOM_PLUGIN\"" "$MARKET_JSON" 2>/dev/null; then
+    rate "marketplace.json ne référence aucun plugin nommé « $NOM_PLUGIN »"
+fi
+
+# ---------------------------------------------------------------- 6
+titre "6. La version est bumpée par rapport à la branche par défaut"
+
+# Sans bump, aucune mise à jour n'est proposée, même si le dépôt distant a
+# changé : c'est la panne silencieuse que le README décrit à sa section
+# « Mettre à jour le workflow ».
+VERSION=$(version_de < "$PLUGIN_JSON")
+if [ -z "$VERSION" ]; then
+    rate "aucune version lisible dans $PLUGIN_JSON"
+else
+    # JAMAIS de --depth ici. Sur un clone complet privé de la ref origin/main
+    # (clone --single-branch, git init + remote add, CI sans fetch-depth), un
+    # fetch superficiel pose .git/shallow et ampute l'historique du dossier de
+    # travail — mesuré : 24 commits ramenés à 1. Une commande « test » n'a pas
+    # le droit d'abîmer le dépôt qu'elle vérifie.
+    git fetch --quiet origin main 2>/dev/null || true
+    REF_MAIN=""
+    for r in origin/main FETCH_HEAD main; do
+        git rev-parse --verify --quiet "$r" >/dev/null 2>&1 && { REF_MAIN=$r; break; }
+    done
+    if [ -z "$REF_MAIN" ]; then
+        ignore "branche par défaut introuvable — rien à quoi comparer $VERSION"
+    # La bonne question est « le dépôt diffère-t-il de la branche par défaut ? »,
+    # pas « HEAD a-t-il bougé ? ». /flow:verify tourne AVANT le commit de
+    # /flow:ship : comparer les commits rendrait ce contrôle inerte à chaque
+    # passage de la porte, c'est-à-dire exactement quand on le lance.
+    elif git diff --quiet "$REF_MAIN" -- 2>/dev/null; then
+        ignore "rien ne diffère de $REF_MAIN ($VERSION) — aucun bump attendu"
+    else
+        AVANT=$(git show "$REF_MAIN:$PLUGIN_JSON" 2>/dev/null | version_de)
+        if [ -z "$AVANT" ]; then
+            ignore "version illisible sur $REF_MAIN — comparaison sautée"
+        elif [ "$AVANT" = "$VERSION" ]; then
+            rate "version toujours $VERSION alors que $REF_MAIN porte la même — sans bump, aucune mise à jour ne sera proposée"
+        elif ! plus_grande "$VERSION" "$AVANT"; then
+            rate "version $VERSION en RECUL par rapport à $REF_MAIN ($AVANT) — même effet qu'une absence de bump"
+        else
+            fin "version $VERSION ($REF_MAIN : $AVANT)"
+        fi
+    fi
+fi
+
+# ---------------------------------------------------------------- 7
+titre "7. Les chemins du dépôt cités par le README existent"
+
+# Uniquement les chaînes qui prétendent désigner un fichier DE CE DÉPÔT, c'est-à-dire
+# celles qui commencent par un de ses dossiers de premier niveau. Tout le reste —
+# motifs de permission (`**/.env`), chemins d'exemple (`config/.env`), chemins hors
+# dépôt (`~/.claude/settings.json`) — est ignoré sans exception : une extraction
+# générique produit une dizaine de fausses alertes sur un README juste.
+grep -o '`[a-zA-Z0-9_.][a-zA-Z0-9_./-]*`' README.md 2>/dev/null | tr -d '`' |
+    grep -E '^(docs|plugins|scripts|\.github|\.claude-plugin)/' | sort -u > "$TMP/chemins"
+while read -r p; do
+    [ -z "$p" ] && continue
+    [ -e "$p" ] || rate "le README cite $p, qui n'existe pas"
+done < "$TMP/chemins"
+fin "$(wc -l < "$TMP/chemins" | tr -d ' ') chemins du dépôt cités, tous présents"
+
+# ---------------------------------------------------------------- 8
+titre "8. Aucun appel gh dépendant d'une version"
+
+# Garde de la décision 0002. `gh repo edit --visibility` est cassé des DEUX
+# côtés : avant gh 2.61.0 le drapeau --accept-visibility-change-consequences
+# n'existe pas, à partir de 2.61.0 il est obligatoire. Interdire la commande
+# entière plutôt qu'un de ses drapeaux couvre les deux formes, et toute variante
+# future. Le périmètre est volontairement `commands/` : `docs/` a le droit de
+# nommer le drapeau, et le nomme (spec et décision), sans quoi ce contrôle
+# serait rouge le jour de sa naissance.
+TROUVE=$(grep -rn -- 'gh repo edit' "$COMMANDES" 2>/dev/null)
+if [ -n "$TROUVE" ]; then
+    rate "cet appel échoue avant gh 2.61.0 (drapeau inexistant) ET à partir de 2.61.0 (drapeau obligatoire) : passer par gh api"
+    printf '%s\n' "$TROUVE" | sed 's/^/          /'
+else
+    fin "aucune commande n'emploie la sous-commande d'édition de dépôt"
+fi
+
+for v in public private; do
+    grep -rq -- "visibility=$v" "$COMMANDES" 2>/dev/null ||
+        rate "plus aucun appel « visibility=$v » : /flow:visibilite a perdu un de ses deux bouts"
+done
+
+# ---------------------------------------------------------------- 9
+titre "9. Aucun reste PowerShell dans le plugin"
+
+TROUVE=$(grep -rniE 'powershell|\.ps1' plugins/ 2>/dev/null)
+if [ -n "$TROUVE" ]; then
+    rate "PowerShell n'existe pas sous Linux — la décision 0001 l'avait retiré"
+    printf '%s\n' "$TROUVE" | sed 's/^/          /'
+else
+    fin "rien de spécifique à Windows dans le plugin"
+fi
+
+# ----------------------------------------------------------------
+printf '\n'
+# Un contrôle IGNORÉ n'est pas un contrôle vert. Le dire est la seule règle que
+# ce script impose à tous les projets et qu'il se doit à lui-même : « une
+# commande absente se note non configuré — jamais OK ». Le code de sortie reste
+# 0, en revanche : rendre rouge sur « python3 absent » ferait crier la porte dès
+# sa naissance sur le poste Windows, et une porte qui crie faux est désactivée
+# dans la semaine.
+if [ "$TOTAL" -eq 0 ]; then
+    if [ "$IGNORES" -eq 0 ]; then
+        printf 'PASSE — tous les contrôles sont verts.\n'
+    else
+        printf "PASSE avec réserves — aucun contrôle rouge, mais %s contrôle(s) IGNORÉ(S) ci-dessus : ils n'ont rien pu vérifier.\n" "$IGNORES"
+    fi
+    exit 0
+fi
+printf 'BLOQUÉ — %s contrôle(s) rouge(s)' "$TOTAL"
+[ "$IGNORES" -gt 0 ] && printf ', et %s IGNORÉ(S)' "$IGNORES"
+printf '.\n'
+exit 1

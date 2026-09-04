@@ -13,10 +13,12 @@ claude plugin install flow@pym --scope user
 
 `--scope user` = disponible dans tous les projets.
 
-Le dépôt étant privé, git doit savoir s'identifier sur la machine :
+Quand le dépôt est privé, git doit savoir s'identifier sur la machine :
 
 - **Windows** — le gestionnaire d'identifiants installé par GitHub Desktop suffit. Rien à configurer.
 - **Ubuntu** — GitHub Desktop n'existe pas pour Linux. Installer `gh` (`sudo apt install gh`), puis lancer `gh auth login` et `gh auth setup-git`. Git réutilisera ces identifiants pour les dépôts privés, sans autre réglage.
+
+**La version de `gh` livrée par Ubuntu suffit.** Vérifié le 4 septembre 2026 sur la tour : paquet `noble/universe`, `gh` 2.45.0, et les cinq appels que le plugin utilise fonctionnent — `repo view`, `api`, `pr list`, `pr create`, `run list`. Depuis la version 0.12.0, plus aucune commande n'emploie de capacité apparue dans une version récente ; c'est l'objet de `docs/decisions/0002-visibilite-par-api-et-porte-du-plugin.md`.
 
 ## Le cycle
 
@@ -133,6 +135,8 @@ Chacun a l'ordre explicite de ne rien dire quand il ne trouve rien. Un rapport v
 
 Ce plugin n'installe **aucun hook**. Le formatage se fait au passage de la porte : `/flow:verify` lance la commande `format` déclarée dans le bloc « Profil projet » du projet, et le résultat apparaît dans son tableau de vérification.
 
+**La commande `format` du profil est celle qui _vérifie_** (`prettier --check`), jamais celle qui écrit. C'est ce qui permet à `/flow:verify` de démarrer ses checks sans rien te demander : un check ne modifie rien. Si elle est rouge, la porte lance alors la variante qui écrit — mais en tant que **correction**, annoncée comme telle, et soumise à la règle « jamais directement sur la branche par défaut ».
+
 Un hook de formatage a existé jusqu'à la 0.10.1. Il a été retiré pour deux raisons : aucun projet n'avait adopté de formateur, donc il n'avait **jamais rien produit** — et il était la seule pièce du plugin qui ne fonctionnait pas sous Linux. Le raisonnement complet, avec les quatre impasses d'implémentation qu'il aura coûtées, est dans `docs/decisions/0001-hook-de-formatage-portable.md`.
 
 Pour formater un projet : pose-lui un `.prettierrc` (ou l'équivalent de sa stack) et déclare la commande `format` dans son Profil projet. `/flow:verify` s'en chargera, sur toutes tes machines. Le style d'un projet appartient au projet — c'est aussi pour ça qu'il n'a rien à faire dans un plugin installé pour tous.
@@ -146,6 +150,20 @@ Puis, par tâche : `/flow:spec` → `/flow:design` → `/flow:new-feature` → `
 Entre deux tâches sans rapport : `/clear`.
 
 Ce que ce cycle ne promet pas : « zéro bug ». Ça n'existe pas. Ce qu'il change, c'est *quand* les bugs apparaissent — attrapés par une machine en trente secondes plutôt que par toi trois semaines plus tard.
+
+## Le plugin se vérifie lui-même
+
+Un plugin qui prêche « une porte qui a le droit de dire non » et n'en a aucune sur lui-même finit par dériver — il est passé de 3 à 11 commandes en huit jours, et **tous** les défauts trouvés à la main jusqu'ici étaient détectables mécaniquement.
+
+```bash
+sh scripts/verifier-le-plugin.sh
+```
+
+Neuf contrôles, quelques secondes, aucun réseau sauf pour comparer la version : le bloc de fin partagé présent et identique dans les dix commandes qui le portent · chaque commande citée par le README et réciproquement · le frontmatter de chaque commande (sans lui, elle disparaît de l'autocomplétion) · chaque agent avec ses outils déclarés, sans `Edit` ni `Write` · les deux manifestes valides et cohérents · la version bumpée par rapport à la branche par défaut · les chemins du dépôt cités par le README · aucun appel `gh` dépendant d'une version · aucun reste PowerShell.
+
+C'est la commande `test` du Profil projet, donc ce que lance `/flow:verify`, **et** exactement ce que rejoue `.github/workflows/ci.yml` à chaque poussée. Deux définitions du mot « vert » finissent toujours par diverger.
+
+Il lance les neuf avant de conclure, plutôt que de s'arrêter au premier rouge : découvrir neuf défauts en neuf exécutions est le meilleur moyen d'abandonner à la troisième.
 
 ## Mettre à jour le workflow
 

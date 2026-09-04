@@ -1,0 +1,41 @@
+# La porte du plugin sur lui-même, rejouée par GitHub.
+#
+# Elle lance exactement la commande `test` du Profil projet — pas une variante :
+# deux définitions du mot « vert » finissent toujours par diverger.
+#
+# Ubuntu seul, délibérément. Un job Windows coûterait le double de minutes sur
+# un dépôt privé, et prouverait le shell d'un runner GitHub — pas celui de la
+# machine de l'auteur. C'est `.gitattributes` qui garantit le fin de ligne, et
+# c'est vérifiable en le lisant.
+#
+# Les deux déclencheurs sont nécessaires :
+#   - `pull_request` donne au contrôle 6 un point de comparaison de version ;
+#   - `push` sur main donne à la branche par défaut une exécution verte, sans
+#     laquelle l'étape 2 de /flow:release s'arrête faute de CI.
+
+name: Vérification du plugin
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+# Le jeton de la CI n'a besoin que de lire. Sur un dépôt qu'on ouvre exprès au
+# public le temps d'une campagne, un jeton en écriture par défaut est un pouvoir
+# dont on ne se sert pas et qu'on expose quand même.
+permissions:
+  contents: read
+
+jobs:
+  verifier:
+    name: Les neuf contrôles
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          # Historique complet : le contrôle 6 compare la version du plugin à
+          # celle de la branche par défaut. Sans ça, il n'a rien à comparer.
+          fetch-depth: 0
+
+      - name: sh scripts/verifier-le-plugin.sh
+        run: sh scripts/verifier-le-plugin.sh
