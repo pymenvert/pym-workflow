@@ -159,11 +159,22 @@ Un plugin qui prêche « une porte qui a le droit de dire non » et n'en a aucun
 sh scripts/verifier-le-plugin.sh
 ```
 
-Neuf contrôles, quelques secondes, aucun réseau sauf pour comparer la version : le bloc de fin partagé présent et identique dans les dix commandes qui le portent · chaque commande citée par le README et réciproquement · le frontmatter de chaque commande (sans lui, elle disparaît de l'autocomplétion) · chaque agent avec ses outils déclarés, sans `Edit` ni `Write` · les deux manifestes valides et cohérents · la version bumpée par rapport à la branche par défaut · les chemins du dépôt cités par le README · aucun appel `gh` dépendant d'une version · aucun reste PowerShell.
+Quelques secondes, aucun réseau sauf pour comparer la version. Ce qu'il contrôle : le bloc de fin partagé, présent et identique dans les dix commandes qui le portent · chaque commande citée par le README **et** par la description de la marketplace, et réciproquement · le frontmatter de chaque commande (sans lui, elle disparaît de l'autocomplétion) · chaque agent avec ses outils déclarés, sans `Edit` ni `Write`, et tous ceux que `/flow:verify` convoque bien présents · les deux manifestes valides, cohérents, et pointant vers un plugin qui existe · la version bumpée — jamais égale, jamais en recul · les chemins du dépôt cités par le README · aucun appel `gh` dépendant d'une version · aucun reste PowerShell · les scripts forcés en LF, sans quoi Windows refuse de les lancer.
 
-C'est la commande `test` du Profil projet, donc ce que lance `/flow:verify`, **et** exactement ce que rejoue `.github/workflows/ci.yml` à chaque poussée. Deux définitions du mot « vert » finissent toujours par diverger.
+Il ne dit jamais « vert » d'un contrôle qu'il n'a pas pu lancer : ceux-là ressortent **IGNORÉ**, comptés à part. Et il les lance tous avant de conclure, plutôt que de s'arrêter au premier rouge — découvrir un seul défaut par exécution est le meilleur moyen de faire abandonner à la troisième.
 
-Il lance les neuf avant de conclure, plutôt que de s'arrêter au premier rouge : découvrir neuf défauts en neuf exécutions est le meilleur moyen d'abandonner à la troisième.
+### Qui garde le gardien
+
+```bash
+sh scripts/eprouver-le-verificateur.sh
+```
+
+Une porte verte n'est pas une preuve, c'est une affirmation. Ce banc casse le dépôt exprès — un défaut à la fois, chacun dans une copie jetable — et exige que le bon contrôle tombe à chaque fois. Il pose aussi la **réciproque**, sans laquelle un contrôle qui rougirait sur tout passerait chaque cas avec les félicitations : un changement légitime doit laisser la porte verte.
+
+C'est `/flow:mutation` appliqué d'avance, et il a déjà servi deux fois. Écrit **avant** les corrections qu'il justifiait, six de ses cas passaient alors au vert. Puis ses propres relecteurs y ont trouvé qu'une variable non initialisée le faisait répondre « attrapé » à tout : ses vingt-quatre cas ne prouvaient rien. Il refuse désormais de compter un cas qui n'a pas tourné, distingue un contrôle **IGNORÉ** d'un trou, vérifie que la mutation a bien changé quelque chose, et lit le **code de sortie** de la porte autant que son texte.
+
+Les deux scripts forment ensemble la commande `test` du Profil projet — donc ce que lance `/flow:verify` — **et** exactement ce que rejoue `.github/workflows/ci.yml` à chaque poussée. Deux définitions du mot « vert » finissent toujours par diverger.
+
 
 ## Mettre à jour le workflow
 

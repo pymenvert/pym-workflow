@@ -1,13 +1,13 @@
 #!/bin/sh
 # La porte du plugin sur lui-même.
 #
-# Neuf contrôles mécaniques, en sh POSIX pour rendre le même verdict sur la tour
+# Des contrôles mécaniques — comptés, jamais écrits en dur —, en sh POSIX pour
 # Ubuntu et sous Git Bash (Windows). Sortie 0 si tout est vert, 1 sinon.
 #
 # Deux règles de conception, apprises de la porte qu'il imite :
 #
 #   - Il lance TOUS les contrôles avant de conclure. S'arrêter au premier rouge
-#     obligerait à relancer neuf fois pour découvrir neuf défauts, et c'est le
+#     obligerait à le relancer autant de fois qu'il y a de défauts, et c'est le
 #     meilleur moyen de faire abandonner à la troisième.
 #   - Il ne rend rouge que sur un défaut réel. Un contrôle qui crie faux dès sa
 #     naissance est désactivé dans la semaine — et le jour où il a raison,
@@ -20,16 +20,28 @@ set -u
 RACINE=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd) || exit 1
 cd "$RACINE" || exit 1
 
+case "${1:-}" in
+    -h|--help|--aide)
+        printf 'Vérifie le plugin sur lui-même. Aucun argument.\n'
+        printf "Sortie 0 si aucun contrôle n'est rouge, 1 sinon.\n"
+        printf "Un contrôle IGNORÉ n'est pas un contrôle vert : il est compté à part.\n"
+        printf 'Le banc qui éprouve ces contrôles : sh scripts/eprouver-le-verificateur.sh\n'
+        exit 0 ;;
+    "") ;;
+    *)  printf 'Argument inconnu : %s. Essaie --aide.\n' "$1" >&2; exit 2 ;;
+esac
+
 TOTAL=0   # contrôles rouges, toutes sections confondues
 SECTION=0 # contrôles rouges de la section en cours
 IGNORES=0 # contrôles qui n'ont rien pu vérifier — ni verts, ni rouges
+COMPTE=0  # contrôles lancés — compté, jamais écrit en dur
 
 TMP=${TMPDIR:-/tmp}/verif-plugin-$$
 mkdir -p "$TMP" || exit 1
 # shellcheck disable=SC2064
 trap "rm -rf '$TMP'" EXIT HUP INT TERM
 
-titre()  { SECTION=0; printf '\n%s\n' "$1"; }
+titre()  { SECTION=0; COMPTE=$((COMPTE + 1)); printf '\n%s\n' "$1"; }
 ok()     { printf '  ok      %s\n' "$1"; }
 ignore() { printf '  IGNORÉ  %s\n' "$1"; IGNORES=$((IGNORES + 1)); }
 rate()   { printf '  ROUGE   %s\n' "$1"; SECTION=$((SECTION + 1)); TOTAL=$((TOTAL + 1)); }
@@ -92,9 +104,14 @@ fin "$NB commandes, bloc présent et identique (guide.md exempté)"
 # ---------------------------------------------------------------- 2
 titre "2. README et commandes se citent mutuellement"
 
+# Le nom doit être cité ENTIER : une recherche de sous-chaîne ferait passer
+# « /flow:mutationX » pour une citation de « /flow:mutation », et un README qui
+# a dérivé d'une lettre resterait vert.
+cite_entier() { grep -qE -- "/flow:$2([^a-zA-Z0-9-]|\$)" "$1" 2>/dev/null; }
+
 for f in "$COMMANDES"/*.md; do
     n=$(basename "$f" .md)
-    grep -q -- "/flow:$n" README.md 2>/dev/null ||
+    cite_entier README.md "$n" ||
         rate "/flow:$n existe mais n'est nulle part dans le README"
 done
 
@@ -115,7 +132,7 @@ fi
 if grep -q '/flow:' "$MARKET_JSON" 2>/dev/null; then
     for f in "$COMMANDES"/*.md; do
         n=$(basename "$f" .md)
-        grep -q -- "/flow:$n" "$MARKET_JSON" 2>/dev/null ||
+        cite_entier "$MARKET_JSON" "$n" ||
             rate "/flow:$n manque à la description de marketplace.json, qui énumère les commandes"
     done
 fi
@@ -144,16 +161,41 @@ titre "4. Chaque agent déclare ses outils, sans Edit ni Write"
 
 for f in plugins/flow/agents/*.md; do
     n=$(basename "$f")
-    ligne=$(sansCR "$f" | grep -m1 '^tools:')
-    if [ -z "$ligne" ]; then
+    # YAML accepte deux écritures pour la même chose : « tools: A, B » sur une
+    # ligne, ou « tools: » suivi d'une liste à tirets. Ne lire que la première
+    # laissait passer un agent qui réclame Edit sous la seconde forme — mesuré.
+    bloc=$(sansCR "$f" | awk '
+        /^tools:/                        { pris = 1; print; next }
+        pris && /^[[:space:]]*-[[:space:]]*[A-Za-z]/ { print; next }
+        pris                             { exit }')
+    valeur=$(printf '%s' "$bloc" | sed '1s/^tools:[[:space:]]*//' | tr -d '[:space:]-')
+    if [ -z "$bloc" ]; then
         rate "$n n'a pas de ligne « tools: » — il hérite de tout, Edit et Write compris"
-        continue
+    elif [ -z "$valeur" ]; then
+        rate "$n a une ligne « tools: » vide — elle ne déclare rien du tout"
+    else
+        case "$bloc" in
+            *Edit*|*Write*) rate "$n déclare Edit ou Write : un relecteur rapporte, il ne répare pas" ;;
+        esac
     fi
-    case "$ligne" in
-        *Edit*|*Write*) rate "$n déclare Edit ou Write : un relecteur rapporte, il ne répare pas" ;;
-    esac
+    # Même exigence que pour les commandes : sans « description: », Claude Code
+    # ne sait plus quand convoquer l'agent. Le défaut est silencieux.
+    sansCR "$f" | sed -n '2,/^---$/p' | grep -q '^description:[[:space:]]*[^[:space:]]' ||
+        rate "$n n'a pas de ligne « description: » renseignée — plus rien ne dit quand le convoquer"
 done
-fin "$(ls plugins/flow/agents/*.md 2>/dev/null | wc -l | tr -d ' ') agents, outils déclarés"
+
+# Un agent SUPPRIMÉ ne se voyait pas : la boucle ci-dessus ne parcourt que ce
+# qui existe, et le décompte affiché tombait de 4 à 3 sans être comparé à rien.
+# C'est /flow:verify qui fait autorité sur la liste attendue — même forme que le
+# contrôle 2, où le README fait autorité sur les commandes.
+sansCR "$COMMANDES/verify.md" | sed -n 's/^- \*\*`\([a-z][a-z-]*\)`\*\*.*/\1/p' | sort -u > "$TMP/agents-attendus"
+while read -r a; do
+    [ -z "$a" ] && continue
+    [ -f "plugins/flow/agents/$a.md" ] ||
+        rate "/flow:verify convoque l'agent « $a », dont le fichier n'existe pas"
+done < "$TMP/agents-attendus"
+
+fin "$(ls plugins/flow/agents/*.md 2>/dev/null | wc -l | tr -d ' ') agents, tous déclarés et tous présents"
 
 # ---------------------------------------------------------------- 5
 titre "5. Les manifestes sont valides et se répondent"
@@ -176,6 +218,16 @@ if [ -z "$NOM_PLUGIN" ]; then
     rate "aucun nom lisible dans $PLUGIN_JSON"
 elif ! grep -q "\"$NOM_PLUGIN\"" "$MARKET_JSON" 2>/dev/null; then
     rate "marketplace.json ne référence aucun plugin nommé « $NOM_PLUGIN »"
+fi
+
+# La clé « source » dit OÙ est le plugin. Une valeur qui pointe dans le vide rend
+# le plugin ininstallable sans qu'aucun autre contrôle ne bronche — le nom, lui,
+# continue de correspondre.
+SOURCE=$(sed -n 's/.*"source"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p' "$MARKET_JSON" 2>/dev/null | head -1)
+if [ -z "$SOURCE" ]; then
+    rate "marketplace.json n'a pas de clé « source » lisible"
+elif [ ! -f "${SOURCE#./}/.claude-plugin/plugin.json" ]; then
+    rate "marketplace.json pointe vers « $SOURCE », où il n'y a pas de plugin.json"
 fi
 
 # ---------------------------------------------------------------- 6
@@ -204,7 +256,13 @@ else
     # pas « HEAD a-t-il bougé ? ». /flow:verify tourne AVANT le commit de
     # /flow:ship : comparer les commits rendrait ce contrôle inerte à chaque
     # passage de la porte, c'est-à-dire exactement quand on le lance.
-    elif git diff --quiet "$REF_MAIN" -- 2>/dev/null; then
+    # `git diff <ref>` ne voit PAS les fichiers non suivis. Or /flow:verify passe
+    # avant le commit de /flow:ship : un fichier tout neuf y est encore non suivi,
+    # et l'ajout d'un fichier est précisément ce qui réclame un bump. Sans cette
+    # seconde condition, le contrôle se déclarait IGNORÉ au moment exact où il
+    # avait quelque chose à dire.
+    elif git diff --quiet "$REF_MAIN" -- 2>/dev/null &&
+         [ -z "$(git ls-files --others --exclude-standard 2>/dev/null)" ]; then
         ignore "rien ne diffère de $REF_MAIN ($VERSION) — aucun bump attendu"
     else
         AVANT=$(git show "$REF_MAIN:$PLUGIN_JSON" 2>/dev/null | version_de)
@@ -270,6 +328,27 @@ else
     fin "rien de spécifique à Windows dans le plugin"
 fi
 
+# ---------------------------------------------------------------- 10
+titre "10. Les scripts arrivent en LF, y compris sous Windows"
+
+# La décision 0002 fait de cette garantie la raison de NE PAS payer un runner
+# Windows. Elle reposait sur un fichier que rien ne lisait.
+#
+# On interroge git sur la propriété EFFECTIVE, pas sur la rédaction de
+# .gitattributes : une réécriture plus large (« * text=auto eol=lf ») est plus
+# protectrice et rendrait rouge un contrôle qui chercherait la ligne « *.sh ».
+if ! git rev-parse --git-dir >/dev/null 2>&1; then
+    ignore "hors d'un dépôt git — la propriété de fin de ligne n'est pas interrogeable"
+else
+    for s in scripts/*.sh; do
+        [ -e "$s" ] || continue
+        EOL=$(git check-attr eol -- "$s" 2>/dev/null | sed 's/.*: eol: //')
+        [ "$EOL" = "lf" ] ||
+            rate "$s n'est pas forcé en LF (git répond « $EOL ») : Git Bash refuserait de l'exécuter sous Windows"
+    done
+    fin "$(ls scripts/*.sh 2>/dev/null | wc -l | tr -d ' ') scripts, fin de ligne LF garantie par git"
+fi
+
 # ----------------------------------------------------------------
 printf '\n'
 # Un contrôle IGNORÉ n'est pas un contrôle vert. Le dire est la seule règle que
@@ -280,9 +359,9 @@ printf '\n'
 # dans la semaine.
 if [ "$TOTAL" -eq 0 ]; then
     if [ "$IGNORES" -eq 0 ]; then
-        printf 'PASSE — tous les contrôles sont verts.\n'
+        printf 'PASSE — les %s contrôles sont verts.\n' "$COMPTE"
     else
-        printf "PASSE avec réserves — aucun contrôle rouge, mais %s contrôle(s) IGNORÉ(S) ci-dessus : ils n'ont rien pu vérifier.\n" "$IGNORES"
+        printf "PASSE avec réserves — sur %s contrôles, aucun rouge mais %s IGNORÉ(S) ci-dessus : ils n'ont rien pu vérifier.\n" "$COMPTE" "$IGNORES"
     fi
     exit 0
 fi

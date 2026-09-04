@@ -10,7 +10,7 @@ instructions lues par Claude Code au démarrage d'une conversation.
 - format : aucun
 - lint : aucun
 - typecheck : aucun
-- test : sh scripts/verifier-le-plugin.sh
+- test : sh scripts/verifier-le-plugin.sh && sh scripts/eprouver-le-verificateur.sh
 - build : aucun
 - run : aucun — le plugin s'exécute dans Claude Code, pas en ligne de commande. Pour l'essayer : `claude plugin marketplace update pym`, `claude plugin update flow@pym`, puis **une conversation neuve**.
 - critique : `plugins/flow/commands/visibilite.md` (seule commande aux effets irréversibles) · les deux manifestes `.claude-plugin/*.json` (une erreur y rend le plugin ininstallable) · le frontmatter de chaque commande (sans `description:`, la commande disparaît de l'autocomplétion)
