@@ -48,4 +48,4 @@ Et dis-lui le coût, une fois : `/flow:verify` lance la suite de tests complète
 
 ## Forme de la réponse
 
-Quinze lignes maximum. **Aucun terme technique sans sa traduction dans la même phrase** — il travaille dans GitHub Desktop et ne connaît ni « diff », ni « rebase », ni « worktree ». Termine par une seule chose à faire, jamais deux options — sauf la question du cas ambigu, qui est le seul endroit où demander coûte moins cher que supposer.
+Quinze lignes maximum. **Aucun terme technique sans sa traduction dans la même phrase** — il n'est pas développeur et ne connaît ni « diff », ni « rebase », ni « worktree ». Termine par une seule chose à faire, jamais deux options — sauf la question du cas ambigu, qui est le seul endroit où demander coûte moins cher que supposer.

@@ -36,7 +36,7 @@ Livraison du travail en cours sur cette branche.
 
 8. **Conclus** : ce qui est parti, et où c'en est.
 
-   Si la CI est verte, donne-moi la suite exactement, dans l'ordre — sinon je reste bloqué là : fusionner la pull request sur GitHub en choisissant « Create a merge commit » ou « Rebase and merge », **jamais « Squash and merge »** qui écraserait les commits séparés ; supprimer la branche (GitHub le propose juste après) ; puis revenir sur la branche par défaut et faire *Pull* dans GitHub Desktop. Sans ce dernier geste, mon dossier reste sur l'ancienne branche et ignore la fusion.
+   Si la CI est verte, donne-moi la suite exactement, dans l'ordre — sinon je reste bloqué là : fusionner la pull request sur GitHub en choisissant « Create a merge commit » ou « Rebase and merge », **jamais « Squash and merge »** qui écraserait les commits séparés ; supprimer la branche (GitHub le propose juste après) ; puis revenir sur la branche par défaut et récupérer la fusion sur ma machine — le bouton *Pull* de mon outil git, ou `git pull`. Sans ce dernier geste, mon dossier reste sur l'ancienne branche et ignore la fusion.
 
 ---
 
@@ -54,4 +54,4 @@ Termine toujours ta dernière réponse par ces trois lignes. Les titres ne chang
 **Ensuite** — UNE seule chose : une commande à lancer, ou une phrase à me répondre. Jamais deux options que tu pourrais trancher toi-même en regardant le projet — tu l'as lu, moi non. En revanche, quand la réponse ne dépend que de moi (« est-ce que je considère ce travail comme fini ? », « laquelle de ces deux formes je préfère ? »), demande — mais constate d'abord, et présente ce que tu as vu en même temps que ta question.
 **Si tu hésites** — `/flow:guide` : il regarde où j'en suis et me donne la seule chose à faire ensuite. Il ne modifie rien, ne lance aucun test, et coûte trois secondes.
 
-Aucun terme technique sans sa traduction dans la même phrase. Je travaille dans GitHub Desktop : « branche », « commit », « CI », « pull request », « diff » demandent trois mots d'explication au passage, pas un renvoi à la documentation.
+Aucun terme technique sans sa traduction dans la même phrase. Je ne suis pas développeur : « branche », « commit », « CI », « pull request », « diff » demandent trois mots d'explication au passage, pas un renvoi à la documentation.

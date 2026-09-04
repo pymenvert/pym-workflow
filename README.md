@@ -11,7 +11,12 @@ claude plugin marketplace add pymenvert/pym-workflow
 claude plugin install flow@pym --scope user
 ```
 
-`--scope user` = disponible dans tous les projets. Le repo est privé : Claude Code réutilise les identifiants git déjà en place. Sous Windows, le gestionnaire d'identifiants installé par GitHub Desktop suffit — rien à configurer, et `gh` n'est pas nécessaire pour cette étape.
+`--scope user` = disponible dans tous les projets.
+
+Le dépôt étant privé, git doit savoir s'identifier sur la machine :
+
+- **Windows** — le gestionnaire d'identifiants installé par GitHub Desktop suffit. Rien à configurer.
+- **Ubuntu** — GitHub Desktop n'existe pas pour Linux. Installer `gh` (`sudo apt install gh`), puis lancer `gh auth login` et `gh auth setup-git`. Git réutilisera ces identifiants pour les dépôts privés, sans autre réglage.
 
 ## Le cycle
 
@@ -38,7 +43,7 @@ Les étapes intermédiaires savent s'effacer : sur une faute de frappe, `/flow:s
 | 4 | *tu réponds « ok »* | Il implémente, par petits lots | **il écrit ton code** | non |
 | 5 | `/flow:verify` | Tests, puis les quatre agents. Corrige les bloquants. Rend **PASSE** ou **BLOQUÉ** | il peut corriger | non |
 | 6 | `/flow:ship` | Enregistre, envoie, ouvre la pull request, surveille la CI | il enregistre | non |
-| 7 | *sur GitHub* | Tu fusionnes, tu supprimes la branche, tu fais *Pull* dans GitHub Desktop | — | — |
+| 7 | *sur GitHub* | Tu fusionnes, tu supprimes la branche, tu récupères la fusion sur ta machine | — | — |
 
 ### Les trois arrêts — c'est là qu'on se plante
 
@@ -68,13 +73,16 @@ Rien de ton travail ne vit dans la conversation. Le code est sur ton disque, la 
 
 ## Hors cycle — plus rare, plus cher
 
-Deux commandes ne servent pas à une tâche mais à une version :
+Quatre commandes ne servent pas à une tâche mais à une version, ou à la machine :
 
 | Commande | Rôle | Quand |
 |---|---|---|
 | `/flow:audit` | Audit de fond de **tout** le programme : dérive lente, angles morts, ce que l'app dit d'elle-même qui est devenu faux | Entre deux versions |
 | `/flow:mutation` | Casse le code exprès et exige que la suite tombe. La seule commande qui met en doute **les tests** plutôt que le code | Après une grosse vague de tests |
 | `/flow:release` | Cohérence de tous les numéros de version, CI verte exigée, puis le tag qui publie | Au moment de livrer une version |
+| `/flow:visibilite` | Ouvre un dépôt privé le temps d'une campagne de CI coûteuse, puis le referme **et le vérifie** | Rare — et jamais sans lire ce qu'elle expose |
+
+`/flow:visibilite` mérite un avertissement : rendre un dépôt public expose **tout son historique**, pas seulement son état actuel, et repasser en privé n'annule ni un clone, ni un fork, ni une mise en cache. La commande fouille l'historique à la recherche de secrets avant d'ouvrir, et refuse de considérer le travail fini tant qu'elle n'a pas vérifié la fermeture.
 
 `/flow:mutation` mérite un mot : toutes les autres commandes font confiance à la suite de tests. Une suite verte n'est pourtant pas une preuve, c'est une affirmation. Casser le code délibérément est le seul moyen de la vérifier — et sur un projet où cette épreuve a été passée, elle a révélé que la suite était **aveugle à quatre cassages réels**. Comme la commande modifie du code source, git sert de filet : dossier propre exigé au départ, restauration par `git checkout`, et preuve par `git status` à l'arrivée.
 
@@ -84,7 +92,7 @@ Fusionner une pull request **ne publie rien**. Dans ce type de projet, c'est le 
 
 Le cycle ne sert à rien si on ne sait pas où on en est. Trois mécanismes s'en occupent, et aucun ne coûte cher :
 
-**Chaque commande finit par trois lignes** — *Où on en est*, *Ensuite*, *Si tu hésites*. Une seule action proposée, jamais deux options, jamais de « si » à arbitrer soi-même. Et si la commande s'est arrêtée en route, elle le dit là plutôt que d'annoncer un travail qui n'a pas eu lieu.
+**Chaque commande finit par trois lignes** — *Où on en est*, *Ensuite*, *Si tu hésites*. Sauf `/flow:guide`, qui *est* le recours et ne peut pas se citer lui-même. Une seule action proposée, jamais deux options, jamais de « si » à arbitrer soi-même. Et si la commande s'est arrêtée en route, elle le dit là plutôt que d'annoncer un travail qui n'a pas eu lieu.
 
 **`/flow:guide`** fait le point quand on est perdu ou qu'on reprend un projet trois semaines plus tard. Il lit l'état du dépôt en un seul appel groupé et nomme la seule commande à lancer. Il lui est interdit de lancer un test, un agent, un lint ou un build — c'est la commande gratuite du lot. Là où git ne permet pas de trancher, il pose une question au lieu de deviner : deviner enverrait relancer la porte, qui est la commande chère.
 
@@ -121,20 +129,13 @@ Chacun a l'ordre explicite de ne rien dire quand il ne trouve rien. Un rapport v
 
 `/flow:verify` appelle aussi `/security-review`, livré avec Claude Code, quand le diff touche à des entrées, des fichiers, du réseau ou des secrets.
 
-## Le hook de formatage
+## Le formatage
 
-Un hook PostToolUse formate chaque fichier modifié — `ruff` ou `black` pour le Python, `prettier` pour le reste. Si aucun formateur n'est installé, le hook ne fait rien et ne bloque jamais.
+Ce plugin n'installe **aucun hook**. Le formatage se fait au passage de la porte : `/flow:verify` lance la commande `format` déclarée dans le bloc « Profil projet » du projet, et le résultat apparaît dans son tableau de vérification.
 
-**Il ne se déclenche que si le projet a adopté le formateur** — `.prettierrc` (ou une clé `prettier` dans `package.json`), `ruff.toml` ou `[tool.ruff]` dans `pyproject.toml`. Sans configuration, il ne touche à rien.
+Un hook de formatage a existé jusqu'à la 0.10.1. Il a été retiré pour deux raisons : aucun projet n'avait adopté de formateur, donc il n'avait **jamais rien produit** — et il était la seule pièce du plugin qui ne fonctionnait pas sous Linux. Le raisonnement complet, avec les quatre impasses d'implémentation qu'il aura coûtées, est dans `docs/decisions/0001-hook-de-formatage-portable.md`.
 
-C'est délibéré : ce hook est installé en scope utilisateur, donc actif dans *tous* tes projets, y compris ceux écrits avant lui. Reformater aux réglages par défaut un projet qui n'a jamais demandé prettier produirait un diff énorme et parasite. Le style d'un projet appartient au projet.
-
-Pour l'activer quelque part : `npm install -g prettier` (une fois sur la machine), puis un `.prettierrc` dans le projet concerné.
-
-Deux autres choix volontaires :
-
-- **Les `.md` sont exclus.** Reformater de la prose (`CLAUDE.md`, `README`) à chaque écriture réaligne les tableaux et rebrasse les puces : plus pénible qu'utile.
-- **Le script est en PowerShell**, pas en bash ni en Python. Sous Windows le `bash` du PATH est le lanceur WSL (souvent cassé), `jq` est absent, et le Python de l'alias WindowsApps tourne en conteneur applicatif avec `%APPDATA%` virtualisé — il ne voit donc pas les outils installés par `npm install -g`. Sur un poste non-Windows, remplacer la commande de `hooks/hooks.json` par un équivalent shell.
+Pour formater un projet : pose-lui un `.prettierrc` (ou l'équivalent de sa stack) et déclare la commande `format` dans son Profil projet. `/flow:verify` s'en chargera, sur toutes tes machines. Le style d'un projet appartient au projet — c'est aussi pour ça qu'il n'a rien à faire dans un plugin installé pour tous.
 
 ## Cycle type
 
@@ -155,7 +156,7 @@ Quatre étapes, dans cet ordre. Les deux premières sont contre-intuitives et sa
 3. **`/plugin marketplace update pym`**, puis `/plugin update flow@pym`. (L'auto-update en arrière-plan peut échouer sur un dépôt privé en HTTPS ; la mise à jour manuelle utilise tes identifiants et fonctionne toujours.)
 4. **Ouvrir une NOUVELLE conversation.** Les plugins sont lus au démarrage d'une conversation, une fois pour toutes. Une discussion déjà ouverte gardera pour toujours la liste de commandes qu'elle avait à sa naissance — redémarrer l'application n'y change rien, elle reste accrochée à sa session d'origine.
 
-Pour vérifier qu'une mise à jour a bien pris, taper `/flow:` dans une conversation neuve : les six commandes doivent apparaître dans l'autocomplétion.
+Pour vérifier qu'une mise à jour a bien pris, taper `/flow:` dans une conversation neuve : les onze commandes doivent apparaître dans l'autocomplétion.
 
 ## Réglages globaux recommandés (une fois)
 

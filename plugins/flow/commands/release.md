@@ -25,7 +25,11 @@ Publication de version : $ARGUMENTS
 
 8. **Surveille la publication** jusqu'à son verdict, et donne-moi le lien de la release. Si elle échoue, le tag existe déjà sur le dépôt distant : dis-moi exactement quoi supprimer avant de recommencer, sinon je serai bloqué.
 
-9. **Le dépôt est-il resté ouvert ?** Si `.git/flow-depot-ouvert` existe, le dépôt a été rendu public pour cette campagne et **ne l'a pas encore été refermé**. Dis-le-moi en premier, avant le bilan, et propose `/flow:visibilite fermer`. C'est le moment exact où on oublie : la release est publiée, le travail semble fini, et le dépôt reste ouvert pour la nuit.
+9. **Le dépôt est-il resté ouvert ?** Demande-le à GitHub, pas à un fichier : `gh repo view <dépôt> --json visibility`. Si la réponse est `PUBLIC` alors que le dépôt est censé être privé, dis-le-moi **en premier, avant le bilan**, et propose `/flow:visibilite fermer`.
+
+   **Ne te fie pas au seul témoin `.git/flow-depot-ouvert`** : il vit dans un clone, donc il ne traverse pas les machines. Un dépôt ouvert depuis un poste puis repris depuis un autre n'a aucun témoin de ce côté-là — et le seul endroit qui détient la vérité est GitHub. Le témoin reste utile, il dit *pourquoi* et *depuis quand* ; mais c'est la réponse de GitHub qui tranche.
+
+   C'est le moment exact où on oublie : la release est publiée, le travail semble fini, et le dépôt reste ouvert pour la nuit.
 
 ---
 
@@ -43,4 +47,4 @@ Termine toujours ta dernière réponse par ces trois lignes. Les titres ne chang
 **Ensuite** — UNE seule chose : une commande à lancer, ou une phrase à me répondre. Jamais deux options que tu pourrais trancher toi-même en regardant le projet — tu l'as lu, moi non. En revanche, quand la réponse ne dépend que de moi (« est-ce que je considère ce travail comme fini ? », « laquelle de ces deux formes je préfère ? »), demande — mais constate d'abord, et présente ce que tu as vu en même temps que ta question.
 **Si tu hésites** — `/flow:guide` : il regarde où j'en suis et me donne la seule chose à faire ensuite. Il ne modifie rien, ne lance aucun test, et coûte trois secondes.
 
-Aucun terme technique sans sa traduction dans la même phrase. Je travaille dans GitHub Desktop : « branche », « commit », « CI », « pull request », « diff » demandent trois mots d'explication au passage, pas un renvoi à la documentation.
+Aucun terme technique sans sa traduction dans la même phrase. Je ne suis pas développeur : « branche », « commit », « CI », « pull request », « diff » demandent trois mots d'explication au passage, pas un renvoi à la documentation.
