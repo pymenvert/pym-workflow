@@ -52,7 +52,8 @@ Vérifie aussi `git status` en début de commande : si des fichiers sont déjà 
    ou « c'est fini ? » : réponds comme la commande `/flow:guide` — le constat, ce qu'il
    reste à faire, et une seule action à lancer. Sans lancer de test, d'agent, de lint
    ni de build. Si `docs/reste-a-faire.md` existe, lis-le avant d'affirmer que rien
-   n'attend.
+   n'attend. Si `docs/journal.md` a une panne dont la dernière ligne d'incident
+   porte « cause : ? », propose-la avant tout.
    ```
 
    Complète ensuite par : architecture en 3 à 5 points, conventions de code, et la règle git (jamais directement sur `main`, commits atomiques, aucun secret).

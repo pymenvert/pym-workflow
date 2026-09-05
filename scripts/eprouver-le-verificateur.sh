@@ -45,7 +45,7 @@ mkdir -p "$BAC" || exit 1
 # interruption effaçait le bac et laissait le script continuer sur des copies
 # devenues impossibles — en concluant « tous attrapés ».
 trap 'rm -rf "$BAC"' EXIT
-trap 'rm -rf "$BAC"; printf "\ninterrompu — aucun verdict.\n" >&2; exit 130' HUP INT TERM
+trap 'rm -rf "$BAC"; printf "\ninterrompu — aucun verdict.\n" >&2; exit 130' HUP INT TERM PIPE
 
 # La référence : une copie saine, dont l'historique est remplacé par un dépôt
 # vierge. Sans branche par défaut ni distant, le contrôle de version s'y déclare
@@ -135,6 +135,12 @@ reciproque() { # $1 = intitulé · $2… = changement LÉGITIME : rien ne doit r
         ECHECS=$((ECHECS + 1)); return 1
     }
     ( cd "$BAC/x" && sh -c "$*" ) >/dev/null 2>&1
+    # Même garde que cas() : une réciproque dont le changement n'a pas eu lieu
+    # est un test qui ne peut plus échouer — mesuré au bilan du 5 septembre 2026.
+    if diff -rq "$BAC/ref" "$BAC/x" >/dev/null 2>&1; then
+        printf '  ÉCHEC    %-52s → le changement n\047a RIEN changé, le cas ne teste plus rien\n' "$nom"
+        ECHECS=$((ECHECS + 1)); return 1
+    fi
     lancer_porte "$BAC/x"
     if printf '%s\n' "$SORTIE" | grep -q 'ROUGE'; then
         printf '  ÉCHEC    %-52s → la porte rougit sur un changement légitime\n' "$nom"
@@ -203,6 +209,21 @@ else
     printf '  ok       aucun rouge, code de sortie 0\n'
 fi
 
+# Un tuyau coupé — « | head » — envoie PIPE : la porte doit nettoyer ET sortir,
+# code 130, sans verdict. Mesuré au bilan du 5 septembre 2026 : elle continuait
+# à l'aveugle et concluait avec un rouge fantôme.
+# Et sous le robot de GitHub, le signal PIPE est ignoré à la naissance des
+# processus : la porte doit aussi sortir quand une ÉCRITURE échoue — mesuré le
+# même jour, la CI rendait 0 ici.
+CAS=$((CAS + 1))
+( cd "$BAC/ref" && sh scripts/verifier-le-plugin.sh 2>/dev/null; printf '%s\n' "$?" > "$BAC/code-tube" ) | head -1 >/dev/null
+if [ "$(cat "$BAC/code-tube" 2>/dev/null)" = 130 ]; then
+    printf '  ok       %-52s → code 130, aucun verdict\n' "tuyau coupé : la porte nettoie et sort"
+else
+    printf '  ÉCHEC    %-52s → code %s au lieu de 130\n' "tuyau coupé : la porte nettoie et sort" "$(cat "$BAC/code-tube" 2>/dev/null)"
+    ECHECS=$((ECHECS + 1))
+fi
+
 printf '\nDéfauts injectés — chacun doit faire rougir le bon contrôle\n'
 
 cas 1 "bloc partagé retiré d'un fichier" \
@@ -223,6 +244,8 @@ cas 2 "README ne cite qu'un préfixe de la commande" \
 
 cas 3 "commande privée de sa ligne description:" \
     "sed -i '2,4{/^description:/d}' $C/audit.md"
+cas 3 "frontmatter jamais refermé" \
+    "sed -i '2,6{/^---\$/d}' $C/spec.md"
 cas 3 "commande privée de son frontmatter entier" \
     "sed -i '1,4d' $C/design.md"
 
@@ -236,6 +259,12 @@ cas 4 "agent dont la ligne tools: est vide" \
     "sed -i 's/^tools: .*/tools:/' $A/architect.md"
 cas 4 "agent privé de sa ligne description:" \
     "sed -i '/^description:/d' $A/test-engineer.md"
+cas 4 "liste des relecteurs de /flow:verify devenue illisible" \
+    "sed -i 's/^- \*\*\`/- **/' $C/verify.md"
+cas 4 "UNE ligne de relecteur reformatée, l'agent supprimé" \
+    "sed -i 's/^- \*\*\`ux-reviewer\`\*\*/- **ux-reviewer**/' $C/verify.md && rm $A/ux-reviewer.md"
+cas 4 "agent au frontmatter jamais refermé" \
+    "sed -i '5{/^---\$/d}' $A/architect.md"
 cas 4 "agent convoqué par /flow:verify mais supprimé" \
     "rm $A/test-engineer.md"
 
@@ -310,8 +339,61 @@ reciproque "terme employé en prose par une commande sans relecteur" \
     "sed -i '10i On y traque le code mort et la duplication.' $C/mutation.md"
 reciproque "renvoi légitime depuis une commande" \
     "sed -i '24i La duplication est mesurée par \`architect\`, pas ici.' $C/audit.md"
-reciproque "cinquième agent, convoqué et présent" \
+reciproque "cinquième agent présent, sans être convoqué" \
     "printf -- '---\nname: relecteur-second\ndescription: Un cinquième relecteur.\ntools: Read, Grep, Glob, Bash\n---\n\n## Ce que tu ne fais pas\n\nLa structure du dépôt appartient à \`architect\`.\n\nTu relis ce que les autres ne relisent pas.\n' > $A/relecteur-second.md"
+
+# La commande de calcul de /flow:audit, extraite d'audit.md et lancée sur un
+# journal connu : ses chiffres décident de rendre un relecteur rare. Elle
+# comptait zéro en silence sur une ligne mal formée — mesuré au bilan du
+# 5 septembre 2026 — et rien ne l'éprouvait.
+cas_journal() { # $1 = intitulé · $2 = lignes de journal · $3 = sortie attendue · $4 = date d'une étiquette à poser, facultative
+    nom=$1; CAS=$((CAS + 1))
+    rm -rf "$BAC/x"
+    cp -R "$BAC/ref" "$BAC/x" || {
+        printf "  ÉCHEC    %-52s → copie impossible, LE CAS N'A PAS TOURNÉ\n" "$nom"
+        ECHECS=$((ECHECS + 1)); return 1
+    }
+    # %b interprète les antislashs de la fixture (\n, \r) : en doubler tout autre.
+    printf '# Journal\n\n%b\n' "$2" > "$BAC/x/docs/journal.md"
+    # Sans étiquette, « depuis » vaut 0000-00-00 et le filtre par date n'est
+    # jamais exercé — c'est par là qu'un « dont » faux est passé. Une étiquette
+    # datée dans la copie l'exerce.
+    [ -n "${4:-}" ] && ( cd "$BAC/x" && { [ -d .git ] || git init -q; } &&
+        git -c user.email=banc@essai -c user.name=banc commit -q --allow-empty -m etiquette --date="${4}T12:00:00" &&
+        git tag v0 ) >/dev/null 2>&1
+    OBTENU=$(cd "$BAC/x" && sed -n '/^DEPUIS=/,/^'"'"' depuis=/p' plugins/flow/commands/audit.md | sh 2>&1 | sort)
+    if [ "$OBTENU" = "$(printf '%b' "$3" | sort)" ]; then
+        printf '  ok       %-52s → compte juste\n' "$nom"
+    else
+        printf '  ÉCHEC    %-52s → compte faux :\n' "$nom"
+        printf '%s\n' "$OBTENU" | sed 's/^/             /'
+        ECHECS=$((ECHECS + 1))
+    fi
+}
+
+printf '\nLa commande de calcul de /flow:audit, sur un journal connu\n'
+
+cas_journal "deux portes, un « ? », un incident" \
+    '- 2026-09-01 · porte · a · checks : 1 vert · bloquants : code-reviewer 2, architect ? · durée : 3 min\n- 2026-09-02 · incident · b · cause : ?\n- 2026-09-03 · porte · c · bloquants : code-reviewer 1, architect 0' \
+    'code-reviewer : 3 bloquant(s) sur 2 convocation(s), 0 fois sans pouvoir regarder\narchitect : 0 bloquant(s) sur 2 convocation(s), 1 fois sans pouvoir regarder\nincidents depuis 0000-00-00 : 1, dont 1 sans cause connue ; 1 panne(s) ouverte(s) en tout'
+cas_journal "journal arrivé en CRLF, panne corrigée par une seconde ligne" \
+    '- 2026-09-01 · porte · a · bloquants : code-reviewer 2\r\n- 2026-09-02 · incident · b · cause : ?\r\n- 2026-09-03 · incident · b · cause : un câble · leçon : le tester\r' \
+    'code-reviewer : 2 bloquant(s) sur 1 convocation(s), 0 fois sans pouvoir regarder\nincidents depuis 0000-00-00 : 1, dont 0 sans cause connue ; 0 panne(s) ouverte(s) en tout'
+cas_journal "case « bloquants » illisible : signalée, jamais comptée zéro" \
+    '- 2026-09-01 · porte · a · bloquants : code-reviewer : 5, architect : 2' \
+    'illisible, ligne 3 : « code-reviewer : 5 »\nillisible, ligne 3 : « architect : 2 »\nincidents depuis 0000-00-00 : 0, dont 0 sans cause connue ; 0 panne(s) ouverte(s) en tout'
+cas_journal "« ; » à la place de la virgule : illisible, pas un relecteur disparu" \
+    '- 2026-09-01 · porte · a · bloquants : code-reviewer 2 ; architect 0' \
+    'illisible, ligne 3 : « code-reviewer 2 ; architect 0 »\nincidents depuis 0000-00-00 : 0, dont 0 sans cause connue ; 0 panne(s) ouverte(s) en tout'
+cas_journal "incident sans case « cause » : sans cause connue, jamais « connue »" \
+    '- 2026-09-02 · incident · b' \
+    'incidents depuis 0000-00-00 : 1, dont 1 sans cause connue ; 1 panne(s) ouverte(s) en tout'
+cas_journal "ligne à puce « • » : ignorée, et dite" \
+    '• 2026-09-01 · porte · a · bloquants : code-reviewer 2' \
+    'ignorée, ligne 3 : ne commence pas par « - »\nincidents depuis 0000-00-00 : 0, dont 0 sans cause connue ; 0 panne(s) ouverte(s) en tout'
+cas_journal "panne d'avant l'étiquette qui revient après : comptée, « dont » reste vrai" \
+    '- 2026-08-01 · incident · b · cause : un câble\n- 2026-09-04 · incident · b · cause : ?\n- 2026-08-20 · incident · c · cause : ?' \
+    'incidents depuis 2026-09-01 : 1, dont 1 sans cause connue ; 2 panne(s) ouverte(s) en tout' 2026-09-01
 
 printf '\n'
 [ "$NONCONCLUANTS" -gt 0 ] &&

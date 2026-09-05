@@ -7,10 +7,71 @@ vivent dans `docs/decisions/`, les cadrages dans `docs/specs/`, et ce qui s'est
 passé — portes, livraisons, incidents, versions — dans `docs/journal.md`. Ne rien
 dupliquer entre les quatre.
 
-Dernière mise à jour : 5 septembre 2026, après la porte du lot 2 (le journal, le
-mode incident, le bilan de santé, 0.16.0).
+Dernière mise à jour : 5 septembre 2026, après le bilan de santé de la 0.16.0 — le
+premier ; il a fermé l'angle mort du critère 4 (le guide lancé le 4 septembre n'a
+pas conseillé `/flow:init-project`), réécrit trois items, et ajouté quatre points
+à corriger.
 
 ---
+
+## Bilan de santé du 5 septembre 2026 (version 0.16.0)
+
+Premier bilan sous cette forme, lancé par la publication de la 0.16.0.
+Relecteurs convoqués : `architect` en dérive sur tout le dépôt, `test-engineer`
+sur les deux scripts ; `ux-reviewer` sans objet, ni interface ni exécutable.
+Journal lu : deux portes, deux livraisons, une version. Indicateurs : code-reviewer
+10 bloquants sur 2 convocations, architect 5 sur 2, 0 incident depuis la v0.15.0.
+Ce qui se répète : « non vérifié : Windows » et « la chaîne avec la version
+installée » à chaque porte ; l'architecte trouve à chaque convocation.
+Dépendances : aucune, sans objet.
+
+### À corriger avant la prochaine version
+
+1. ~~fait le 5 septembre (0.16.1)~~ **Remplir les « ? » d'une ligne d'incident la réécrit**, et `merge=union` en
+   fait un doublon silencieux à la fusion — mesuré dans une copie : deux
+   incidents comptés pour un, et le guide propose pour toujours une panne déjà
+   corrigée. Corriger : on n'édite jamais, on **ajoute** une ligne pour le même
+   objet ; l'audit compte par objet ; le guide cherche l'objet dont la dernière
+   ligne porte « cause : ? ».
+2. ~~fait le 5 septembre (0.16.1)~~ **Un bilan périmé reste au registre pour toujours** : à la troisième version,
+   trois bilans rayés, soit les relevés que la décision `0005` voulait sortir
+   d'ici. Corriger : un bilan neuf remplace le précédent ; ses « à corriger »
+   non rayés remontent dans « Défauts constatés ».
+3. ~~fait le 5 septembre (0.16.1)~~ **La commande de calcul compte zéro en silence** sur une ligne mal formée —
+   mesuré : `code-reviewer : 5` avec deux-points, « ; » au lieu de « , »,
+   « aucun », une puce « • » — et c'est ce zéro qui rend un relecteur rare.
+   Corriger : signaler « illisible » au lieu de compter, et l'éprouver au banc.
+4. ~~fait le 5 septembre (0.16.1)~~ **Deux trous mesurés dans la porte** : un en-tête de commande jamais refermé
+   passe le contrôle 3 (PASSE, mesuré) ; une liste de relecteurs illisible dans
+   `verify.md` vide la liste attendue du contrôle 4, et un agent supprimé passe
+   (mesuré). Corriger : une garde d'une ligne chacun, un cas au banc chacun —
+   le gel interdit un contrôle neuf, pas de boucher un trou mesuré.
+
+### Dette assumable
+
+- `README.md`:21 affirmait cinq appels `gh` vérifiés sur la tour ; les commandes
+  en emploient huit sous-commandes. Le README le dit désormais ; les trois autres
+  restent à constater au premier `/flow:ship` réel sur la tour.
+- ~~fait~~ La Boussole (`CLAUDE.md`, `init-project.md`) ne voit pas une panne ouverte,
+  le guide oui : alignée avec le point 1 le 5 septembre.
+- Le banc : ~~ses réciproques n'ont pas la garde « rien changé »~~ (fait) ; sept cas
+  visent par numéro de ligne ; ~~la réciproque « cinquième agent » ne prouve pas
+  son titre~~ (renommée) ; ~~un tuyau coupé laisse une copie dans le dossier
+  temporaire~~ (PIPE piégé, et une écriture qui échoue fait sortir la porte aussi :
+  le robot de GitHub ignore ce signal). Et le contrôle 6 attend le réseau sans limite de temps.
+- `release.md` : une liste numérotée où cinq lots inséreront une étape ; à
+  réorganiser en sections fixes, comme `audit.md`.
+- La forme de la ligne de journal vit à douze endroits, et son premier champ —
+  la date, sans heure — est le seul sans étiquette : le changer migrera tous les
+  journaux. C'est, selon l'architecte, la partie la plus pénible à modifier.
+- Renvois par numéro de ligne déjà faux : la décision `0004` cite `guide.md`:44
+  pour une précédence qui est à :69.
+
+### Ce que ce bilan n'a pas pu voir
+
+Windows et Git Bash — rien depuis la 0.12.0 —, gawk, `gh` appelé par un script,
+ce que Claude Code fait d'un en-tête mal formé, `merge=union` sur deux branches
+réelles, et une ligne de journal écrite par une commande installée.
 
 ## Défauts constatés
 
@@ -36,10 +97,11 @@ tâche en cours », mais rien ne dit où finit une tâche dans une conversation,
 combien de temps dure ce frein. Constaté par l'architecte le 5 septembre ; à
 trancher après une tâche réelle, pas avant.
 
-### La forme du cycle est écrite à trois endroits
+### La forme du cycle est écrite à sept endroits
 
-Le tableau du README, la section « cycle » de `guide.md`, le `CLAUDE.md` de ce
-dépôt. Le mode incident (lot 2) et `/flow:studio`, s'il vient, les changeront
+Le README (trois fois), la section « cycle » de `guide.md`, le plan (deux fois),
+la décision `0004` — mesuré par le bilan du 5 septembre ; le `CLAUDE.md` de ce
+dépôt, lui, ne la porte pas. Le mode incident (lot 2) et `/flow:studio`, s'il vient, les changeront
 tous à la main.
 
 ### Laissé ouvert par la porte du 5 septembre 2026, lot 2 (0.16.0)
@@ -58,10 +120,21 @@ tous à la main.
 - **`release.md` est la partie la plus pénible à modifier** selon l'architecte :
   une liste numérotée où cinq lots insèreront une étape, la seule commande qui
   écrit sur la branche par défaut, et un CHANGELOG qu'elle lit sans exister ici.
-- **Une case `bloquants : ?` entière** produit un relecteur fantôme « ? » dans le
-  calcul ; visible à l'œil, pas fatal.
+- ~~fait~~ **Une case `bloquants : ?` entière** produisait un relecteur fantôme ;
+  la commande la dit désormais « illisible ».
 
-### Ce que le lot 4 devra savoir sur `guide.md` et `audit.md`
+### Laissé ouvert par la porte du 5 septembre 2026, corrections du bilan (0.16.1)
+
+- **Une case « Bloquants : » en majuscule ou « bloquants: » sans espace** n'est
+  pas reconnue par la commande de calcul, en silence : une porte sans relecteur
+  étant légitime, elle ne peut pas crier sur l'absence. À surveiller sur les
+  journaux écrits à la main.
+- **Un en-tête YAML avec une ligne vide à l'intérieur** ne rougit plus (la garde
+  du contrôle 3 cherche un titre de section, pas la première ligne vide) ; mais
+  `--- ` avec une espace finale reste « jamais refermé ». Acceptable, à connaître.
+- **Les cas de banc par numéro de ligne** sont désormais neuf ; la garde « rien
+  changé » les fait échouer bruyamment le jour où la mise en page bouge.
+
 
 Son glossaire dit « un jeton d'accès est un secret » et nomme test-engineer sans
 accents graves — exprès, pour que le guide ne devienne pas une commande arbitre
@@ -110,7 +183,7 @@ est bornée et qu'aucune ne produit de faux vert :
    « ok ». Les quatre cas réciproques couvrent l'essentiel du risque — un
    contrôle qui rougit sur un changement légitime est attrapé — mais pas le cas
    d'un défaut qui déborde sur un contrôle voisin.
-2. **Une sortie envoyée dans `head` ou `less` laisse une copie du dépôt dans le
+2. ~~fait le 5 septembre (0.16.1)~~ **Une sortie envoyée dans `head` ou `less` laisse une copie du dépôt dans le
    dossier temporaire.** Le nettoyage passe par un piège sur la sortie du
    script ; interrompu par un tuyau fermé, il peut ne pas s'exécuter. Sans
    conséquence sur le verdict, mais ça encombre.
@@ -118,12 +191,14 @@ est bornée et qu'aucune ne produit de faux vert :
 ### `/flow:guide` propose de concevoir un cadrage déjà réalisé
 
 Il apparie cadrages et décisions par leurs noms de fichiers, sans lire leur
-contenu (`guide.md`:10 et :41). Un cadrage absorbé par une décision qui ne porte
+contenu (`guide.md`:10 et :43). Un cadrage absorbé par une décision qui ne porte
 pas son nom, comme `audit-et-architect-en-double.md` par la `0003`, lui paraît
 donc sans décision, et il propose `/flow:design` dessus : constaté le 4 septembre
 2026 au soir. La mention « Réalisé » posée en tête du cadrage ne le corrige pas,
 puisqu'il ne l'ouvre pas. Correctif prévu au lot 3 de `docs/plan-studio.md` ;
-d'ici là, ne pas suivre cette proposition.
+d'ici là, ne pas suivre cette proposition. Le bilan du 5 septembre 2026 mesure
+qu'**aucun des six cadrages** ne partage un nom avec sa décision : lancé ici, le
+guide proposerait `/flow:design` six fois.
 
 ---
 
@@ -166,9 +241,10 @@ faudra alors recopier les sorties brutes dans la décision `0002`. À ne pas
 provoquer exprès : rouvrir un dépôt est l'acte irréversible que la commande
 existe pour encadrer.
 
-### Rien de la 0.12.0 ni de la 0.13.0 n'a tourné sous Windows
+### Rien n'a tourné sous Windows depuis la 0.12.0
 
-Les deux lots ont été écrits et vérifiés sur la tour Ubuntu. La version de `gh` du
+Les deux lots ont été écrits et vérifiés sur la tour Ubuntu, et les quatre
+versions suivantes, jusqu'à la 0.16.0, de même. La version de `gh` du
 poste Windows reste **inconnue** — c'est précisément pour ça que plus rien ne
 dépend d'une version. Restent deux choses à constater là-bas : que
 `sh scripts/verifier-le-plugin.sh` tourne sous Git Bash, et que `.gitattributes`
@@ -182,14 +258,6 @@ de grandeur plus chère. Si elle agace à l'usage, la ligne `visibilité attendu
 du Profil projet reviendra comme **silencieux d'alerte** — avec le droit de
 rétrograder une alarme en mention, jamais celui d'empêcher la question d'être
 posée.
-
-### Le critère 4 de la spec est satisfait par construction, jamais constaté
-
-Il demandait que `/flow:guide`, lancé sur ce dépôt de markdown, ne conseille pas
-`/flow:init-project`. Le `CLAUDE.md` écrit par ce lot contient un bloc « Profil
-projet », donc la ligne du tableau qui déclenchait ce conseil ne s'active plus.
-C'est mécaniquement vrai — mais `/flow:guide` n'a pas été lancé sur ce dépôt
-après le lot pour le voir. Une conversation neuve suffira à le constater.
 
 ### Le critère 2 de la spec est satisfait par élimination, pas par construction
 

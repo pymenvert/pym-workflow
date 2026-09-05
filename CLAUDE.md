@@ -26,7 +26,8 @@ tableau « Avancement », par leur forme et non par un numéro de ligne :
 `grep '^| [0-9]' docs/plan-studio.md`, ajouté à l'appel groupé du guide, jamais un
 appel de plus. Au repos, si un lot est « à constater », la seule action à proposer est la tâche
 réelle qui le constate ; sinon, le premier lot « à faire » — à la place de
-« `/flow:spec` ton idée ».
+« `/flow:spec` ton idée ». Et si `docs/journal.md` a une panne dont la dernière
+ligne d'incident porte « cause : ? », propose-la avant tout.
 
 ## Architecture
 
@@ -42,7 +43,7 @@ réelle qui le constate ; sinon, le premier lot « à faire » — à la place d
 - **Tout est en français**, y compris les commentaires du script et les messages d'enregistrement.
 - **Aucun terme technique sans sa traduction dans la même phrase.** L'auteur n'est pas développeur.
 - **Une modification d'une commande se répercute dans le README**, qui est le seul endroit où l'auteur relit comment fonctionne son propre outil. Le contrôle 2 du vérificateur l'exige mécaniquement, dans les deux sens.
-- **Ce qui s'est passé va au journal, ce qui est ouvert au registre.** Plus de relevé daté de ce qui s'est passé dans `docs/reste-a-faire.md` depuis la 0.16.0 ; ses titres datés restent ceux de l'ouvert, et un bilan de santé y reste, ses items rayés, jusqu'à l'étiquette suivante (décision `0005`).
+- **Ce qui s'est passé va au journal, ce qui est ouvert au registre.** Plus de relevé daté de ce qui s'est passé dans `docs/reste-a-faire.md` depuis la 0.16.0 ; ses titres datés restent ceux de l'ouvert, et un bilan de santé y reste, ses items rayés, jusqu'au bilan suivant, qui le remplace (décision `0005`).
 - **Deux machines** : une tour Ubuntu (`gh` 2.45.0, ni Node ni PowerShell) et un poste Windows (version de `gh` inconnue). Rien ne doit dépendre d'une capacité présente d'un seul côté — c'est l'objet de la décision `0002`.
 
 ## Git

@@ -38,13 +38,21 @@ COMPTE=0  # contrôles lancés — compté, jamais écrit en dur
 
 TMP=${TMPDIR:-/tmp}/verif-plugin-$$
 mkdir -p "$TMP" || exit 1
-# shellcheck disable=SC2064
-trap "rm -rf '$TMP'" EXIT HUP INT TERM
+# Les signaux nettoient PUIS SORTENT : une porte qui continue après un tuyau
+# coupé ou un Ctrl-C rend un verdict avec des rouges fantômes — mesuré au bilan
+# du 5 septembre 2026. Même discipline que le banc.
+trap 'rm -rf "$TMP"' EXIT
+trap 'rm -rf "$TMP"; exit 130' HUP INT TERM PIPE
 
-titre()  { SECTION=0; COMPTE=$((COMPTE + 1)); printf '\n%s\n' "$1"; }
-ok()     { printf '  ok      %s\n' "$1"; }
-ignore() { printf '  IGNORÉ  %s\n' "$1"; IGNORES=$((IGNORES + 1)); }
-rate()   { printf '  ROUGE   %s\n' "$1"; SECTION=$((SECTION + 1)); TOTAL=$((TOTAL + 1)); }
+# Toute sortie passe par dire() : si l'écriture échoue — tuyau fermé alors que
+# le signal PIPE est ignoré, ce qui est le cas des processus lancés par le robot
+# de GitHub —, la porte sort sans verdict, exactement comme sur le signal.
+# Mesuré : sur le runner, « | head -1 » rendait 0 avec le seul piège du signal.
+dire()   { printf "$@" || exit 130; }
+titre()  { SECTION=0; COMPTE=$((COMPTE + 1)); dire '\n%s\n' "$1"; }
+ok()     { dire '  ok      %s\n' "$1"; }
+ignore() { dire '  IGNORÉ  %s\n' "$1"; IGNORES=$((IGNORES + 1)); }
+rate()   { dire '  ROUGE   %s\n' "$1"; SECTION=$((SECTION + 1)); TOTAL=$((TOTAL + 1)); }
 # Conclut une section : le récapitulatif vert n'apparaît que si rien n'a raté.
 fin()    { [ "$SECTION" -eq 0 ] && ok "$1"; return 0; }
 
@@ -151,6 +159,14 @@ for f in "$COMMANDES"/*.md; do
         rate "$n ne commence pas par un frontmatter"
         continue
     fi
+    # Un en-tête jamais refermé passait : la plage « 2,/^---$/ » courait jusqu'au
+    # séparateur du bloc partagé, où « description: » se trouve encore — mesuré
+    # au bilan du 5 septembre 2026. Le symptôme sûr : un titre de section dans
+    # la plage. (Exiger la fermeture avant la première ligne vide rougirait un
+    # en-tête YAML légitime qui en contient une.)
+    if sansCR "$f" | sed -n '2,/^---$/p' | grep -q '^## '; then
+        rate "$n a un frontmatter jamais refermé — sans second « --- », Claude Code ne sait plus où finit l'en-tête"
+    fi
     sansCR "$f" | sed -n '2,/^---$/p' | grep -q '^description:[[:space:]]*[^[:space:]]' ||
         rate "$n n'a pas de ligne « description: » renseignée — la commande disparaîtrait de l'autocomplétion"
 done
@@ -180,6 +196,9 @@ for f in plugins/flow/agents/*.md; do
     fi
     # Même exigence que pour les commandes : sans « description: », Claude Code
     # ne sait plus quand convoquer l'agent. Le défaut est silencieux.
+    if sansCR "$f" | sed -n '2,/^---$/p' | grep -q '^## '; then
+        rate "$n a un frontmatter jamais refermé — sans second « --- », Claude Code ne sait plus où finit l'en-tête"
+    fi
     sansCR "$f" | sed -n '2,/^---$/p' | grep -q '^description:[[:space:]]*[^[:space:]]' ||
         rate "$n n'a pas de ligne « description: » renseignée — plus rien ne dit quand le convoquer"
 done
@@ -194,6 +213,16 @@ while read -r a; do
     [ -f "plugins/flow/agents/$a.md" ] ||
         rate "/flow:verify convoque l'agent « $a », dont le fichier n'existe pas"
 done < "$TMP/agents-attendus"
+# Une liste vide éteignait la boucle en silence : verify.md reformaté, un agent
+# supprimé, et « tous présents » — mesuré au bilan du 5 septembre 2026. Même
+# garde que le contrôle 12 avec NB_AG.
+[ -s "$TMP/agents-attendus" ] ||
+    rate "/flow:verify ne convoque plus aucun agent lisible (forme « - **\`nom\`** ») — un agent supprimé passerait inaperçu"
+# Et UNE seule ligne reformatée suffisait à faire disparaître son agent de la
+# liste — mesuré. Toute puce de la section 2 doit avoir la forme lisible.
+NB_ILLISIBLES=$(sansCR "$COMMANDES/verify.md" | sed -n '/^## 2\./,/^## 3\./p' | grep '^- ' | grep -vc '^- \*\*`[a-z][a-z-]*`\*\*')
+[ "$NB_ILLISIBLES" -eq 0 ] ||
+    rate "/flow:verify : $NB_ILLISIBLES ligne(s) de relecteur illisible(s) dans la section 2 (forme attendue « - **\`nom\`** ») — l'agent qu'elles nomment n'est plus contrôlé"
 
 fin "$(ls plugins/flow/agents/*.md 2>/dev/null | wc -l | tr -d ' ') agents, tous déclarés et tous présents"
 
@@ -455,7 +484,7 @@ done
 fin "$NB_AG agents, chacun nomme ce qu'il laisse aux autres"
 
 # ----------------------------------------------------------------
-printf '\n'
+dire '\n'
 # Un contrôle IGNORÉ n'est pas un contrôle vert. Le dire est la seule règle que
 # ce script impose à tous les projets et qu'il se doit à lui-même : « une
 # commande absente se note non configuré — jamais OK ». Le code de sortie reste
@@ -464,13 +493,13 @@ printf '\n'
 # dans la semaine.
 if [ "$TOTAL" -eq 0 ]; then
     if [ "$IGNORES" -eq 0 ]; then
-        printf 'PASSE — les %s contrôles sont verts.\n' "$COMPTE"
+        dire 'PASSE — les %s contrôles sont verts.\n' "$COMPTE"
     else
-        printf "PASSE avec réserves — sur %s contrôles, aucun rouge mais %s IGNORÉ(S) ci-dessus : ils n'ont rien pu vérifier.\n" "$COMPTE" "$IGNORES"
+        dire "PASSE avec réserves — sur %s contrôles, aucun rouge mais %s IGNORÉ(S) ci-dessus : ils n'ont rien pu vérifier.\n" "$COMPTE" "$IGNORES"
     fi
     exit 0
 fi
-printf 'BLOQUÉ — %s contrôle(s) rouge(s)' "$TOTAL"
-[ "$IGNORES" -gt 0 ] && printf ', et %s IGNORÉ(S)' "$IGNORES"
-printf '.\n'
+dire 'BLOQUÉ — %s contrôle(s) rouge(s)' "$TOTAL"
+[ "$IGNORES" -gt 0 ] && dire ', et %s IGNORÉ(S)' "$IGNORES"
+dire '.\n'
 exit 1

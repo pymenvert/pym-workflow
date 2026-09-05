@@ -40,7 +40,7 @@ Faire le point doit coûter quelques secondes. **Jamais d'agent de revue, jamais
 Sinon, **un seul appel groupé**. Ne le découpe jamais : chaque appel d'outil relit toute la conversation, c'est là que part l'argent — pas dans la longueur des sorties.
 
 ```
-git branch --show-current; git status --short; git rev-list --count HEAD --not main 2>/dev/null; ls docs/specs docs/decisions docs/reste-a-faire.md 2>/dev/null; grep -c 'incident .* cause : ?' docs/journal.md 2>/dev/null; grep -c "Profil projet" CLAUDE.md 2>/dev/null; cat .git/flow-depot-ouvert 2>/dev/null; gh repo view --json visibility -q .visibility 2>/dev/null
+git branch --show-current; git status --short; git rev-list --count HEAD --not main 2>/dev/null; ls docs/specs docs/decisions docs/reste-a-faire.md 2>/dev/null; awk -F' · ' '{sub(/\r$/,"")} /^- /&&$2=="incident"{o[$3]=1; for(i=4;i<=NF;i++) if($i ~ /^cause : /) o[$3]=($i ~ /^cause : \?[[:space:]]*$/)} END{for(k in o) if(o[k]) print "panne ouverte : " k}' docs/journal.md 2>/dev/null; grep -c "Profil projet" CLAUDE.md 2>/dev/null; cat .git/flow-depot-ouvert 2>/dev/null; gh repo view --json visibility -q .visibility 2>/dev/null
 ```
 
 La visibilité tient dans **cette ligne-là**, pas dans un appel de plus. Le budget de cette commande se compte en appels d'outils, pas en secondes : replié dans le groupe, l'appel à GitHub en coûte **zéro de plus** (mesuré : un tiers de seconde de réponse). S'il ne rend rien — pas de dépôt distant, `gh` absent, pas de réseau —, **tu continues normalement**. `/flow:guide` est le recours de dernière instance : il n'a jamais le droit de s'arrêter en erreur.
@@ -64,7 +64,7 @@ La visibilité tient dans **cette ligne-là**, pas dans un appel de plus. Le bud
 | une pull request ouverte | il reste à la fusionner | lui donner le lien et la marche à suivre |
 | une spec sans décision correspondante dans `docs/decisions/` | conception pas encore tranchée | `/flow:design <nom de la spec>` |
 | `docs/reste-a-faire.md` existe et n'est pas vide | des points ont été reportés par une porte précédente | lui en citer deux ou trois et proposer d'en prendre un |
-| une ligne `incident` du journal avec « cause : ? » | une panne connue, pas encore corrigée | `/flow:new-feature <la panne>`, en mode incident |
+| **une « panne ouverte » imprimée par l'appel groupé** — une panne du journal dont la dernière ligne n'a pas de cause | une panne connue, pas encore corrigée — passe avant le reste du tableau, juste après la visibilité | `/flow:new-feature <la panne>`, en mode incident |
 
 **Qui tranche, du témoin ou de GitHub.** GitHub dit **si** le dépôt est ouvert ; le témoin dit seulement **pourquoi** et **depuis quand**. Quand les deux se contredisent, c'est GitHub qui a raison — le témoin vit dans un dossier de travail, il ne traverse pas les machines, et il ne sait pas ce qui a été fait depuis l'autre poste. Une absence de témoin n'a donc jamais voulu dire « rien en cours ».
 
