@@ -44,10 +44,15 @@ mkdir -p "$TMP" || exit 1
 trap 'rm -rf "$TMP"' EXIT
 trap 'rm -rf "$TMP"; exit 130' HUP INT TERM PIPE
 
-titre()  { SECTION=0; COMPTE=$((COMPTE + 1)); printf '\n%s\n' "$1"; }
-ok()     { printf '  ok      %s\n' "$1"; }
-ignore() { printf '  IGNORÉ  %s\n' "$1"; IGNORES=$((IGNORES + 1)); }
-rate()   { printf '  ROUGE   %s\n' "$1"; SECTION=$((SECTION + 1)); TOTAL=$((TOTAL + 1)); }
+# Toute sortie passe par dire() : si l'écriture échoue — tuyau fermé alors que
+# le signal PIPE est ignoré, ce qui est le cas des processus lancés par le robot
+# de GitHub —, la porte sort sans verdict, exactement comme sur le signal.
+# Mesuré : sur le runner, « | head -1 » rendait 0 avec le seul piège du signal.
+dire()   { printf "$@" || exit 130; }
+titre()  { SECTION=0; COMPTE=$((COMPTE + 1)); dire '\n%s\n' "$1"; }
+ok()     { dire '  ok      %s\n' "$1"; }
+ignore() { dire '  IGNORÉ  %s\n' "$1"; IGNORES=$((IGNORES + 1)); }
+rate()   { dire '  ROUGE   %s\n' "$1"; SECTION=$((SECTION + 1)); TOTAL=$((TOTAL + 1)); }
 # Conclut une section : le récapitulatif vert n'apparaît que si rien n'a raté.
 fin()    { [ "$SECTION" -eq 0 ] && ok "$1"; return 0; }
 
@@ -479,7 +484,7 @@ done
 fin "$NB_AG agents, chacun nomme ce qu'il laisse aux autres"
 
 # ----------------------------------------------------------------
-printf '\n'
+dire '\n'
 # Un contrôle IGNORÉ n'est pas un contrôle vert. Le dire est la seule règle que
 # ce script impose à tous les projets et qu'il se doit à lui-même : « une
 # commande absente se note non configuré — jamais OK ». Le code de sortie reste
@@ -488,13 +493,13 @@ printf '\n'
 # dans la semaine.
 if [ "$TOTAL" -eq 0 ]; then
     if [ "$IGNORES" -eq 0 ]; then
-        printf 'PASSE — les %s contrôles sont verts.\n' "$COMPTE"
+        dire 'PASSE — les %s contrôles sont verts.\n' "$COMPTE"
     else
-        printf "PASSE avec réserves — sur %s contrôles, aucun rouge mais %s IGNORÉ(S) ci-dessus : ils n'ont rien pu vérifier.\n" "$COMPTE" "$IGNORES"
+        dire "PASSE avec réserves — sur %s contrôles, aucun rouge mais %s IGNORÉ(S) ci-dessus : ils n'ont rien pu vérifier.\n" "$COMPTE" "$IGNORES"
     fi
     exit 0
 fi
-printf 'BLOQUÉ — %s contrôle(s) rouge(s)' "$TOTAL"
-[ "$IGNORES" -gt 0 ] && printf ', et %s IGNORÉ(S)' "$IGNORES"
-printf '.\n'
+dire 'BLOQUÉ — %s contrôle(s) rouge(s)' "$TOTAL"
+[ "$IGNORES" -gt 0 ] && dire ', et %s IGNORÉ(S)' "$IGNORES"
+dire '.\n'
 exit 1

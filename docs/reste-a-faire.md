@@ -57,7 +57,8 @@ Dépendances : aucune, sans objet.
 - Le banc : ~~ses réciproques n'ont pas la garde « rien changé »~~ (fait) ; sept cas
   visent par numéro de ligne ; ~~la réciproque « cinquième agent » ne prouve pas
   son titre~~ (renommée) ; ~~un tuyau coupé laisse une copie dans le dossier
-  temporaire~~ (PIPE piégé). Et le contrôle 6 attend le réseau sans limite de temps.
+  temporaire~~ (PIPE piégé, et une écriture qui échoue fait sortir la porte aussi :
+  le robot de GitHub ignore ce signal). Et le contrôle 6 attend le réseau sans limite de temps.
 - `release.md` : une liste numérotée où cinq lots inséreront une étape ; à
   réorganiser en sections fixes, comme `audit.md`.
 - La forme de la ligne de journal vit à douze endroits, et son premier champ —

@@ -212,6 +212,9 @@ fi
 # Un tuyau coupé — « | head » — envoie PIPE : la porte doit nettoyer ET sortir,
 # code 130, sans verdict. Mesuré au bilan du 5 septembre 2026 : elle continuait
 # à l'aveugle et concluait avec un rouge fantôme.
+# Et sous le robot de GitHub, le signal PIPE est ignoré à la naissance des
+# processus : la porte doit aussi sortir quand une ÉCRITURE échoue — mesuré le
+# même jour, la CI rendait 0 ici.
 CAS=$((CAS + 1))
 ( cd "$BAC/ref" && sh scripts/verifier-le-plugin.sh 2>/dev/null; printf '%s\n' "$?" > "$BAC/code-tube" ) | head -1 >/dev/null
 if [ "$(cat "$BAC/code-tube" 2>/dev/null)" = 130 ]; then
