@@ -20,17 +20,29 @@ Ton rôle ici n'est pas de coder ni de proposer une solution technique. C'est d'
    - **Cas limites** — entrées vides, valeurs extrêmes, échecs, interruptions. Ce que le logiciel doit faire dans chacun.
    - **Risques et inconnues** — ce qui pourrait rendre le travail beaucoup plus long que prévu.
 
-4. **Montre-moi la spec et attends ma validation.** Ne passe pas à `/flow:design` de toi-même. Je réponds dans la discussion, en français — je n'ai aucune commande à relancer pour valider.
+4. **Montre-moi la spec.** Puis, selon le rythme, arrête-toi ou enchaîne — voir « Arrêts et suite ». Si tu t'arrêtes, je réponds dans la discussion, en français : je n'ai aucune commande à relancer pour valider.
 
    Si c'est ma première tâche sur ce projet, précise-moi au passage que `/flow:new-feature` créera la branche de travail tout seul : je n'ai rien à préparer avant.
 
 **Vise 60 lignes, plafond 80.** Une spec qu'on lit en entier vaut mieux que trois pages qu'on survole. Si tu dépasses, relis-toi avant de me la montrer : c'est presque toujours que du *comment* a glissé dans les critères — le choix d'une bibliothèque, la forme d'un module, la façon d'écrire un format. Ça appartient à `/flow:design`. Ici, les critères disent **quoi**, et à quoi on reconnaîtra que c'est fait.
 
-Si la demande est vraiment triviale — une faute de frappe, un libellé —, dis-le et propose d'aller directement à `/flow:new-feature` plutôt que de produire de la paperasse.
+Si la demande est vraiment triviale — une faute de frappe, un libellé —, dis-le et va directement à `/flow:new-feature` — lancé en enchaîné, proposé en pas à pas — plutôt que de produire de la paperasse.
+
+## Arrêts et suite
+
+- **Arrêts** : une question dont la réponse n'appartient qu'à moi — la nature des trois questions de l'étape 2 → raison 1. Aucun autre : une hypothèse raisonnable se prend et se signale.
+- **En pas à pas** : « J'attends ta réponse » après le cadrage, et la suite, c'est moi qui la tape.
+- **Suite en enchaîné**, si aucune question n'attend ma réponse : point de passage, puis `/flow:design <nom du cadrage>` — ou `/flow:new-feature <idée>` directement, si la demande est triviale.
 
 ---
 
 ## Arrêts et attentes
+
+**Le rythme.** Lis la ligne `- rythme :` du bloc « Profil projet » du `CLAUDE.md` : `enchaîné` ou `pas à pas`. Ligne absente ou valeur inconnue : enchaîné, dit une fois par conversation. Un mot de ma part dans la discussion — « attends », « pas à pas », « enchaîne » — l'emporte sur le profil pour la tâche en cours. Ce réglage ne vaut que pour les commandes qui portent un paragraphe « Arrêts et suite » ; hors de ce cycle, les arrêts de la commande restent ce qu'ils sont.
+
+**Les quatre raisons de s'arrêter.** En enchaîné, tu ne t'arrêtes que pour l'une d'elles, et tu la nommes : **(1)** une réponse qui n'appartient qu'à moi — le besoin, la priorité, l'apparence, « est-ce fini ? » · **(2)** de l'argent ou un engagement · **(3)** un acte irréversible ou public · **(4)** une porte rouge que tu ne sais pas rendre verte sans changer le besoin.
+
+**Le point de passage, et lancer la suivante.** Avant l'étape suivante, trois lignes visibles : **Fait** : … · **Décidé ou constaté** : … · **Commence** : …. Lancer la suivante, c'est la charger toi-même, comme si je l'avais tapée, avec son argument — vers l'aval seulement : jamais celle qui t'a chargé, jamais une étape amont, que tu proposes sans la lancer (une seule remontée est admise, écrite dans `/flow:ship`). Si tu ne peux pas la charger, ou si la conversation a été résumée en route, dis-le et termine par « Ensuite » : `/flow:guide` retrouve l'état par git et les fichiers.
 
 **Chaque fois que tu t'arrêtes pour attendre ma réponse**, commence par « **J'attends ta réponse.** » Puis la question en clair, la conséquence de chaque réponse possible, et les options quand il y en a. N'enchaîne jamais sur la suite sans avoir la réponse. Et ne me dis pas que rien n'a été écrit si des fichiers l'ont déjà été — dis exactement où on en est.
 
@@ -38,7 +50,7 @@ Si la demande est vraiment triviale — une faute de frappe, un libellé —, di
 
 ## Fin de réponse — obligatoire
 
-Termine toujours ta dernière réponse par ces trois lignes. Les titres ne changent jamais ; le contenu décrit ce qui s'est réellement passé. **Si tu t'es arrêté en route, dis-le ici** — n'annonce jamais un travail qui n'a pas eu lieu.
+Termine toujours ta dernière réponse par ces trois lignes — en chaîne, elles closent la chaîne, pas chaque étape. Les titres ne changent jamais ; le contenu décrit ce qui s'est réellement passé. **Si tu t'es arrêté en route, dis-le ici** — n'annonce jamais un travail qui n'a pas eu lieu.
 
 **Où on en est** — un fait constaté, puis sa conséquence. Deux lignes maximum.
 **Ensuite** — UNE seule chose : une commande à lancer, ou une phrase à me répondre. Jamais deux options que tu pourrais trancher toi-même en regardant le projet — tu l'as lu, moi non. En revanche, quand la réponse ne dépend que de moi (« est-ce que je considère ce travail comme fini ? », « laquelle de ces deux formes je préfère ? »), demande — mais constate d'abord, et présente ce que tu as vu en même temps que ta question.

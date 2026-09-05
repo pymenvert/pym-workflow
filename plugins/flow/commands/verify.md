@@ -10,7 +10,7 @@ Deux règles absolues : **tu ne déclares jamais vert quelque chose que tu n'as 
 
 **Y a-t-il quelque chose à vérifier ?** Lance `git status --short`, puis `git rev-list --count HEAD --not main`. Si les deux sont vides, **arrête-toi immédiatement — sans lancer un seul check ni un seul agent.** Dis exactement ceci :
 
-> Rien à vérifier : aucun fichier modifié, aucun commit sur cette branche. Je n'ai lancé ni test ni agent, donc ça n'a rien coûté. Si je viens de te montrer un plan et que j'attends ton feu vert, réponds simplement « ok » ici, dans la discussion — c'est ça qui me fait écrire le code.
+> Rien à vérifier : aucun fichier modifié, aucun commit sur cette branche. Je n'ai lancé ni test ni agent, donc ça n'a rien coûté. Si je me suis arrêté sur une question, ou sur un plan qui attend ton feu vert, réponds-y ici, dans la discussion — c'est ça qui me fait écrire le code.
 
 Ce contrôle est la contrepartie mécanique du message de `/flow:new-feature` : un message peut être manqué, ce contrôle non. Il évite de lancer une suite de tests complète et quatre agents sur du vide.
 
@@ -55,9 +55,23 @@ Si le diff a ajouté beaucoup de tests — plus d'une dizaine —, signale-le en
 
 Termine par une seule ligne : **PASSE** ou **BLOQUÉ**, suivie du nombre de bloquants restants.
 
+Puis le **Compte-rendu**, pour moi, sans terme non traduit, toujours dans cet ordre : ce que le logiciel fait maintenant qu'il ne faisait pas · ce qui a été vérifié, ou n'a pas pu l'être — bloquants trouvés et corrigés compris · ce qui reste, c'est-à-dire la liste « À traiter plus tard ». Ajoute ensuite les lignes « Pour toi » de chaque relecteur convoqué.
+
+## Arrêts et suite
+
+- **Arrêts** : la branche par défaut, avant ta première correction → raison 3 · un BLOQUÉ que tu ne sais pas rendre vert sans changer le besoin → raison 4. « Rien à vérifier » n'est pas un arrêt : c'est une fin, et elle est gratuite.
+- **En pas à pas** : aucun arrêt de plus ; la suite, c'est moi qui la tape.
+- **Suite en enchaîné**, sur PASSE seulement : point de passage, puis `/flow:ship` — sauf si c'est `/flow:ship` qui t'a chargé : tu rends ton verdict, et il reprend.
+
 ---
 
 ## Arrêts et attentes
+
+**Le rythme.** Lis la ligne `- rythme :` du bloc « Profil projet » du `CLAUDE.md` : `enchaîné` ou `pas à pas`. Ligne absente ou valeur inconnue : enchaîné, dit une fois par conversation. Un mot de ma part dans la discussion — « attends », « pas à pas », « enchaîne » — l'emporte sur le profil pour la tâche en cours. Ce réglage ne vaut que pour les commandes qui portent un paragraphe « Arrêts et suite » ; hors de ce cycle, les arrêts de la commande restent ce qu'ils sont.
+
+**Les quatre raisons de s'arrêter.** En enchaîné, tu ne t'arrêtes que pour l'une d'elles, et tu la nommes : **(1)** une réponse qui n'appartient qu'à moi — le besoin, la priorité, l'apparence, « est-ce fini ? » · **(2)** de l'argent ou un engagement · **(3)** un acte irréversible ou public · **(4)** une porte rouge que tu ne sais pas rendre verte sans changer le besoin.
+
+**Le point de passage, et lancer la suivante.** Avant l'étape suivante, trois lignes visibles : **Fait** : … · **Décidé ou constaté** : … · **Commence** : …. Lancer la suivante, c'est la charger toi-même, comme si je l'avais tapée, avec son argument — vers l'aval seulement : jamais celle qui t'a chargé, jamais une étape amont, que tu proposes sans la lancer (une seule remontée est admise, écrite dans `/flow:ship`). Si tu ne peux pas la charger, ou si la conversation a été résumée en route, dis-le et termine par « Ensuite » : `/flow:guide` retrouve l'état par git et les fichiers.
 
 **Chaque fois que tu t'arrêtes pour attendre ma réponse**, commence par « **J'attends ta réponse.** » Puis la question en clair, la conséquence de chaque réponse possible, et les options quand il y en a. N'enchaîne jamais sur la suite sans avoir la réponse. Et ne me dis pas que rien n'a été écrit si des fichiers l'ont déjà été — dis exactement où on en est.
 
@@ -65,7 +79,7 @@ Termine par une seule ligne : **PASSE** ou **BLOQUÉ**, suivie du nombre de bloq
 
 ## Fin de réponse — obligatoire
 
-Termine toujours ta dernière réponse par ces trois lignes. Les titres ne changent jamais ; le contenu décrit ce qui s'est réellement passé. **Si tu t'es arrêté en route, dis-le ici** — n'annonce jamais un travail qui n'a pas eu lieu.
+Termine toujours ta dernière réponse par ces trois lignes — en chaîne, elles closent la chaîne, pas chaque étape. Les titres ne changent jamais ; le contenu décrit ce qui s'est réellement passé. **Si tu t'es arrêté en route, dis-le ici** — n'annonce jamais un travail qui n'a pas eu lieu.
 
 **Où on en est** — un fait constaté, puis sa conséquence. Deux lignes maximum.
 **Ensuite** — UNE seule chose : une commande à lancer, ou une phrase à me répondre. Jamais deux options que tu pourrais trancher toi-même en regardant le projet — tu l'as lu, moi non. En revanche, quand la réponse ne dépend que de moi (« est-ce que je considère ce travail comme fini ? », « laquelle de ces deux formes je préfère ? »), demande — mais constate d'abord, et présente ce que tu as vu en même temps que ta question.

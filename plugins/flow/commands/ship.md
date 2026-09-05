@@ -8,7 +8,7 @@ Livraison du travail en cours sur cette branche.
 
    La raison n'est pas l'élégance de l'historique. La CI ne parle qu'**après** le push : livrer depuis la branche par défaut, c'est y déposer du code dont les vérifications les plus révélatrices — autres systèmes d'exploitation, environnement propre, machine plus lente — n'ont pas encore rendu leur verdict. Si elles cassent, c'est la branche par défaut qui est cassée, et avec elle tout ce qui en dépend : releases, déploiements, paquets construits depuis elle. Sur une branche dédiée, le même échec ne coûte qu'un commit de plus.
 
-2. **Exige la porte.** Si `/flow:verify` n'a pas été passé sur l'état actuel du code, lance-le maintenant. **S'il rend BLOQUÉ, arrête-toi.** Ne livre jamais en promettant de corriger après : c'est précisément comme ça qu'un bug part en production.
+2. **Exige la porte.** Si `/flow:verify` vient de rendre PASSE dans cette conversation, sur cet état exact du code, ne le relance pas. Sinon, lance-le maintenant — c'est la seule remontée vers l'amont que le plugin admet : il rend son verdict, et tu reprends à l'étape 3. **S'il rend BLOQUÉ, arrête-toi.** Ne livre jamais en promettant de corriger après : c'est précisément comme ça qu'un bug part en production.
 
 3. **Diff.** `git status` et `git diff` complets. Retire tout ce qui n'a rien à voir avec la tâche — fichiers de test personnels, traces de débogage, réglages d'éditeur. Un diff qui ne contient que la tâche est un diff qu'on peut relire.
 
@@ -20,6 +20,7 @@ Livraison du travail en cours sur cette branche.
 
    Sinon, ouvre-la avec `gh pr create` :
    - l'objectif, et le lien vers la spec si elle existe
+   - le **Compte-rendu**, écrit pour quelqu'un qui n'a pas suivi, toujours dans cet ordre : ce que le logiciel fait maintenant qu'il ne faisait pas · ce qui a été vérifié, ou n'a pas pu l'être · ce qui reste
    - les changements, en trois points maximum
    - **les vérifications réellement effectuées** — reprends le tableau de `/flow:verify`, sans embellir
    - les risques et ce qui reste à surveiller
@@ -34,13 +35,25 @@ Livraison du travail en cours sur cette branche.
 
    Si la CI casse, ne referme pas le sujet : montre-moi quel job échoue et pourquoi. Elle attrape ce qui est invisible en local — machine différente, environnement propre, timing plus lent.
 
-8. **Conclus** : ce qui est parti, et où c'en est.
+8. **Conclus** par le **Compte-rendu**, le même que dans la pull request, puis ce qui est parti et où c'en est.
 
    Si la CI est verte, donne-moi la suite exactement, dans l'ordre — sinon je reste bloqué là : fusionner la pull request sur GitHub en choisissant « Create a merge commit » ou « Rebase and merge », **jamais « Squash and merge »** qui écraserait les commits séparés ; supprimer la branche (GitHub le propose juste après) ; puis revenir sur la branche par défaut et récupérer la fusion sur ma machine — le bouton *Pull* de mon outil git, ou `git pull`. Sans ce dernier geste, mon dossier reste sur l'ancienne branche et ignore la fusion.
+
+## Arrêts et suite
+
+- **Arrêts** : la branche par défaut, avant le moindre commit → raison 3 · la fusion, que je fais moi-même sur GitHub → raison 3. Une pull request sur un dépôt public est visible de tous, mais elle se ferme : ce n'est pas un arrêt.
+- **En pas à pas** : aucun arrêt de plus.
+- **Suite** : aucune commande — la chaîne finit ici, sur le lien et le compte-rendu ; après la fusion, `/flow:guide` me dit la suite. La seule remontée admise du plugin est ici : une porte non passée sur cet état, tu la lances toi-même (étape 2), et à son PASSE tu reprends à l'étape 3.
 
 ---
 
 ## Arrêts et attentes
+
+**Le rythme.** Lis la ligne `- rythme :` du bloc « Profil projet » du `CLAUDE.md` : `enchaîné` ou `pas à pas`. Ligne absente ou valeur inconnue : enchaîné, dit une fois par conversation. Un mot de ma part dans la discussion — « attends », « pas à pas », « enchaîne » — l'emporte sur le profil pour la tâche en cours. Ce réglage ne vaut que pour les commandes qui portent un paragraphe « Arrêts et suite » ; hors de ce cycle, les arrêts de la commande restent ce qu'ils sont.
+
+**Les quatre raisons de s'arrêter.** En enchaîné, tu ne t'arrêtes que pour l'une d'elles, et tu la nommes : **(1)** une réponse qui n'appartient qu'à moi — le besoin, la priorité, l'apparence, « est-ce fini ? » · **(2)** de l'argent ou un engagement · **(3)** un acte irréversible ou public · **(4)** une porte rouge que tu ne sais pas rendre verte sans changer le besoin.
+
+**Le point de passage, et lancer la suivante.** Avant l'étape suivante, trois lignes visibles : **Fait** : … · **Décidé ou constaté** : … · **Commence** : …. Lancer la suivante, c'est la charger toi-même, comme si je l'avais tapée, avec son argument — vers l'aval seulement : jamais celle qui t'a chargé, jamais une étape amont, que tu proposes sans la lancer (une seule remontée est admise, écrite dans `/flow:ship`). Si tu ne peux pas la charger, ou si la conversation a été résumée en route, dis-le et termine par « Ensuite » : `/flow:guide` retrouve l'état par git et les fichiers.
 
 **Chaque fois que tu t'arrêtes pour attendre ma réponse**, commence par « **J'attends ta réponse.** » Puis la question en clair, la conséquence de chaque réponse possible, et les options quand il y en a. N'enchaîne jamais sur la suite sans avoir la réponse. Et ne me dis pas que rien n'a été écrit si des fichiers l'ont déjà été — dis exactement où on en est.
 
@@ -48,7 +61,7 @@ Livraison du travail en cours sur cette branche.
 
 ## Fin de réponse — obligatoire
 
-Termine toujours ta dernière réponse par ces trois lignes. Les titres ne changent jamais ; le contenu décrit ce qui s'est réellement passé. **Si tu t'es arrêté en route, dis-le ici** — n'annonce jamais un travail qui n'a pas eu lieu.
+Termine toujours ta dernière réponse par ces trois lignes — en chaîne, elles closent la chaîne, pas chaque étape. Les titres ne changent jamais ; le contenu décrit ce qui s'est réellement passé. **Si tu t'es arrêté en route, dis-le ici** — n'annonce jamais un travail qui n'a pas eu lieu.
 
 **Où on en est** — un fait constaté, puis sa conséquence. Deux lignes maximum.
 **Ensuite** — UNE seule chose : une commande à lancer, ou une phrase à me répondre. Jamais deux options que tu pourrais trancher toi-même en regardant le projet — tu l'as lu, moi non. En revanche, quand la réponse ne dépend que de moi (« est-ce que je considère ce travail comme fini ? », « laquelle de ces deux formes je préfère ? »), demande — mais constate d'abord, et présente ce que tu as vu en même temps que ta question.

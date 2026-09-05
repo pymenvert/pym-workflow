@@ -27,35 +27,43 @@ Quand le dépôt est privé, git doit savoir s'identifier sur la machine :
 | `/flow:init-project` | Détecte la stack, écrit le **profil projet**, pose tests et CI | Un projet sans filet automatique |
 | `/flow:spec <idée>` | Critères d'acceptation testables, hors-périmètre, cas limites | Construire la mauvaise chose |
 | `/flow:design <spec>` | Architecture, **attaquée** par l'agent `architect`, tracée en ADR | Le code qui devient intouchable |
-| `/flow:new-feature <desc>` | Branche, plan validé, petits lots, tests d'abord sur le critique | Le grand diff illisible |
+| `/flow:new-feature <desc>` | Branche, plan court, petits lots, tests d'abord sur le critique | Le grand diff illisible |
 | `/flow:verify` | **La porte** : checks + quatre agents. Verdict PASSE ou BLOQUÉ | Livrer du cassé |
 | `/flow:ship` | Commit atomique, push, PR, surveillance de la CI | Le « je corrigerai après » |
 
-Les étapes intermédiaires savent s'effacer : sur une faute de frappe, `/flow:spec` te dira d'aller directement à `/flow:new-feature` plutôt que de produire de la paperasse.
+Les étapes intermédiaires savent s'effacer : sur une faute de frappe, `/flow:spec` va directement à `/flow:new-feature` — ou te le dit, en pas à pas — plutôt que de produire de la paperasse.
 
 ## Le déroulé d'une tâche, concrètement
 
 **La règle de base : les commandes marquent des moments, elles ne remplacent pas la conversation.** Entre deux commandes, on parle normalement — c'est même là que se prennent les décisions.
 
-| # | Tu tapes | Ce qui se passe | Tes fichiers | Il t'attend ? |
+| # | Tu tapes | Ce qui se passe | Tes fichiers | Il s'arrête ? |
 |---|---|---|---|---|
-| 1 | `/flow:spec <ton idée>` | Il lit ton code, pose **trois questions maximum**, écrit un document dans `docs/specs/` | 1 fichier créé | **oui** |
-| 2 | `/flow:design <nom de la spec>` | Il propose une architecture et la fait **attaquer** par l'agent `architect`, puis écrit la décision dans `docs/decisions/` | 1 fichier créé | **oui** |
-| 3 | `/flow:new-feature <ta tâche>` | Il crée la branche tout seul, explore le code, montre un plan court | rien encore | **oui** |
-| 4 | *tu réponds « ok »* | Il implémente, par petits lots | **il écrit ton code** | non |
-| 5 | `/flow:verify` | Tests, puis les quatre agents. Corrige les bloquants. Rend **PASSE** ou **BLOQUÉ** | il peut corriger | non |
-| 6 | `/flow:ship` | Enregistre, envoie, ouvre la pull request, surveille la CI | il enregistre | non |
-| 7 | *sur GitHub* | Tu fusionnes, tu supprimes la branche, tu récupères la fusion sur ta machine | — | — |
+| 1 | `/flow:spec <ton idée>` | Il lit ton code, pose **trois questions maximum**, écrit un document dans `docs/specs/` | 1 fichier créé | seulement s'il a une question pour toi |
+| 2 | *il enchaîne* `/flow:design` | Il propose une architecture et la fait **attaquer** par l'agent `architect`, puis écrit la décision dans `docs/decisions/` | 1 fichier créé | seulement si un choix te revient — il te le pose alors dans une forme fixe, recommandation d'abord |
+| 3 | *il enchaîne* `/flow:new-feature` | Il crée la branche tout seul, explore le code, annonce un plan court, implémente par petits lots | **il écrit ton code** | seulement si le code contredit le cadrage |
+| 4 | *il enchaîne* `/flow:verify` | Tests, puis les quatre agents. Corrige les bloquants. Rend **PASSE** ou **BLOQUÉ**, puis un compte-rendu pour toi | il peut corriger | sur **BLOQUÉ** |
+| 5 | *il enchaîne* `/flow:ship` | Enregistre, envoie, ouvre la pull request avec le compte-rendu, surveille la CI, te donne le lien | il enregistre | non |
+| 6 | *sur GitHub* | Tu fusionnes, tu supprimes la branche, tu récupères la fusion sur ta machine | — | c'est toi qui fusionnes |
 
-### Les trois arrêts — c'est là qu'on se plante
+Entre deux étapes, un **point de passage** de trois lignes — fait, décidé ou constaté, commence — pour relire un fil de deux heures en trente secondes.
 
-Aux étapes 1, 2 et 3, la commande **s'arrête et attend**. Elle commence toujours par « **J'attends ta réponse.** »
+### Les quatre raisons de s'arrêter
 
-À ce moment-là, **tu réponds dans la discussion, en français.** Tu ne relances pas une commande. Répondre `/flow:verify` à un plan qui attend validation ne construit rien : le travail n'a pas commencé, et la porte n'a rien à vérifier.
+En rythme **enchaîné** — le défaut —, une commande ne s'arrête que pour l'une de ces quatre raisons, et elle la nomme :
+
+1. **une réponse qui n'appartient qu'à toi** : le besoin, la priorité, l'apparence, « est-ce fini ? » ;
+2. **de l'argent ou un engagement** : un service payant, un abonnement, un compte à ouvrir ;
+3. **un acte irréversible ou public** : la fusion sur la branche par défaut, l'étiquette de version, la mise en ligne, la visibilité, une suppression ;
+4. **une porte rouge** qu'elle ne sait pas rendre verte sans changer le besoin.
+
+Chaque arrêt commence par « **J'attends ta réponse.** » et **tu réponds dans la discussion, en français.** Tu ne relances pas une commande. Un mot de toi dans le fil — « attends », « pas à pas » — l'emporte sur le profil pour la tâche en cours.
+
+En **pas à pas** (ligne `rythme` du profil projet), les trois arrêts d'avant sont de retour : après les questions de `/flow:spec`, après la proposition de `/flow:design`, après le plan de `/flow:new-feature` — et c'est toi qui tapes la commande suivante. Un projet qu'on découvre peut le mériter ; un projet qu'on connaît ne le mérite plus. Le raisonnement est dans `docs/decisions/0004-rythme-enchaine-et-quatre-raisons.md`.
 
 ### Ce qui coûte cher, ce qui ne coûte rien
 
-`/flow:verify` est **la seule commande chère** : elle lance toute la suite de tests et jusqu'à quatre relecteurs automatiques. Plusieurs minutes.
+`/flow:verify` est **la seule commande chère** : elle lance toute la suite de tests et jusqu'à quatre relecteurs automatiques. Plusieurs minutes. En rythme enchaîné, elle tourne sans te demander : c'est le prix de ne pas attendre, et « attends » la retient.
 
 Tout le reste répond en quelques secondes. `/flow:guide` est gratuit — il ne lance ni test ni agent — et c'est le bon réflexe quand on ne sait pas où on en est.
 
@@ -63,7 +71,7 @@ Tout le reste répond en quelques secondes. `/flow:guide` est gratuit — il ne 
 
 Le cycle complet sert aux tâches qui comptent. Pour le reste :
 
-- **Une faute de frappe, un libellé** → directement `/flow:new-feature`. `/flow:spec` te le dira lui-même plutôt que de produire de la paperasse.
+- **Une faute de frappe, un libellé** → directement `/flow:new-feature`. `/flow:spec` y va lui-même plutôt que de produire de la paperasse.
 - **Un défaut dont la définition de « terminé » est évidente** → `/flow:new-feature` suffit. Une spec ne sert qu'à écrire ce qu'on ne sait pas encore.
 - **Rien ne touche à la structure** → saute `/flow:design`. Il sert aux décisions qu'on regrette, pas aux modifications qu'on oublie.
 
@@ -92,13 +100,15 @@ Fusionner une pull request **ne publie rien**. Dans ce type de projet, c'est le 
 
 ## Ne jamais rester sans savoir quoi faire
 
-Le cycle ne sert à rien si on ne sait pas où on en est. Trois mécanismes s'en occupent, et aucun ne coûte cher :
+Le cycle ne sert à rien si on ne sait pas où on en est. Quatre mécanismes s'en occupent, et aucun ne coûte cher :
 
-**Chaque commande finit par trois lignes** — *Où on en est*, *Ensuite*, *Si tu hésites*. Sauf `/flow:guide`, qui *est* le recours et ne peut pas se citer lui-même. Une seule action proposée, jamais deux options, jamais de « si » à arbitrer soi-même. Et si la commande s'est arrêtée en route, elle le dit là plutôt que d'annoncer un travail qui n'a pas eu lieu.
+**Chaque commande — ou chaque chaîne de commandes — finit par trois lignes** — *Où on en est*, *Ensuite*, *Si tu hésites*. Sauf `/flow:guide`, qui *est* le recours et ne peut pas se citer lui-même. Une seule action proposée, jamais deux options, jamais de « si » à arbitrer soi-même. Et si la commande s'est arrêtée en route, elle le dit là plutôt que d'annoncer un travail qui n'a pas eu lieu.
 
 **`/flow:guide`** fait le point quand on est perdu ou qu'on reprend un projet trois semaines plus tard. Il lit l'état du dépôt en un seul appel groupé et nomme la seule commande à lancer. Il lui est interdit de lancer un test, un agent, un lint ou un build — c'est la commande gratuite du lot. Là où git ne permet pas de trancher, il pose une question au lieu de deviner : deviner enverrait relancer la porte, qui est la commande chère.
 
-**Le bloc « Boussole »**, écrit par `/flow:init-project` dans le `CLAUDE.md` du projet, capte les questions posées en français — « et maintenant ? », « je fais quoi ? », « c'est fini ? » — et y répond comme `/flow:guide`. C'est le mécanisme le plus utile des trois, parce que c'est ainsi qu'on demande son chemin en vrai : pas en tapant le nom d'une septième commande.
+**`/flow:guide <mot>`** explique un mot en trois lignes et un exemple tiré de ton projet — « ça veut dire quoi ? », le même recours que « je fais quoi ? ». Dix-sept mots y ont le sens précis que `flow` leur donne ; les autres s'expliquent en termes généraux.
+
+**Le bloc « Boussole »**, écrit par `/flow:init-project` dans le `CLAUDE.md` du projet, capte les questions posées en français — « et maintenant ? », « je fais quoi ? », « c'est fini ? » — et y répond comme `/flow:guide`. C'est le mécanisme le plus utile des quatre, parce que c'est ainsi qu'on demande son chemin en vrai : pas en tapant le nom d'une septième commande.
 
 Deux règles complètent l'ensemble : chaque arrêt commence par « **J'attends ta réponse** », et tout passage long et muet — agents, tests, surveillance de la CI — est annoncé avec sa durée. Un silence long ressemble à un plantage, et le réflexe est alors de taper une autre commande.
 
@@ -111,12 +121,13 @@ Deux règles complètent l'ensemble : chaque arrêt commence par « **J'attends 
 - type : cli | desktop | web | service | script
 - stack : <langage + framework>
 - format / lint / typecheck / test / build / run : <commandes réelles>
+- rythme : enchaîné | pas à pas
 - critique : <modules à couvrir en priorité>
 ```
 
 L'adaptation est donc **écrite une fois**, pas redevinée à chaque session. C'est ce bloc qui dit à `/flow:verify` quoi lancer, et à `ux-reviewer` s'il doit juger un `--help`, une fenêtre ou une page web.
 
-Règle d'or : chaque commande du profil doit avoir été **exécutée avec succès** au moment où elle y est inscrite. Une commande écrite au jugé rendrait la porte mensongère.
+Règle d'or : chaque commande du profil doit avoir été **exécutée avec succès** au moment où elle y est inscrite. Une commande écrite au jugé rendrait la porte mensongère. `rythme` est la seule ligne sans vérité extérieure : rien ne la lance, elle se lit — et absente, c'est enchaîné.
 
 ## Les quatre agents
 
@@ -128,6 +139,8 @@ Règle d'or : chaque commande du profil doit avoir été **exécutée avec succ�
 | `ux-reviewer` | **L'interface rendue**, celle qui n'existe qu'une fois lancée | Si l'interface ou ce qui construit l'exécutable a changé |
 
 **Ils se partagent le travail par objet, pas par vocabulaire.** Deux agents peuvent regarder la duplication sans faire doublon : `code-reviewer` celle que ce lot ajoute, `architect` celle du dépôt. Chacun porte un bloc « Ce que tu ne fais pas » qui nomme le propriétaire des sujets voisins, et deux contrôles du vérificateur les tiennent : l'un exige que ce bloc existe, l'autre refuse qu'un sujet réservé soit repris ailleurs **sans citer son propriétaire dans la même phrase**. C'est une vérification de forme, pas de sens : elle attrape le doublon qui revient par distraction, pas celui qu'on écrirait exprès. C'est l'objet de `docs/decisions/0003-un-proprietaire-par-preoccupation.md`.
+
+**Chaque rapport s'ouvre par trois lignes pour toi**, sans terme non traduit — ce que l'agent a regardé, ce que ça change pour ton logiciel, ce qu'il recommande —, avant ses constats écrits pour le studio, avec fichiers et lignes. `/flow:verify` recopie ces lignes dans son compte-rendu.
 
 Chacun a l'ordre explicite de ne rien dire quand il ne trouve rien. Un rapport vide est un résultat — **sauf pour `ux-reviewer`**, seul dont un rapport court peut vouloir dire « je n'ai pas pu lancer le logiciel ». Il doit alors le dire en toutes lettres, et `/flow:verify` le porte dans sa section « non vérifié » plutôt que de le prendre pour un feu vert.
 
@@ -182,7 +195,7 @@ Les deux scripts forment ensemble la commande `test` du Profil projet — donc c
 
 ## Le cap
 
-Le plugin a un cap écrit : `docs/plan-studio.md`. Son tableau d'avancement, en tête, dit quel lot vient ensuite ; sa section 13 liste les choix qui reviennent à l'auteur. La règle qui va avec : aucun lot sur ce dépôt sans un item de ce plan ou une app réelle qui le justifie.
+Le plugin a un cap écrit : `docs/plan-studio.md`. Son tableau d'avancement, en tête, dit quel lot vient ensuite ; sa section 13 liste les choix qui reviennent à l'auteur. La règle qui va avec : aucun lot sur ce dépôt sans un item de ce plan ou une app réelle qui le justifie. Le lot 1 — le rythme enchaîné et la pédagogie — est écrit dans la 0.15.0 ; il ne sera « livré » qu'une fois constaté sur une tâche réelle traversant la chaîne.
 
 ## Mettre à jour le workflow
 

@@ -70,6 +70,14 @@ Deux situations valent tout le reste, parce que personne d'autre ne les regarde.
 
 ## Forme du rapport
 
+Ouvre par trois lignes pour l'auteur, qui n'est pas développeur — aucun terme non traduit, aucune ligne de code :
+
+**Pour toi.** Ce que j'ai regardé : … — ou « rien : je n'ai pas pu lancer le logiciel, il m'a manqué … »
+Ce que ça change pour ton logiciel : …
+Ce que je recommande : …
+
+Puis, pour le studio :
+
 - **Ce que j'ai lancé** — la commande ou l'écran exact, et ce que tu as observé. Sans cette section, le reste n'est pas crédible.
 - **Bloquant** — ce qui fait rater une tâche à l'utilisateur, ou fait clairement amateur.
 - **Amélioration** — hiérarchisée par visibilité.
@@ -77,4 +85,4 @@ Deux situations valent tout le reste, parce que personne d'autre ne les regarde.
 
 Sois concret : « le bouton Enregistrer est à 3 px du bord alors que tous les autres sont à 12 » vaut cent fois « les espacements manquent de cohérence ».
 
-**Si tu n'as pas pu lancer le logiciel, c'est un verdict, pas un silence.** Tu es le seul des quatre dont un rapport court peut vouloir dire « je n'ai pas pu regarder » au lieu de « je n'ai rien trouvé ». Dis lequel des deux, en toutes lettres et en première ligne, avec ce qui t'a manqué — une machine, un appareil, un écran. `/flow:verify` doit pouvoir le recopier dans sa section « non vérifié » : une porte qui prend ton silence pour un feu vert ne protège de rien.
+**Si tu n'as pas pu lancer le logiciel, c'est un verdict, pas un silence.** Tu es le seul des quatre dont un rapport court peut vouloir dire « je n'ai pas pu regarder » au lieu de « je n'ai rien trouvé ». Dis lequel des deux, en toutes lettres et en première ligne — c'est la valeur de « Ce que j'ai regardé » —, avec ce qui t'a manqué — une machine, un appareil, un écran. `/flow:verify` doit pouvoir le recopier dans sa section « non vérifié » : une porte qui prend ton silence pour un feu vert ne protège de rien.
