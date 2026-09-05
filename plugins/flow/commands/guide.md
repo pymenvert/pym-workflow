@@ -30,6 +30,8 @@ Faire le point doit coûter quelques secondes. **Jamais d'agent de revue, jamais
 - **Endurance** : faire tourner longtemps ou sous charge pour voir ce qui dérive.
 - **Simulateur** : un faux appareil ou un faux service qui se comporte comme le vrai, pour tester sans lui.
 - **Diagnostic** : le paquet de journaux, configuration et version qu'on envoie quand ça casse.
+- **Journal** : deux sens — ce que ton logiciel écrit sur ce qu'il fait (les « logs »), et `docs/journal.md`, où `flow` note chaque porte, livraison, incident et version.
+- **Incident** : un comportement qui existait et a cessé, ou un plantage ; `flow` le note au journal avant même de le corriger, et part d'une reproduction.
 
 ## Les signaux : au plus deux appels d'outils
 
@@ -38,7 +40,7 @@ Faire le point doit coûter quelques secondes. **Jamais d'agent de revue, jamais
 Sinon, **un seul appel groupé**. Ne le découpe jamais : chaque appel d'outil relit toute la conversation, c'est là que part l'argent — pas dans la longueur des sorties.
 
 ```
-git branch --show-current; git status --short; git rev-list --count HEAD --not main 2>/dev/null; ls docs/specs docs/decisions docs/reste-a-faire.md 2>/dev/null; grep -c "Profil projet" CLAUDE.md 2>/dev/null; cat .git/flow-depot-ouvert 2>/dev/null; gh repo view --json visibility -q .visibility 2>/dev/null
+git branch --show-current; git status --short; git rev-list --count HEAD --not main 2>/dev/null; ls docs/specs docs/decisions docs/reste-a-faire.md 2>/dev/null; grep -c 'incident .* cause : ?' docs/journal.md 2>/dev/null; grep -c "Profil projet" CLAUDE.md 2>/dev/null; cat .git/flow-depot-ouvert 2>/dev/null; gh repo view --json visibility -q .visibility 2>/dev/null
 ```
 
 La visibilité tient dans **cette ligne-là**, pas dans un appel de plus. Le budget de cette commande se compte en appels d'outils, pas en secondes : replié dans le groupe, l'appel à GitHub en coûte **zéro de plus** (mesuré : un tiers de seconde de réponse). S'il ne rend rien — pas de dépôt distant, `gh` absent, pas de réseau —, **tu continues normalement**. `/flow:guide` est le recours de dernière instance : il n'a jamais le droit de s'arrêter en erreur.
@@ -62,6 +64,7 @@ La visibilité tient dans **cette ligne-là**, pas dans un appel de plus. Le bud
 | une pull request ouverte | il reste à la fusionner | lui donner le lien et la marche à suivre |
 | une spec sans décision correspondante dans `docs/decisions/` | conception pas encore tranchée | `/flow:design <nom de la spec>` |
 | `docs/reste-a-faire.md` existe et n'est pas vide | des points ont été reportés par une porte précédente | lui en citer deux ou trois et proposer d'en prendre un |
+| une ligne `incident` du journal avec « cause : ? » | une panne connue, pas encore corrigée | `/flow:new-feature <la panne>`, en mode incident |
 
 **Qui tranche, du témoin ou de GitHub.** GitHub dit **si** le dépôt est ouvert ; le témoin dit seulement **pourquoi** et **depuis quand**. Quand les deux se contredisent, c'est GitHub qui a raison — le témoin vit dans un dossier de travail, il ne traverse pas les machines, et il ne sait pas ce qui a été fait depuis l'autre poste. Une absence de témoin n'a donc jamais voulu dire « rien en cours ».
 
@@ -69,10 +72,11 @@ La visibilité tient dans **cette ligne-là**, pas dans un appel de plus. Le bud
 
 ## S'il demande à comprendre le cycle plutôt que son état
 
-Réponds sur ce qu'il a demandé, pas sur les six étapes. Deux règles seulement méritent d'être répétées, parce qu'elles ne figurent nulle part ailleurs :
+Réponds sur ce qu'il a demandé, pas sur les six étapes. Trois règles seulement méritent d'être répétées, parce qu'elles ne figurent nulle part ailleurs :
 
 - **Le rythme.** Par défaut, les commandes du cycle s'enchaînent — cadrage, conception, plan, code, porte, livraison — et ne s'arrêtent que pour quatre raisons : une réponse qui n'appartient qu'à lui, de l'argent ou un engagement, un acte irréversible ou public, une porte rouge. En `pas à pas` (ligne `rythme` du profil), trois commandes s'arrêtent et attendent une réponse dans la discussion : `/flow:spec` après ses questions, `/flow:design` après sa proposition, `/flow:new-feature` après son plan. Dans les deux cas on répond dans le fil — on ne relance pas une commande.
 - **`/flow:new-feature` crée la branche tout seul.** Rien à faire à la main avant. `/flow:verify` et `/flow:ship` travaillent ensuite sur cette branche.
+- **Une panne passe par `/flow:new-feature` aussi**, en mode incident : il la note au journal, la reproduit d'abord, puis corrige.
 
 Et dis-lui le coût, une fois : `/flow:verify` lance la suite de tests complète et jusqu'à quatre relecteurs automatiques, soit plusieurs minutes. C'est la seule commande chère du cycle ; les autres répondent en quelques secondes. En rythme enchaîné, elle tourne sans demander ; un mot de lui — « attends » — la retient.
 

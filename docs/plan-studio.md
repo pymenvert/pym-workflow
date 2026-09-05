@@ -14,7 +14,7 @@
 |---|---|---|
 | 0 | Ce plan, le cap dans la Boussole, le registre corrigé | livré avec la 0.14.1, le 4 septembre 2026 |
 | 1 | Le rythme enchaîné, la décision expliquée, les rapports « pour toi » ; `/flow:studio` seulement si le manque se constate | livré dans la 0.15.0 le 5 septembre 2026 (décision `0004`), à constater sur une app |
-| 2 | Le journal, le mode incident, l'audit redéfini en bilan de santé à la version | à faire |
+| 2 | Le journal, le mode incident, l'audit redéfini en bilan de santé à la version | livré dans la 0.16.0 le 5 septembre 2026 (décision `0005`), à constater sur une app |
 | 3 | Le profil étendu, la fiche produit, la liste à faire | à faire |
 | 4 | L'expert sécurité `securite` et ses automates | à faire |
 | 5 | La conception d'interface avant le code | à faire |
@@ -302,9 +302,9 @@ Une règle pour le profil étendu, héritée de la décision `0002`, qui a écar
 - vérifier que la liste à faire décrit encore le produit ;
 - relever les indicateurs de la section 11.
 
-Trois sections de rendu, inchangées : à corriger avant la version, dette assumable, ce que l'audit n'a pas pu voir. Puis tout au registre. Sur un projet repris, c'est aussi le bilan d'entrée.
+Trois sections de rendu, inchangées : à corriger avant la version, dette assumable, ce que l'audit n'a pas pu voir. Puis l'ouvert au registre, le passé au journal. Sur un projet repris, c'est aussi le bilan d'entrée.
 
-**`/flow:mutation`** existe et ne change pas. Déclenchée par `/flow:release` quand la suite a nettement grossi depuis la version précédente.
+**`/flow:mutation`** existe et ne change pas. Proposée par `/flow:release` pour après, quand la suite a nettement grossi depuis la version précédente (la décision `0005` a renversé « déclenchée » : ses accords ne sont aucune des quatre raisons).
 
 **`/flow:endurance`** (nouveau, lot 8). Fait tourner longtemps ou sous charge, et regarde ce qui dérive. Pour un outil de régie : le logiciel lancé une heure avec un simulateur qui l'alimente, la mémoire relevée toutes les minutes, la dérive du temps mesurée, le comportement à la perte puis au retour de l'appareil. Pour un serveur : une charge soutenue, les délais de réponse, les erreurs, la mémoire. Verdict : stable, dérive lente, fuite. C'est la classe de tests qui tue ou sauve une représentation de trois heures, et aucune porte par tâche ne peut la payer. Elle appartient à la famille rare, avec la mutation et l'audit.
 
@@ -405,8 +405,8 @@ Aucune décision récente sur les agents n'a été prise avec des données, et l
 
 **`docs/journal.md`**, une ligne par événement, écrite par les commandes :
 
-- `porte` : date, tâche, checks verts ou rouges, bloquants réels par expert, non vérifié, durée.
-- `livraison` : date, tâche, lien, ce que ça change pour l'utilisateur.
+- `porte` : date, tâche, checks verts ou rouges, bloquants réels par expert, non vérifié, durée, jetons.
+- `livraison` : date, tâche, branche, ce que ça change pour l'utilisateur (le lien reste sur GitHub — décision `0005`).
 - `incident` : date, quoi, cause, leçon.
 - `version` : date, numéro, résumé du bilan de santé.
 
@@ -479,7 +479,7 @@ Chaque lot suit le cycle complet sur ce dépôt : cadrage, conception, implémen
 
 **Lot 1 : le rythme et la pédagogie.** Le réglage `rythme` et les quatre raisons dans les six commandes du cycle · la décision expliquée et l'annonce dans `/flow:design` · « pour toi » dans les quatre agents · les points de passage · le compte-rendu de lot, le bilan de porte et le compte-rendu de livraison · `/flow:guide <mot>` · la décision `0004` qui fixe le rythme et les quatre raisons. Constaté quand une tâche réelle traverse la chaîne sans arrêt inutile, et que chaque arrêt restant est l'une des quatre raisons. `/flow:studio` n'entre qu'après ce constat, si l'entrée unique manque encore ; le modèle par agent attend dix portes journalisées. Premier parce que c'est l'expérience même de « passer la porte ». (Corrigé le 5 septembre 2026 par la décision `0004` : il économise des relances, pas des jetons — une chaîne fait relire la conversation à chaque appel ; le constat mesurera.)
 
-**Lot 2 : le journal et l'audit redéfini.** Le journal écrit par verify, ship et new-feature · le mode incident · l'audit en bilan de santé, à la version. Constaté par un audit lancé sur une vraie app, avec ses indicateurs.
+**Lot 2 : le journal et l'audit redéfini.** Le journal écrit par verify, ship, new-feature et release · le mode incident · l'audit en bilan de santé, à la version. Constaté par un audit lancé sur une vraie app, avec ses indicateurs.
 
 **Lot 3 : le profil étendu, la fiche produit, la liste à faire.** Et `/flow:guide` qui propose un item, et qui ignore les cadrages marqués « Réalisé ». Constaté par la fiche produit de deux apps existantes.
 

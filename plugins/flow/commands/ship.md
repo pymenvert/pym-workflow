@@ -10,13 +10,15 @@ Livraison du travail en cours sur cette branche.
 
 2. **Exige la porte.** Si `/flow:verify` vient de rendre PASSE dans cette conversation, sur cet état exact du code, ne le relance pas. Sinon, lance-le maintenant — c'est la seule remontée vers l'amont que le plugin admet : il rend son verdict, et tu reprends à l'étape 3. **S'il rend BLOQUÉ, arrête-toi.** Ne livre jamais en promettant de corriger après : c'est précisément comme ça qu'un bug part en production.
 
-3. **Diff.** `git status` et `git diff` complets. Retire tout ce qui n'a rien à voir avec la tâche — fichiers de test personnels, traces de débogage, réglages d'éditeur. Un diff qui ne contient que la tâche est un diff qu'on peut relire.
+3. **Diff.** `git status` et `git diff` complets. Retire tout ce qui n'a rien à voir avec la tâche — fichiers de test personnels, traces de débogage, réglages d'éditeur. Un diff qui ne contient que la tâche est un diff qu'on peut relire. La ligne que la porte a ajoutée à `docs/journal.md` fait partie de la tâche.
 
 4. **Secrets.** Vérifie qu'aucun secret, `.env`, jeton, clé ou identifiant ne part dans le commit. En cas de doute, montre-moi la ligne.
 
-5. **Commit.** Un commit atomique, dont le message explique **le pourquoi** — le quoi se lit dans le diff. Plusieurs commits uniquement si le travail couvre des changements réellement distincts.
+5. **Ligne de journal, avant le commit.** Ajoute à `docs/journal.md`, par `cat >>` — jamais en réécrivant le fichier —, une ligne `livraison` : `- <AAAA-MM-JJ> · livraison · <tâche> · branche : <branche> · change : <ce que ça change, la première partie du Compte-rendu>`. L'en-tête fait foi sur la forme : ni « · » ni retour à la ligne dans une case — un « ; » les remplace —, « ? » pour ce qu'on ne sait pas, jamais « aucun ». Le fichier existe : la porte l'a créé. Le lien de la pull request n'y va pas : GitHub le garde, et l'écrire après coup coûterait un second commit et une CI de plus.
 
-6. **Push.** Vérifie d'abord si une pull request est déjà ouverte sur cette branche (`gh pr list --head <branche>`). Si oui, **n'en crée pas une seconde** : le push la met à jour tout seul. Dis-le-moi, ajoute en commentaire ce que ce nouveau commit change, et passe directement à la surveillance de la CI.
+6. **Commit.** Un commit atomique, dont le message explique **le pourquoi** — le quoi se lit dans le diff. Plusieurs commits uniquement si le travail couvre des changements réellement distincts.
+
+7. **Push.** Vérifie d'abord si une pull request est déjà ouverte sur cette branche (`gh pr list --head <branche>`). Si oui, **n'en crée pas une seconde** : le push la met à jour tout seul. Dis-le-moi, ajoute en commentaire ce que ce nouveau commit change, et passe directement à la surveillance de la CI.
 
    Sinon, ouvre-la avec `gh pr create` :
    - l'objectif, et le lien vers la spec si elle existe
@@ -27,7 +29,7 @@ Livraison du travail en cours sur cette branche.
 
    Donne-moi le lien. Si `gh` n'est pas disponible, pousse quand même et donne-moi l'URL à ouvrir pour créer la PR à la main.
 
-7. **Surveille la CI** jusqu'à son verdict.
+8. **Surveille la CI** jusqu'à son verdict.
 
    **Ne fonde jamais un verdict sur du texte découpé.** Les noms de jobs contiennent des espaces, les colonnes se décalent d'une ligne à l'autre, et un moniteur bancal annonce « tout vert, zéro échec » alors qu'un job est encore en cours. Fonde-toi sur le **code de sortie** de `gh pr checks` — `0` tout vert, `8` en attente, autre chose un échec — ou sur sa sortie JSON. Jamais sur un découpage de colonnes.
 
@@ -35,9 +37,9 @@ Livraison du travail en cours sur cette branche.
 
    Si la CI casse, ne referme pas le sujet : montre-moi quel job échoue et pourquoi. Elle attrape ce qui est invisible en local — machine différente, environnement propre, timing plus lent.
 
-8. **Conclus** par le **Compte-rendu**, le même que dans la pull request, puis ce qui est parti et où c'en est.
+9. **Conclus** par le **Compte-rendu**, le même que dans la pull request, puis ce qui est parti et où c'en est.
 
-   Si la CI est verte, donne-moi la suite exactement, dans l'ordre — sinon je reste bloqué là : fusionner la pull request sur GitHub en choisissant « Create a merge commit » ou « Rebase and merge », **jamais « Squash and merge »** qui écraserait les commits séparés ; supprimer la branche (GitHub le propose juste après) ; puis revenir sur la branche par défaut et récupérer la fusion sur ma machine — le bouton *Pull* de mon outil git, ou `git pull`. Sans ce dernier geste, mon dossier reste sur l'ancienne branche et ignore la fusion.
+   Si la CI est verte, donne-moi la suite exactement, dans l'ordre — sinon je reste bloqué là : fusionner la pull request sur GitHub en choisissant « Create a merge commit » ou « Rebase and merge », **jamais « Squash and merge »** qui écraserait les commits séparés ; supprimer la branche (GitHub le propose juste après) ; puis revenir sur la branche par défaut et récupérer la fusion sur ma machine — le bouton *Pull* de mon outil git, ou `git pull`. Sans ce dernier geste, mon dossier reste sur l'ancienne branche et ignore la fusion. Si GitHub signale un conflit sur `docs/journal.md`, je te réponds « conflit journal » et c'est toi qui le règles : tu ramènes la branche par défaut dans la branche, tu gardes les deux côtés, tu tries les lignes par date — la date en tête rend le tri juste —, tu pousses.
 
 ## Arrêts et suite
 

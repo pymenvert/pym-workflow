@@ -90,7 +90,7 @@ lot 2 lira une forme, pas trois.
 elle se ferme. La chaîne l'ouvre ; la fusion, irréversible, reste à l'auteur.
 
 **7. `/flow:guide <mot>`** : le glossaire de `guide.md` fait foi sur celui du
-plan. Dix-sept mots où `flow` a sa doctrine ; les autres s'expliquent en
+plan. Une vingtaine de mots où `flow` a sa doctrine ; les autres s'expliquent en
 termes généraux. « Inconnu » veut dire : un mot que le guide ne sait pas
 illustrer par un exemple de ce projet — il le dit, et explique quand même.
 

@@ -1,5 +1,5 @@
 ---
-description: Audit de fond de tout le programme — la dérive, les angles morts, ce qui est devenu faux. Rare et cher.
+description: Le bilan de santé de tout le programme, à la version — ce qui se répète au journal, la dérive, ce qui est devenu faux. Rare et cher.
 argument-hint: (rien), ou un périmètre à examiner
 ---
 
@@ -7,7 +7,7 @@ Audit de fond : $ARGUMENTS
 
 Ce n'est pas `/flow:verify`. La porte examine **ce qui vient de changer** ; toi tu examines **tout le programme**, et tu cherches ce qu'aucun diff ne peut révéler : la dérive lente, les angles morts, et les affirmations devenues fausses.
 
-Commande **chère et rare** : à lancer entre deux versions, jamais à chaque tâche. Annonce-moi sa durée avant de commencer.
+Commande **chère et rare** : le bilan de santé du produit, à chaque version — `/flow:release` te lance avant l'étiquette —, jamais à chaque tâche. Annonce-moi sa durée avant de commencer.
 
 ## S'il existe déjà un rapport d'audit, confronte-le
 
@@ -23,7 +23,7 @@ Commence par les constats les plus graves, et ne confronte pas les cosmétiques 
 
 Un audit qui commence par une opinion ne vaut rien. Mais ne refais pas la mesure structurelle toi-même : la duplication, le code mort et les dépendances circulaires sont mesurés par `architect`. Tu lis son rapport, tu ne le doubles pas.
 
-**Lance donc les agents maintenant** — section « Les agents, sur le fond » plus bas — et attends leurs rapports avant de répondre aux questions : trois des cinq en dépendent. Préviens-moi de la durée.
+**Lance donc les agents maintenant** — section « Qui il convoque » plus bas — et attends leurs rapports avant de répondre aux questions : trois des cinq en dépendent. Préviens-moi de la durée.
 
 ## Les cinq questions
 
@@ -37,9 +37,38 @@ Un audit qui commence par une opinion ne vaut rien. Mais ne refais pas la mesure
 
 5. **Qu'est-ce qui a été corrigé sans que la cause soit écrite ?** Un défaut réglé dont la leçon n'est consignée nulle part reviendra sous une autre forme.
 
-## Les agents, sur le fond
+## Ce que l'audit lit
 
-Lance `architect` en mode dérive structurelle, `test-engineer` sur les chemins critiques du projet entier, et `ux-reviewer` sur l'interface complète — pas seulement les écrans récemment touchés. Préviens-moi : plusieurs minutes.
+- **Le journal**, `docs/journal.md` : une ligne par porte, livraison, incident et version. Dis **ce qui se répète** — un relecteur toujours à zéro ou toujours bloquant, la même chose en « non vérifié » deux fois, la même cause d'incident. Sans journal : dis-le en une ligne, indicateurs « sans objet ».
+- **Le registre**, `docs/reste-a-faire.md` : ce qui est ouvert — c'est lui que tu confrontes.
+- **Les dépendances**, avec les outils du projet s'ils existent — `npm outdated` et `npm audit`, `pip list --outdated` et `pip-audit`, `cargo outdated` et `cargo audit` : en retard, et failles connues. Sans outil, dis que ça manque ; n'installe rien.
+- Demain, la liste à faire et la fiche produit (lot 3) : seulement si elles existent.
+
+## Ce qu'il calcule
+
+Deux indicateurs, par une seule commande sur les cases étiquetées du journal — les noms des relecteurs viennent des lignes, jamais d'ici :
+
+```
+DEPUIS=$(git log -1 --format=%as "$(git describe --tags --abbrev=0 2>/dev/null)" 2>/dev/null || echo 0000-00-00)
+awk -F' · ' '
+  { sub(/\r$/, "") }
+  !/^- / { next }
+  { d = $1; sub(/^- /, "", d) }
+  $2 == "porte" { for (i = 4; i <= NF; i++) if ($i ~ /^bloquants : /) { s = $i; sub(/^bloquants : /, "", s); n = split(s, b, ", ")
+      for (j = 1; j <= n; j++) { split(b[j], c, " "); conv[c[1]]++; if (c[2] == "?") pas[c[1]]++; else bloq[c[1]] += c[2] } } }
+  $2 == "incident" && d >= depuis { inc++ }
+  END { for (r in conv) printf "%s : %d bloquant(s) sur %d convocation(s), %d fois sans pouvoir regarder\n", r, bloq[r], conv[r], pas[r]
+        printf "incidents depuis %s : %d\n", depuis, inc }
+' depuis="$DEPUIS" docs/journal.md
+```
+
+**Comment lire.** Le rendement d'un relecteur, c'est ses bloquants réels par convocation ; un « ? » est une fois où il n'a pas pu regarder, jamais un zéro. Un zéro ne se lit qu'avec les incidents de la même période : sur des diffs propres, zéro n'est pas « inutile ». Un relecteur à zéro sur dix convocations devient rare — convoqué à la version seulement —, on ne le supprime pas. Les incidents se comptent **par date** depuis la dernière étiquette, pas par position dans le fichier — au jour près : un incident noté le jour de l'étiquette compte pour la période suivante, dis-le si ça pèse. Seules les lignes qui commencent par « - » comptent : l'en-tête, jamais. Et ces chiffres sont déclarés par la porte qui accepte, corrige et compte : ils mesurent l'accord entre elle et ses relecteurs, pas la vérité.
+
+## Qui il convoque
+
+Les relecteurs dont le projet a l'objet, sur le projet entier : `architect` en mode dérive structurelle, `test-engineer` sur les chemins critiques, et `ux-reviewer` sur l'interface complète — pas seulement les écrans récemment touchés —, mais pas d'`ux-reviewer` sans interface ni exécutable. Préviens-moi : plusieurs minutes.
+
+**Sauf confrontation.** Si le registre porte déjà un bilan daté d'après la dernière étiquette et que tous ses « à corriger » sont rayés, ne convoque personne : confronte seulement, section du haut. Sur un projet repris, tu es aussi le bilan d'entrée.
 
 ## Rendu
 
@@ -49,7 +78,7 @@ Trois sections, hiérarchisées :
 - **Dette assumable** — à noter, à supporter sciemment
 - **Ce que cet audit n'a pas pu voir** — obligatoire, en citant nommément les conditions réelles qui manquent
 
-Puis **écris tout dans `docs/reste-a-faire.md`**, sous un titre daté. Un audit qui ne survit pas à la conversation n'a servi à rien.
+Puis **écris ce qui est ouvert dans `docs/reste-a-faire.md`**, sous un titre daté « Bilan de santé du <date> » — à corriger, dette assumable. Ce bilan reste sous son titre jusqu'à l'étiquette suivante ; un « à corriger » réglé s'y **raye** (`~~…~~`), il ne s'efface pas avant la version suivante : c'est ce qui permet à `/flow:release` de ne pas te relancer pour rien. Ce qui s'est passé, c'est `/flow:release` qui l'écrit au journal, ligne `version`. Un audit qui ne survit pas à la conversation n'a servi à rien.
 
 Et si l'audit dégage une leçon générale — pas un défaut, une règle —, propose-moi de l'ajouter au `CLAUDE.md` du projet. C'est ce qui évite de la réapprendre au prix fort.
 

@@ -3,11 +3,12 @@
 Ce que l'on sait imparfait, et qui n'a pas encore été corrigé.
 
 Ce fichier fait autorité sur ce qui est **ouvert**. Les décisions de structure
-vivent dans `docs/decisions/`, les cadrages dans `docs/specs/`. Ne rien
-dupliquer entre les trois.
+vivent dans `docs/decisions/`, les cadrages dans `docs/specs/`, et ce qui s'est
+passé — portes, livraisons, incidents, versions — dans `docs/journal.md`. Ne rien
+dupliquer entre les quatre.
 
-Dernière mise à jour : 5 septembre 2026, après la porte du lot 1 (le rythme et
-la pédagogie, 0.15.0).
+Dernière mise à jour : 5 septembre 2026, après la porte du lot 2 (le journal, le
+mode incident, le bilan de santé, 0.16.0).
 
 ---
 
@@ -41,13 +42,34 @@ Le tableau du README, la section « cycle » de `guide.md`, le `CLAUDE.md` de ce
 dépôt. Le mode incident (lot 2) et `/flow:studio`, s'il vient, les changeront
 tous à la main.
 
-### Ce que le lot 4 devra savoir sur `guide.md`
+### Laissé ouvert par la porte du 5 septembre 2026, lot 2 (0.16.0)
+
+- **Les incidents se comptent au jour près.** Un incident noté le jour d'une
+  étiquette compte pour la période suivante ; sur ce dépôt, quatre versions en
+  deux jours, l'indicateur sera flou tant que les lignes n'ont pas d'heure.
+- **La forme d'une ligne de journal vit à sept endroits** (quatre commandes,
+  l'en-tête, le README, la décision `0005`), rien ne la garde. L'en-tête de
+  chaque journal fait foi ; les autres copies sont tenues à la relecture.
+- **Un conflit sur `docs/journal.md` dans l'interface web de GitHub** n'est pas
+  réglé par `merge=union`, qui ne vaut qu'en local ; `/flow:ship` dit alors à
+  l'assistant de ramener la branche par défaut et de trier par date.
+- **Le banc vise `audit.md` par numéros de ligne** (24 et 28) : le prochain lot
+  qui touche le haut du fichier déplace les cibles sans que rien ne le dise.
+- **`release.md` est la partie la plus pénible à modifier** selon l'architecte :
+  une liste numérotée où cinq lots insèreront une étape, la seule commande qui
+  écrit sur la branche par défaut, et un CHANGELOG qu'elle lit sans exister ici.
+- **Une case `bloquants : ?` entière** produit un relecteur fantôme « ? » dans le
+  calcul ; visible à l'œil, pas fatal.
+
+### Ce que le lot 4 devra savoir sur `guide.md` et `audit.md`
 
 Son glossaire dit « un jeton d'accès est un secret » et nomme test-engineer sans
 accents graves — exprès, pour que le guide ne devienne pas une commande arbitre
 du contrôle 11. Le jour où « secret » entre dans la table du contrôle et où
 `guide.md` cite un agent entre accents graves, ces deux lignes rougissent.
-Mesuré par l'architecte le 5 septembre.
+Mesuré par l'architecte le 5 septembre. Même chose pour `audit.md` : sa phrase sur
+les « failles connues » et `npm audit` rougira dès que « faille » ou « secret »
+entrera dans la table sans citer `securite` — `audit.md` est déjà arbitre.
 
 ### Trois écritures contournent encore la garde des préoccupations
 
@@ -124,7 +146,9 @@ livraison. **Pas** mesuré : la même chaîne avec les commandes de la 0.15.0, c
 devient une chaîne après résumé de la conversation, et son coût en jetons contre
 une tâche pas à pas. Les trois se constatent à la première tâche réelle en rythme
 enchaîné, dans une conversation neuve avec le plugin mis à jour ; d'ici là, le
-lot 1 est « à constater », pas « constaté ».
+lot 1 est « à constater », pas « constaté ». Même chose pour le lot 2 : les trois
+premières lignes du journal sont reconstituées, les suivantes écrites à la main
+dans la forme, puisque les commandes installées sont encore celles d'avant.
 
 ### La bascule de visibilité n'a jamais été constatée de bout en bout
 
@@ -176,7 +200,10 @@ emploiera une capacité récente fera renaître le besoin intact.
 
 ---
 
-## Relevés datés
+## Relevés datés — clos à la 0.15.0
+
+Depuis la 0.16.0, ce qui s'est passé s'écrit au journal, `docs/journal.md`, une
+ligne par événement (décision `0005`). Les relevés ci-dessous restent tels quels.
 
 ### 5 septembre 2026 — le rythme et la pédagogie (0.15.0)
 

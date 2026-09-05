@@ -7,7 +7,7 @@ Tâche : $ARGUMENTS
 
 1. **État des lieux.** `git status`. Si des fichiers sont modifiés, **ne te contente pas de me demander quoi en faire : regarde d'abord ce que c'est.** Lis le diff, et dis-moi ce que tu constates. « Ce sont les treize styles en ligne retirés et la politique de sécurité unifiée, donc le chantier annoncé semble terminé » vaut infiniment mieux que « treize fichiers modifiés, qu'en fais-tu ? ». Puis pose ta question — elle reste légitime : savoir si je considère ce travail comme fini n'appartient qu'à moi. Mais constate avant de demander.
 
-   **En chaîne, les fichiers que la chaîne vient d'écrire — le cadrage, la décision — ne demandent rien** : constate-les en une ligne, ils suivront la branche. Tout autre fichier modifié reste une question, raison 1.
+   **En chaîne, les fichiers que la chaîne vient d'écrire — le cadrage, la décision, la ligne de journal — ne demandent rien** : constate-les en une ligne, ils suivront la branche. Tout autre fichier modifié reste une question, raison 1.
 
    **Puis tranche le sujet.** Si ce que je demande maintenant est une retouche du travail en cours, reste sur la branche actuelle et ne crée rien — c'est le même sujet. Si c'est autre chose, il faut d'abord livrer l'existant : **une pull request est un sujet, pas un panier.** Mélanger deux sujets rend le diff illisible, et dans six mois « pourquoi ce changement ? » n'a plus de réponse.
 
@@ -35,9 +35,29 @@ Tâche : $ARGUMENTS
 
 Ne conclus pas par un commit : la suite est `/flow:verify`, puis `/flow:ship`.
 
+## Mode incident
+
+Quand ce que je décris est **un comportement qui existait et a cessé, ou un plantage** — « ça plante quand… », « ça a cassé chez… », un diagnostic ou des journaux de l'application collés —, tu passes en mode incident. C'est toi qui tranches après lecture, pas la forme de ma phrase : « ça plante quand je clique trop vite, je veux un bouton grisé » est une fonctionnalité. Les étapes 1 à 3 puis 8 s'appliquent ; ceci remplace les étapes 4 à 7.
+
+1. **Lis ce qui t'est donné** — le diagnostic, les journaux, la description — avant de toucher au code. La branche est `fix/<slug>`.
+2. **Écris la ligne d'incident tout de suite** dans `docs/journal.md`, par `cat >>` : `- <AAAA-MM-JJ> · incident · <quoi> · cause : ? · leçon : ?`. L'en-tête fait foi sur la forme : ni « · » ni retour à la ligne dans une case — un « ; » les remplace —, « ? » pour ce qu'on ne sait pas, jamais « aucun ». S'il manque, crée `docs/` et le fichier avec exactement cet en-tête, sans exemple de ligne :
+
+   ```
+   # Journal
+   
+   Une ligne par événement, ajoutée en fin de fichier par les commandes `/flow:*`, jamais réécrite. Forme : `- date · type · objet · étiquette : valeur · …` — quatre types, `porte`, `livraison`, `incident`, `version` ; jamais de « · » ni de retour à la ligne dans une case, un « ; » les remplace ; « ? » pour ce qu'on ne sait pas, à remplir plus tard. Lu par `/flow:audit`.
+   ```
+
+   Puis **enregistre et pousse cette ligne aussitôt** — un commit « journal : incident », seule exception à « ne conclus pas par un commit ». Une panne ne compte au bilan qu'une fois sa branche fusionnée : si tu dois t'arrêter sans correction, dis-le, et propose de livrer la branche telle quelle par `/flow:ship` — une panne connue et non réglée compte, c'est même celle qui compte le plus.
+3. **Reproduis d'abord par un test qui échoue**, sur le vrai chemin. Si tu n'y arrives pas avec ce que tu as, arrête-toi — raison 1 : il me faut le diagnostic, les journaux ou les gestes exacts — plutôt que de corriger au jugé. Sur un projet sans tests, pose l'infrastructure minimale toi-même, comme le fait `/flow:init-project` : la veille d'un spectacle, un détour ferait contourner le plugin.
+4. **Corrige, garde le test** — pour que la panne ne revienne pas sans être vue — et écris la ligne du changelog si le projet en a un.
+5. **Remplis les « ? »** de la ligne d'incident : la cause, et la leçon — la règle qui empêche que ça revienne sous une autre forme. Remplir une case vide n'est pas réécrire le journal.
+
+Puis la porte, comme pour toute tâche.
+
 ## Arrêts et suite
 
-- **Arrêts** : du travail en cours sur un autre sujet, ou tout fichier modifié que la chaîne n'a pas écrit — moi seul sais ce qu'il vaut → raison 1 · une découverte qui contredit le cadrage → raison 1, c'est le besoin · un sujet structurant sans cadrage → raison 1 : tu proposes `/flow:spec` et tu t'arrêtes. Aucun autre.
+- **Arrêts** : du travail en cours sur un autre sujet, ou tout fichier modifié que la chaîne n'a pas écrit — moi seul sais ce qu'il vaut → raison 1 · une découverte qui contredit le cadrage → raison 1, c'est le besoin · un sujet structurant sans cadrage → raison 1 : tu proposes `/flow:spec` et tu t'arrêtes · une panne que tu ne sais pas reproduire avec ce qu'on a → raison 1, il me faut le diagnostic. Aucun autre.
 - **En pas à pas** : « J'attends ta réponse » après le plan ; une fois validé, tu implémentes, et la suite, c'est moi qui la tape.
 - **Suite en enchaîné** : point de passage, puis `/flow:verify`.
 
