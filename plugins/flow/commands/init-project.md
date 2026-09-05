@@ -22,7 +22,7 @@ Vérifie aussi `git status` en début de commande : si des fichiers sont déjà 
 
 3. **`.gitignore`** adapté à la stack. Toujours : `.env`, `.env.*`, clés et certificats, caches, dossiers de build.
 
-4. **`CLAUDE.md`**, court (moins de 60 lignes), avec **ce bloc en premier** — c'est le contrat lu par `/flow:design`, `/flow:new-feature` et `/flow:verify` :
+4. **`CLAUDE.md`**, court (moins de 60 lignes), avec **ce bloc en premier** — c'est le contrat que lisent toutes les commandes `/flow:*` :
 
    ```markdown
    ## Profil projet
@@ -34,10 +34,13 @@ Vérifie aussi `git status` en début de commande : si des fichiers sont déjà 
    - test : <commande, ou "aucun">
    - build : <commande, ou "aucun">
    - run : <commande pour lancer le logiciel>
+   - rythme : enchaîné | pas à pas
    - critique : <modules dont une panne fait mal ; à couvrir en priorité par les tests>
    ```
 
    **`format` est la seule ligne où la forme compte** : écris la variante qui **contrôle** (`prettier --check`, `ruff format --check`), jamais celle qui écrit. `/flow:verify` la lance en tête de sa chaîne de checks, et il le fait avant d'avoir tranché la question de la branche — parce qu'un check ne modifie rien. Une commande qui écrirait déposerait des modifications sur la branche par défaut sans accord, et ne rendrait jamais rouge.
+
+   **`rythme` est le seul réglage du profil sans vérité extérieure**, et il le dit : rien ne le lance, il se lit. `enchaîné` — le défaut — fait se suivre les commandes du cycle sans attendre, sauf pour les quatre raisons du bloc « Arrêts et attentes » ; `pas à pas` les arrête après le cadrage, la conception et le plan. Écris `enchaîné`, sauf si je demande le pas à pas : un projet qu'on découvre peut le mériter, un projet qu'on connaît ne le mérite plus.
 
    **Chaque commande listée doit avoir été lancée par toi et fonctionner.** Une commande écrite au jugé rend le profil nuisible : `/flow:verify` déclarerait vert quelque chose qui n'a jamais tourné. Si un outil manque, écris « aucun » et propose-moi de l'installer.
 
@@ -64,9 +67,21 @@ Vérifie aussi `git status` en début de commande : si des fichiers sont déjà 
 
 9. **Résumé** : ce qui a été mis en place, ce qui a été détecté, et ce que tu n'as pas pu faire.
 
+## Arrêts et suite
+
+- **Arrêts** : compléter un fichier qui existe déjà → raison 3, on ne le reconstitue pas · des modifications en attente au départ → raison 1, moi seul sais ce qu'elles valent · créer le dépôt GitHub et pousser → raison 3, c'est public. Aucun autre.
+- **En pas à pas** : les mêmes.
+- **Suite** : aucune commande — le cycle commence quand je tape `/flow:spec`.
+
 ---
 
 ## Arrêts et attentes
+
+**Le rythme.** Lis la ligne `- rythme :` du bloc « Profil projet » du `CLAUDE.md` : `enchaîné` ou `pas à pas`. Ligne absente ou valeur inconnue : enchaîné, dit une fois par conversation. Un mot de ma part dans la discussion — « attends », « pas à pas », « enchaîne » — l'emporte sur le profil pour la tâche en cours. Ce réglage ne vaut que pour les commandes qui portent un paragraphe « Arrêts et suite » ; hors de ce cycle, les arrêts de la commande restent ce qu'ils sont.
+
+**Les quatre raisons de s'arrêter.** En enchaîné, tu ne t'arrêtes que pour l'une d'elles, et tu la nommes : **(1)** une réponse qui n'appartient qu'à moi — le besoin, la priorité, l'apparence, « est-ce fini ? » · **(2)** de l'argent ou un engagement · **(3)** un acte irréversible ou public · **(4)** une porte rouge que tu ne sais pas rendre verte sans changer le besoin.
+
+**Le point de passage, et lancer la suivante.** Avant l'étape suivante, trois lignes visibles : **Fait** : … · **Décidé ou constaté** : … · **Commence** : …. Lancer la suivante, c'est la charger toi-même, comme si je l'avais tapée, avec son argument — vers l'aval seulement : jamais celle qui t'a chargé, jamais une étape amont, que tu proposes sans la lancer (une seule remontée est admise, écrite dans `/flow:ship`). Si tu ne peux pas la charger, ou si la conversation a été résumée en route, dis-le et termine par « Ensuite » : `/flow:guide` retrouve l'état par git et les fichiers.
 
 **Chaque fois que tu t'arrêtes pour attendre ma réponse**, commence par « **J'attends ta réponse.** » Puis la question en clair, la conséquence de chaque réponse possible, et les options quand il y en a. N'enchaîne jamais sur la suite sans avoir la réponse. Et ne me dis pas que rien n'a été écrit si des fichiers l'ont déjà été — dis exactement où on en est.
 
@@ -74,7 +89,7 @@ Vérifie aussi `git status` en début de commande : si des fichiers sont déjà 
 
 ## Fin de réponse — obligatoire
 
-Termine toujours ta dernière réponse par ces trois lignes. Les titres ne changent jamais ; le contenu décrit ce qui s'est réellement passé. **Si tu t'es arrêté en route, dis-le ici** — n'annonce jamais un travail qui n'a pas eu lieu.
+Termine toujours ta dernière réponse par ces trois lignes — en chaîne, elles closent la chaîne, pas chaque étape. Les titres ne changent jamais ; le contenu décrit ce qui s'est réellement passé. **Si tu t'es arrêté en route, dis-le ici** — n'annonce jamais un travail qui n'a pas eu lieu.
 
 **Où on en est** — un fait constaté, puis sa conséquence. Deux lignes maximum.
 **Ensuite** — UNE seule chose : une commande à lancer, ou une phrase à me répondre. Jamais deux options que tu pourrais trancher toi-même en regardant le projet — tu l'as lu, moi non. En revanche, quand la réponse ne dépend que de moi (« est-ce que je considère ce travail comme fini ? », « laquelle de ces deux formes je préfère ? »), demande — mais constate d'abord, et présente ce que tu as vu en même temps que ta question.

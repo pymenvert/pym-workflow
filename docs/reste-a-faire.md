@@ -6,13 +6,48 @@ Ce fichier fait autorité sur ce qui est **ouvert**. Les décisions de structure
 vivent dans `docs/decisions/`, les cadrages dans `docs/specs/`. Ne rien
 dupliquer entre les trois.
 
-Dernière mise à jour : 4 septembre 2026, après la porte de la tâche
-« passe sur les quatre agents », puis le soir même lors du plan studio
-(`docs/plan-studio.md`), qui a retiré un défaut déjà réglé.
+Dernière mise à jour : 5 septembre 2026, après la porte du lot 1 (le rythme et
+la pédagogie, 0.15.0).
 
 ---
 
 ## Défauts constatés
+
+### Le bloc partagé a grossi de 83 % dans le lot qui devait le garder court
+
+Mesuré par la porte du 5 septembre : 1 887 → 3 451 octets (après une première
+coupe depuis 3 752), chargé jusqu'à cinq fois par chaîne. Le contrôle 1 garantit
+son identité, rien ne tient sa taille. Piste de l'architecte : ne garder que ce
+qui fait foi, vers 2 300 octets. Laissé ouvert pour mesurer d'abord une chaîne
+réelle plutôt que couper au jugé.
+
+### Les quatre raisons sont paraphrasées à six endroits que rien ne garde
+
+README, `guide.md` (deux fois), `init-project.md`, le plan, la décision `0004`.
+Le bloc partagé fait foi ; une paraphrase qui dérive ne rougit pas. À relire à
+chaque lot qui les touche — le lot 4 en premier, si une convocation de l'expert
+sécurité exige une décision.
+
+### « La tâche en cours » n'a pas de fin définie
+
+Un mot de l'auteur (« attends », « enchaîne ») l'emporte sur le profil « pour la
+tâche en cours », mais rien ne dit où finit une tâche dans une conversation, donc
+combien de temps dure ce frein. Constaté par l'architecte le 5 septembre ; à
+trancher après une tâche réelle, pas avant.
+
+### La forme du cycle est écrite à trois endroits
+
+Le tableau du README, la section « cycle » de `guide.md`, le `CLAUDE.md` de ce
+dépôt. Le mode incident (lot 2) et `/flow:studio`, s'il vient, les changeront
+tous à la main.
+
+### Ce que le lot 4 devra savoir sur `guide.md`
+
+Son glossaire dit « un jeton d'accès est un secret » et nomme test-engineer sans
+accents graves — exprès, pour que le guide ne devienne pas une commande arbitre
+du contrôle 11. Le jour où « secret » entre dans la table du contrôle et où
+`guide.md` cite un agent entre accents graves, ces deux lignes rougissent.
+Mesuré par l'architecte le 5 septembre.
 
 ### Trois écritures contournent encore la garde des préoccupations
 
@@ -78,6 +113,19 @@ Aucun.
 
 ## Angles morts
 
+### L'enchaînement des commandes n'a jamais été constaté
+
+Le lot 1 (0.15.0) fait se suivre les commandes du cycle sans attendre : chacune
+charge la suivante par l'outil qui invoque une compétence. Mesuré le 5 septembre,
+avec les commandes de la 0.14.1 encore installées : cet outil est disponible à
+l'assistant en cours de conversation, et une commande en a chargé une autre depuis
+l'intérieur de la chaîne — l'implémentation a lancé la porte, qui a lancé la
+livraison. **Pas** mesuré : la même chaîne avec les commandes de la 0.15.0, ce que
+devient une chaîne après résumé de la conversation, et son coût en jetons contre
+une tâche pas à pas. Les trois se constatent à la première tâche réelle en rythme
+enchaîné, dans une conversation neuve avec le plugin mis à jour ; d'ici là, le
+lot 1 est « à constater », pas « constaté ».
+
 ### La bascule de visibilité n'a jamais été constatée de bout en bout
 
 Seul point où la 0.12.0 repose sur une mesure partielle. Détaillé dans
@@ -129,6 +177,50 @@ emploiera une capacité récente fera renaître le besoin intact.
 ---
 
 ## Relevés datés
+
+### 5 septembre 2026 — le rythme et la pédagogie (0.15.0)
+
+Lot 1 du plan studio, cadré, conçu, implémenté et livré en une seule conversation,
+en autonomie, à la demande de l'auteur. Le bloc partagé des dix commandes définit
+le rythme, les quatre raisons de s'arrêter et le point de passage ; les six
+commandes du cycle portent un paragraphe « Arrêts et suite » ; `/flow:design`
+pose ses choix dans la forme « Décision » ; les quatre agents ouvrent par
+« Pour toi » ; `/flow:new-feature`, `/flow:verify` et `/flow:ship` finissent par
+un « Compte-rendu » d'une seule forme ; `/flow:guide <mot>` explique dix-sept
+mots. Décision `0004`. Aucun contrôle ni cas de banc ajouté : le vérificateur est
+gelé par le plan.
+
+**Ce que la conception a perdu à l'attaque.** L'architecte a fait tomber deux
+pans : la règle « charge la suivante » dans le bloc partagé (dans `visibilite.md`,
+son seul candidat plausible aurait été `/flow:release`, la commande irréversible)
+et l'affirmation du plan que le lot « fait économiser des jetons » — une chaîne
+fait relire la conversation à chaque appel ; il économise des relances.
+
+**Ce que la porte a trouvé.** Deux relecteurs, `code-reviewer` et `architect` en
+mode dérive ; sept bloquants, tous corrigés avant la livraison : la conception
+disait qu'un acte irréversible me revient mais son paragraphe d'arrêts ne le
+listait pas · la livraison lançait la porte, ce que le bloc interdisait (« jamais
+vers l'amont ») — c'est désormais la seule remontée admise, écrite dans
+`/flow:ship` · l'implémentation ordonnait de ne rien demander sur les fichiers
+modifiés, ce qui aurait fait suivre un fichier étranger dans la branche · le
+compte-rendu de la porte n'avait pas la forme des deux autres · « des trois »
+resté dans le README, « refactoring » non traduit dans la décision · et le bloc
+partagé avait doublé (1 887 → 3 752 octets) dans le lot qui exigeait qu'il reste
+court — coupé à 3 451, le reste est dans les défauts constatés. Les six
+paragraphes « Arrêts et suite » avaient quatre formes ; ils en ont une.
+
+**Le mécanisme d'enchaînement a tourné une fois**, avec les commandes de la
+0.14.1 : l'implémentation a chargé la porte, la porte a chargé la livraison. Ce
+n'est pas le constat du plan — il faut la 0.15.0 installée et une conversation
+neuve —, mais c'est la première preuve que l'outil le permet.
+
+**Coût, chiffré.** Trois convocations d'agents : l'architecte à la conception
+(143 000 jetons), le relecteur de code (175 000) et l'architecte en dérive
+(139 000), soit environ 457 000 jetons d'agents pour un lot de markdown. Le
+budget de la conversation entière n'a pas été relevé.
+
+**Non vérifié.** La chaîne avec les commandes de la 0.15.0 ; rien sous Windows ;
+`/flow:guide <mot>` jamais lancé.
 
 ### 4 septembre 2026 — le plan studio (0.14.1)
 

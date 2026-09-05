@@ -30,13 +30,39 @@ Cette étape existe parce qu'une erreur de structure corrigée maintenant coûte
 
    Ce fichier est ce qui te permettra, dans six mois, de comprendre pourquoi le code est comme il est — et de savoir si la raison tient toujours.
 
-7. **Montre-moi la conception finale et attends ma validation** avant toute implémentation.
+7. **Tranche, ou fais-moi trancher.** Un choix me revient s'il touche ce que je verrai ou ressentirai à l'usage, de l'argent, un engagement, ou un acte irréversible. Tout le reste — structure, outils, bibliothèques, forme des tests — est au studio : tu tranches, tu traces, tu m'annonces. Jamais une question dont la réponse est dans le code, jamais une question de culture technique : « base de données relationnelle ou document ? » n'est pas ma question ; « les données doivent-elles survivre à une coupure de courant en plein spectacle ? » l'est. Un choix qui me revient prend toujours cette forme, dans cet ordre :
 
-Si la tâche ne touche à aucune structure — corriger une condition, ajuster un libellé —, dis-le et passe directement à `/flow:new-feature`. Cette commande sert aux décisions qu'on regrette, pas aux modifications qu'on oublie.
+   ```
+   **Décision : <cinq mots>**
+   De quoi il s'agit, et pourquoi ça se décide maintenant : une phrase.
+   Ce que ça change pour toi : en temps, en argent, en risque, en ce qu'on pourra ou ne pourra plus faire ensuite.
+   Option A, recommandée : ce qu'elle apporte · ce qu'elle coûte · quand on la regretterait.
+   Option B : idem. Trois options au plus.
+   Si on se trompe : ce que coûte de changer d'avis plus tard.
+   Ce que je te demande : une réponse en un mot.
+   ```
+
+   La recommandation d'abord, avec sa raison. Les conséquences en termes vécus — des minutes de démarrage, des euros par mois, des jours de travail, ce qui devient impossible —, jamais des noms de composants. Une image quand elle vaut trois paragraphes. Un choix du studio s'**annonce** dans la même forme, sans la dernière ligne : je le lis, je n'ai rien à répondre.
+
+8. **Montre-moi la conception finale.** Puis, selon le rythme, arrête-toi ou enchaîne — voir « Arrêts et suite ».
+
+Si la tâche ne touche à aucune structure — corriger une condition, ajuster un libellé —, dis-le et va directement à `/flow:new-feature` — lancé en enchaîné, proposé en pas à pas. Cette commande sert aux décisions qu'on regrette, pas aux modifications qu'on oublie.
+
+## Arrêts et suite
+
+- **Arrêts** : une Décision qui me revient — ce que je verrai ou ressentirai → raison 1 · de l'argent ou un engagement → raison 2 · un acte irréversible → raison 3. Un sujet non trivial sans cadrage → raison 1 : tu proposes `/flow:spec` et tu t'arrêtes. Aucun autre : un choix du studio s'annonce, il n'attend pas.
+- **En pas à pas** : « J'attends ta réponse » après la conception, et la suite, c'est moi qui la tape.
+- **Suite en enchaîné**, si aucune Décision n'attend ma réponse : point de passage, puis `/flow:new-feature <nom du cadrage>` — directement, si la tâche ne touche aucune structure.
 
 ---
 
 ## Arrêts et attentes
+
+**Le rythme.** Lis la ligne `- rythme :` du bloc « Profil projet » du `CLAUDE.md` : `enchaîné` ou `pas à pas`. Ligne absente ou valeur inconnue : enchaîné, dit une fois par conversation. Un mot de ma part dans la discussion — « attends », « pas à pas », « enchaîne » — l'emporte sur le profil pour la tâche en cours. Ce réglage ne vaut que pour les commandes qui portent un paragraphe « Arrêts et suite » ; hors de ce cycle, les arrêts de la commande restent ce qu'ils sont.
+
+**Les quatre raisons de s'arrêter.** En enchaîné, tu ne t'arrêtes que pour l'une d'elles, et tu la nommes : **(1)** une réponse qui n'appartient qu'à moi — le besoin, la priorité, l'apparence, « est-ce fini ? » · **(2)** de l'argent ou un engagement · **(3)** un acte irréversible ou public · **(4)** une porte rouge que tu ne sais pas rendre verte sans changer le besoin.
+
+**Le point de passage, et lancer la suivante.** Avant l'étape suivante, trois lignes visibles : **Fait** : … · **Décidé ou constaté** : … · **Commence** : …. Lancer la suivante, c'est la charger toi-même, comme si je l'avais tapée, avec son argument — vers l'aval seulement : jamais celle qui t'a chargé, jamais une étape amont, que tu proposes sans la lancer (une seule remontée est admise, écrite dans `/flow:ship`). Si tu ne peux pas la charger, ou si la conversation a été résumée en route, dis-le et termine par « Ensuite » : `/flow:guide` retrouve l'état par git et les fichiers.
 
 **Chaque fois que tu t'arrêtes pour attendre ma réponse**, commence par « **J'attends ta réponse.** » Puis la question en clair, la conséquence de chaque réponse possible, et les options quand il y en a. N'enchaîne jamais sur la suite sans avoir la réponse. Et ne me dis pas que rien n'a été écrit si des fichiers l'ont déjà été — dis exactement où on en est.
 
@@ -44,7 +70,7 @@ Si la tâche ne touche à aucune structure — corriger une condition, ajuster u
 
 ## Fin de réponse — obligatoire
 
-Termine toujours ta dernière réponse par ces trois lignes. Les titres ne changent jamais ; le contenu décrit ce qui s'est réellement passé. **Si tu t'es arrêté en route, dis-le ici** — n'annonce jamais un travail qui n'a pas eu lieu.
+Termine toujours ta dernière réponse par ces trois lignes — en chaîne, elles closent la chaîne, pas chaque étape. Les titres ne changent jamais ; le contenu décrit ce qui s'est réellement passé. **Si tu t'es arrêté en route, dis-le ici** — n'annonce jamais un travail qui n'a pas eu lieu.
 
 **Où on en est** — un fait constaté, puis sa conséquence. Deux lignes maximum.
 **Ensuite** — UNE seule chose : une commande à lancer, ou une phrase à me répondre. Jamais deux options que tu pourrais trancher toi-même en regardant le projet — tu l'as lu, moi non. En revanche, quand la réponse ne dépend que de moi (« est-ce que je considère ce travail comme fini ? », « laquelle de ces deux formes je préfère ? »), demande — mais constate d'abord, et présente ce que tu as vu en même temps que ta question.

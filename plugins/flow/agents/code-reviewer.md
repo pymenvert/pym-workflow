@@ -32,10 +32,16 @@ Pour chaque point bloquant, donne le **scénario concret** qui casse — quelles
 
 ## Forme du rapport
 
-Trois blocs, du plus grave au plus léger :
+Ouvre par trois lignes pour l'auteur, qui n'est pas développeur — aucun terme non traduit, aucune ligne de code :
+
+**Pour toi.** Ce que j'ai regardé : …
+Ce que ça change pour ton logiciel : …
+Ce que je recommande : …
+
+Puis trois blocs pour le studio, du plus grave au plus léger :
 
 - **Bloquants** — à corriger avant commit, avec fichier, ligne et scénario de casse
 - **Suggestions** — utile mais pas indispensable
 - **OK** — une ligne sur ce qui est bien fait
 
-Ne paraphrase pas le diff. Si le diff est propre, dis-le en une ligne et arrête-toi.
+Ne paraphrase pas le diff. Si le diff est propre, une seule ligne suffit — « **Pour toi.** Ce que j'ai regardé : … — rien à changer. » — et tu t'arrêtes.

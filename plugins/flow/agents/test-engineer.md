@@ -41,8 +41,16 @@ Beaucoup de projets ne vivent pas dans un test : ils pilotent du matériel, parl
 
 ## Forme du rapport
 
+Ouvre par trois lignes pour l'auteur, qui n'est pas développeur — aucun terme non traduit, aucune ligne de code :
+
+**Pour toi.** Ce que j'ai regardé : …
+Ce que ça change pour ton logiciel : …
+Ce que je recommande : …
+
+Puis, pour le studio :
+
 - **Trous critiques** — chemins non couverts dont la casse serait grave. Pour chacun : le cas précis, la conséquence si ça casse, et le test à écrire (donne le code, pas une description).
 - **Trous mineurs** — à couvrir quand l'occasion se présente.
 - **Tests fragiles** — ceux qui passeront à tort ou casseront sans raison.
 
-Hiérarchise par gravité, pas par ordre de lecture des fichiers. Trois trous critiques bien choisis valent mieux que trente remarques. Si la couverture est correcte sur les chemins critiques, dis-le en une ligne.
+Hiérarchise par gravité, pas par ordre de lecture des fichiers. Trois trous critiques bien choisis valent mieux que trente remarques. Si la couverture est correcte sur les chemins critiques, une seule ligne suffit : « **Pour toi.** Ce que j'ai regardé : … — rien à ajouter. »

@@ -13,7 +13,7 @@
 | Lot | Objet | État |
 |---|---|---|
 | 0 | Ce plan, le cap dans la Boussole, le registre corrigé | livré avec la 0.14.1, le 4 septembre 2026 |
-| 1 | Le rythme enchaîné, la décision expliquée, les rapports « pour toi » ; `/flow:studio` seulement si le manque se constate | à faire |
+| 1 | Le rythme enchaîné, la décision expliquée, les rapports « pour toi » ; `/flow:studio` seulement si le manque se constate | livré dans la 0.15.0 le 5 septembre 2026 (décision `0004`), à constater sur une app |
 | 2 | Le journal, le mode incident, l'audit redéfini en bilan de santé à la version | à faire |
 | 3 | Le profil étendu, la fiche produit, la liste à faire | à faire |
 | 4 | L'expert sécurité `securite` et ses automates | à faire |
@@ -477,7 +477,7 @@ Le tableau d'avancement en tête est ma recommandation. Tu le confirmes ou tu le
 
 Chaque lot suit le cycle complet sur ce dépôt : cadrage, conception, implémentation, porte, livraison. Chaque lot se termine par une tâche réelle sur une app qui le constate.
 
-**Lot 1 : le rythme et la pédagogie.** Le réglage `rythme` et les quatre raisons dans les six commandes du cycle · la décision expliquée et l'annonce dans `/flow:design` · « pour toi » dans les quatre agents · les points de passage · le compte-rendu de lot, le bilan de porte et le compte-rendu de livraison · `/flow:guide <mot>` · la décision `0004` qui fixe le rythme et les quatre raisons. Constaté quand une tâche réelle traverse la chaîne sans arrêt inutile, et que chaque arrêt restant est l'une des quatre raisons. `/flow:studio` n'entre qu'après ce constat, si l'entrée unique manque encore ; le modèle par agent attend dix portes journalisées. Premier parce que c'est l'expérience même de « passer la porte », et parce qu'il fait économiser des jetons au lieu d'en coûter.
+**Lot 1 : le rythme et la pédagogie.** Le réglage `rythme` et les quatre raisons dans les six commandes du cycle · la décision expliquée et l'annonce dans `/flow:design` · « pour toi » dans les quatre agents · les points de passage · le compte-rendu de lot, le bilan de porte et le compte-rendu de livraison · `/flow:guide <mot>` · la décision `0004` qui fixe le rythme et les quatre raisons. Constaté quand une tâche réelle traverse la chaîne sans arrêt inutile, et que chaque arrêt restant est l'une des quatre raisons. `/flow:studio` n'entre qu'après ce constat, si l'entrée unique manque encore ; le modèle par agent attend dix portes journalisées. Premier parce que c'est l'expérience même de « passer la porte ». (Corrigé le 5 septembre 2026 par la décision `0004` : il économise des relances, pas des jetons — une chaîne fait relire la conversation à chaque appel ; le constat mesurera.)
 
 **Lot 2 : le journal et l'audit redéfini.** Le journal écrit par verify, ship et new-feature · le mode incident · l'audit en bilan de santé, à la version. Constaté par un audit lancé sur une vraie app, avec ses indicateurs.
 
@@ -512,7 +512,7 @@ Chaque lot suit le cycle complet sur ce dépôt : cadrage, conception, implémen
 
 ## Glossaire
 
-Les mots qu'on rencontrera, en une ligne chacun.
+Les mots qu'on rencontrera, en une ligne chacun. Depuis la 0.15.0, c'est la liste courte de `plugins/flow/commands/guide.md` qui fait foi pour `/flow:guide <mot>` ; celle-ci reste la liste longue.
 
 - **Branche** : une copie de travail du projet, à côté de la version de référence ; on y construit, puis on fusionne.
 - **Commit** : un enregistrement daté et décrit d'un ensemble de modifications.
