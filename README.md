@@ -180,6 +180,10 @@ C'est `/flow:mutation` appliqué d'avance, et il a déjà servi deux fois. Écri
 Les deux scripts forment ensemble la commande `test` du Profil projet — donc ce que lance `/flow:verify` — **et** exactement ce que rejoue `.github/workflows/ci.yml` à chaque poussée. Deux définitions du mot « vert » finissent toujours par diverger.
 
 
+## Le cap
+
+Le plugin a un cap écrit : `docs/plan-studio.md`. Son tableau d'avancement, en tête, dit quel lot vient ensuite ; sa section 13 liste les choix qui reviennent à l'auteur. La règle qui va avec : aucun lot sur ce dépôt sans un item de ce plan ou une app réelle qui le justifie.
+
 ## Mettre à jour le workflow
 
 Quatre étapes, dans cet ordre. Les deux premières sont contre-intuitives et sautent silencieusement si on les oublie.

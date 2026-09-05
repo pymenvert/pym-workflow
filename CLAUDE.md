@@ -20,7 +20,11 @@ Quand je demande « et maintenant ? », « je fais quoi ? », « par quoi je com
 ou « c'est fini ? » : réponds comme la commande `/flow:guide` — le constat, ce qu'il
 reste à faire, et une seule action à lancer. Sans lancer de test, d'agent, de lint
 ni de build. Si `docs/reste-a-faire.md` existe, lis-le avant d'affirmer que rien
-n'attend.
+n'attend. Si `docs/plan-studio.md` existe, lis seulement les lignes de son
+tableau « Avancement », par leur forme et non par un numéro de ligne :
+`grep '^| [0-9]' docs/plan-studio.md`, ajouté à l'appel groupé du guide, jamais un
+appel de plus. Au repos, le premier lot « à faire » est la seule action à proposer,
+à la place de « `/flow:spec` ton idée ».
 
 ## Architecture
 

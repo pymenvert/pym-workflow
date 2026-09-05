@@ -1,5 +1,9 @@
 # `/flow:audit` et `architect` mesurent deux fois la même chose
 
+**Réalisé** le 4 septembre 2026 par la décision `0003`, qui a absorbé ce cadrage
+et en porte le détail. Conservé pour l'historique ; ne pas relancer `/flow:design`
+dessus.
+
 Cadré le 4 septembre 2026, après deux reports assumés : ce défaut demande une décision, pas une retouche.
 
 ## Problème
