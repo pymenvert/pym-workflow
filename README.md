@@ -63,7 +63,7 @@ En **pas à pas** (ligne `rythme` du profil projet), les trois arrêts d'avant s
 
 ### Ce qui coûte cher, ce qui ne coûte rien
 
-`/flow:verify` est **la seule commande chère** : elle lance toute la suite de tests et jusqu'à quatre relecteurs automatiques. Plusieurs minutes. En rythme enchaîné, elle tourne sans te demander : c'est le prix de ne pas attendre, et « attends » la retient.
+`/flow:verify` est **la seule commande chère du cycle** : elle lance toute la suite de tests et jusqu'à quatre relecteurs automatiques. Plusieurs minutes. En rythme enchaîné, elle tourne sans te demander : c'est le prix de ne pas attendre, et « attends » la retient. À la version, `/flow:release` lance le bilan de santé avec ses relecteurs : la version est chère, et c'est voulu.
 
 Tout le reste répond en quelques secondes. `/flow:guide` est gratuit — il ne lance ni test ni agent — et c'est le bon réflexe quand on ne sait pas où on en est.
 
@@ -74,6 +74,7 @@ Le cycle complet sert aux tâches qui comptent. Pour le reste :
 - **Une faute de frappe, un libellé** → directement `/flow:new-feature`. `/flow:spec` y va lui-même plutôt que de produire de la paperasse.
 - **Un défaut dont la définition de « terminé » est évidente** → `/flow:new-feature` suffit. Une spec ne sert qu'à écrire ce qu'on ne sait pas encore.
 - **Rien ne touche à la structure** → saute `/flow:design`. Il sert aux décisions qu'on regrette, pas aux modifications qu'on oublie.
+- **« Ça plante quand… », un comportement qui a cessé** → `/flow:new-feature` en **mode incident** : il écrit la panne au journal, reproduit d'abord par un test qui échoue, corrige, garde le test, puis note la cause et la leçon.
 
 En revanche, `/flow:verify` et `/flow:ship` ne se sautent jamais : ce sont eux qui empêchent de livrer du cassé.
 
@@ -87,9 +88,9 @@ Quatre commandes ne servent pas à une tâche mais à une version, ou à la mach
 
 | Commande | Rôle | Quand |
 |---|---|---|
-| `/flow:audit` | Audit de fond de **tout** le programme : dérive lente, angles morts, ce que l'app dit d'elle-même qui est devenu faux | Entre deux versions |
+| `/flow:audit` | Le bilan de santé de **tout** le programme : ce qui se répète au journal, la dérive lente, les dépendances en retard, ce que l'app dit d'elle-même qui est devenu faux | À chaque version, lancé par `/flow:release` |
 | `/flow:mutation` | Casse le code exprès et exige que la suite tombe. La seule commande qui met en doute **les tests** plutôt que le code | Après une grosse vague de tests |
-| `/flow:release` | Cohérence de tous les numéros de version, CI verte exigée, puis le tag qui publie | Au moment de livrer une version |
+| `/flow:release` | CI verte exigée, bilan de santé, numéro annoncé, ligne au journal, numéros cohérents, puis le tag qui publie — son seul arrêt | Au moment de livrer une version |
 | `/flow:visibilite` | Ouvre un dépôt privé le temps d'une campagne de CI coûteuse, puis le referme **et le vérifie** | Rare — et jamais sans lire ce qu'elle expose |
 
 `/flow:visibilite` mérite un avertissement : rendre un dépôt public expose **tout son historique**, pas seulement son état actuel, et repasser en privé n'annule ni un clone, ni un fork, ni une mise en cache. La commande fouille l'historique à la recherche de secrets avant d'ouvrir, et refuse de considérer le travail fini tant qu'elle n'a pas vérifié la fermeture.
@@ -106,11 +107,15 @@ Le cycle ne sert à rien si on ne sait pas où on en est. Quatre mécanismes s'e
 
 **`/flow:guide`** fait le point quand on est perdu ou qu'on reprend un projet trois semaines plus tard. Il lit l'état du dépôt en un seul appel groupé et nomme la seule commande à lancer. Il lui est interdit de lancer un test, un agent, un lint ou un build — c'est la commande gratuite du lot. Là où git ne permet pas de trancher, il pose une question au lieu de deviner : deviner enverrait relancer la porte, qui est la commande chère.
 
-**`/flow:guide <mot>`** explique un mot en trois lignes et un exemple tiré de ton projet — « ça veut dire quoi ? », le même recours que « je fais quoi ? ». Dix-sept mots y ont le sens précis que `flow` leur donne ; les autres s'expliquent en termes généraux.
+**`/flow:guide <mot>`** explique un mot en trois lignes et un exemple tiré de ton projet — « ça veut dire quoi ? », le même recours que « je fais quoi ? ». Dix-neuf mots y ont le sens précis que `flow` leur donne ; les autres s'expliquent en termes généraux.
 
 **Le bloc « Boussole »**, écrit par `/flow:init-project` dans le `CLAUDE.md` du projet, capte les questions posées en français — « et maintenant ? », « je fais quoi ? », « c'est fini ? » — et y répond comme `/flow:guide`. C'est le mécanisme le plus utile des quatre, parce que c'est ainsi qu'on demande son chemin en vrai : pas en tapant le nom d'une septième commande.
 
 Deux règles complètent l'ensemble : chaque arrêt commence par « **J'attends ta réponse** », et tout passage long et muet — agents, tests, surveillance de la CI — est annoncé avec sa durée. Un silence long ressemble à un plantage, et le réflexe est alors de taper une autre commande.
+
+## Le journal — ce qui s'est passé, compté
+
+`docs/journal.md`, dans chaque projet : une ligne par événement, ajoutée par les commandes, jamais réécrite. Quatre types — `porte` (checks, bloquants réels par relecteur, non vérifié, durée, jetons), `livraison` (branche, ce que ça change), `incident` (quoi, cause, leçon), `version` (numéro, bilan). Tu n'as rien à taper : `/flow:verify`, `/flow:ship`, `/flow:new-feature` et `/flow:release` l'écrivent. `/flow:audit` le lit et en tire deux chiffres, par une seule commande : le rendement de chaque relecteur, et les incidents par version — le seul chiffre qui dit si la porte protège. Un relecteur à zéro sur dix portes devient rare ; on ne le supprime pas. Ces chiffres sont déclarés par la porte elle-même : ils mesurent son accord avec ses relecteurs, pas la vérité (`docs/decisions/0005-le-journal-et-le-bilan-de-sante.md`). Le registre `docs/reste-a-faire.md` ne garde plus que ce qui est ouvert.
 
 ## Le profil projet — comment flow s'adapte
 
@@ -195,7 +200,7 @@ Les deux scripts forment ensemble la commande `test` du Profil projet — donc c
 
 ## Le cap
 
-Le plugin a un cap écrit : `docs/plan-studio.md`. Son tableau d'avancement, en tête, dit quel lot vient ensuite ; sa section 13 liste les choix qui reviennent à l'auteur. La règle qui va avec : aucun lot sur ce dépôt sans un item de ce plan ou une app réelle qui le justifie. Le lot 1 — le rythme enchaîné et la pédagogie — est écrit dans la 0.15.0 ; il ne sera « livré » qu'une fois constaté sur une tâche réelle traversant la chaîne.
+Le plugin a un cap écrit : `docs/plan-studio.md`. Son tableau d'avancement, en tête, dit quel lot vient ensuite ; sa section 13 liste les choix qui reviennent à l'auteur. La règle qui va avec : aucun lot sur ce dépôt sans un item de ce plan ou une app réelle qui le justifie. Le lot 1 — le rythme enchaîné et la pédagogie — est dans la 0.15.0, le lot 2 — le journal, le mode incident, le bilan de santé — dans la 0.16.0 ; aucun des deux n'est « constaté » tant qu'une tâche réelle n'a pas traversé la chaîne.
 
 ## Mettre à jour le workflow
 

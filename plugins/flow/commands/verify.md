@@ -8,7 +8,7 @@ Deux règles absolues : **tu ne déclares jamais vert quelque chose que tu n'as 
 
 ## 0. Deux contrôles à deux secondes, avant tout
 
-**Y a-t-il quelque chose à vérifier ?** Lance `git status --short`, puis `git rev-list --count HEAD --not main`. Si les deux sont vides, **arrête-toi immédiatement — sans lancer un seul check ni un seul agent.** Dis exactement ceci :
+**Y a-t-il quelque chose à vérifier ?** Lance `git status --short`, puis `git rev-list --count HEAD --not main`, et note l'heure (`date +%H:%M`) : la durée de la porte ira au journal. Si les deux premiers sont vides, **arrête-toi immédiatement — sans lancer un seul check ni un seul agent.** Dis exactement ceci :
 
 > Rien à vérifier : aucun fichier modifié, aucun commit sur cette branche. Je n'ai lancé ni test ni agent, donc ça n'a rien coûté. Si je me suis arrêté sur une question, ou sur un plan qui attend ton feu vert, réponds-y ici, dans la discussion — c'est ça qui me fait écrire le code.
 
@@ -28,7 +28,7 @@ Si `format` est rouge, la correction est de lancer la variante qui écrit (`pret
 
 Présente le résultat sous forme de tableau, une ligne par check, avec la commande réellement exécutée et son état. Une commande absente du projet se note « non configuré » — jamais « OK ».
 
-**Si un check échoue après tes corrections : verdict BLOQUÉ, tu t'arrêtes là.** Inutile de lancer les agents sur du code qui ne compile pas.
+**Si un check échoue après tes corrections : verdict BLOQUÉ, tu t'arrêtes là** — après la ligne de journal de la section 3, avec ses rouges. Inutile de lancer les agents sur du code qui ne compile pas.
 
 ## 2. Revue par les agents
 
@@ -56,6 +56,22 @@ Si le diff a ajouté beaucoup de tests — plus d'une dizaine —, signale-le en
 Termine par une seule ligne : **PASSE** ou **BLOQUÉ**, suivie du nombre de bloquants restants.
 
 Puis le **Compte-rendu**, pour moi, sans terme non traduit, toujours dans cet ordre : ce que le logiciel fait maintenant qu'il ne faisait pas · ce qui a été vérifié, ou n'a pas pu l'être — bloquants trouvés et corrigés compris · ce qui reste, c'est-à-dire la liste « À traiter plus tard ». Ajoute ensuite les lignes « Pour toi » de chaque relecteur convoqué.
+
+**Ligne de journal.** Ajoute à `docs/journal.md` une ligne `porte`, par `cat >>` — jamais en réécrivant le fichier. S'il manque, crée `docs/` et le fichier avec exactement cet en-tête, sans exemple de ligne (l'audit compterait l'exemple) :
+
+```
+# Journal
+
+Une ligne par événement, ajoutée en fin de fichier par les commandes `/flow:*`, jamais réécrite. Forme : `- date · type · objet · étiquette : valeur · …` — quatre types, `porte`, `livraison`, `incident`, `version` ; jamais de « · » ni de retour à la ligne dans une case, un « ; » les remplace ; « ? » pour ce qu'on ne sait pas, à remplir plus tard. Lu par `/flow:audit`.
+```
+
+Puis la ligne :
+
+```
+- <AAAA-MM-JJ> · porte · <tâche> · checks : N verts, M rouges · bloquants : code-reviewer N, architect N · non vérifié : … · durée : N min · jetons : code-reviewer 175k, architect ?
+```
+
+Les bloquants réels sont ceux que tu as retenus — corrigés, ou restés bloquants —, pas les suggestions. Un relecteur convoqué qui n'a rien trouvé vaut `0` ; un relecteur qui n'a pas pu regarder vaut `?` — jamais l'un pour l'autre ; un relecteur non convoqué n'est pas dans la case, et la case ne dit jamais « aucun ». Les rouges sont ceux du premier passage des checks. Les jetons sont ceux que l'outil des relecteurs rapporte, sinon `?` ; la durée, l'heure de fin moins celle du départ. L'en-tête fait foi sur la forme : ni « · » ni retour à la ligne dans une case — un « ; » les remplace —, « ? » pour ce qu'on ne sait pas, jamais « aucun ». Sur la branche par défaut, cette ligne s'écrit après le changement de branche, ou pas du tout.
 
 ## Arrêts et suite
 

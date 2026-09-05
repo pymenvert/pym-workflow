@@ -16,3 +16,8 @@
 *.md   text eol=lf
 *.json text eol=lf
 *.yml  text eol=lf
+
+# Le journal ne reçoit que des lignes ajoutées en queue : deux branches qui en
+# ajoutent chacune ne sont pas en conflit, git doit garder les deux (décision
+# 0005). Ne vaut qu'en local (git pull) ; l'interface web de GitHub l'ignore.
+docs/journal.md merge=union
