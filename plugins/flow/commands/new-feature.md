@@ -40,18 +40,18 @@ Ne conclus pas par un commit : la suite est `/flow:verify`, puis `/flow:ship`.
 Quand ce que je décris est **un comportement qui existait et a cessé, ou un plantage** — « ça plante quand… », « ça a cassé chez… », un diagnostic ou des journaux de l'application collés —, tu passes en mode incident. C'est toi qui tranches après lecture, pas la forme de ma phrase : « ça plante quand je clique trop vite, je veux un bouton grisé » est une fonctionnalité. Les étapes 1 à 3 puis 8 s'appliquent ; ceci remplace les étapes 4 à 7.
 
 1. **Lis ce qui t'est donné** — le diagnostic, les journaux, la description — avant de toucher au code. La branche est `fix/<slug>`.
-2. **Écris la ligne d'incident tout de suite** dans `docs/journal.md`, par `cat >>` : `- <AAAA-MM-JJ> · incident · <quoi> · cause : ? · leçon : ?`. L'en-tête fait foi sur la forme : ni « · » ni retour à la ligne dans une case — un « ; » les remplace —, « ? » pour ce qu'on ne sait pas, jamais « aucun ». S'il manque, crée `docs/` et le fichier avec exactement cet en-tête, sans exemple de ligne :
+2. **Écris la ligne d'incident tout de suite** dans `docs/journal.md`, par `cat >>` : `- <AAAA-MM-JJ> · incident · <quoi> · cause : ? · leçon : ?`. L'en-tête fait foi sur la forme : ni « · » ni retour à la ligne dans une case — un « ; » les remplace —, « ? » pour ce qu'on ne sait pas, jamais « aucun » ; une ligne ne se réécrit jamais, on en ajoute une pour le même objet. S'il manque, crée `docs/` et le fichier avec exactement cet en-tête, sans exemple de ligne :
 
    ```
    # Journal
    
-   Une ligne par événement, ajoutée en fin de fichier par les commandes `/flow:*`, jamais réécrite. Forme : `- date · type · objet · étiquette : valeur · …` — quatre types, `porte`, `livraison`, `incident`, `version` ; jamais de « · » ni de retour à la ligne dans une case, un « ; » les remplace ; « ? » pour ce qu'on ne sait pas, à remplir plus tard. Lu par `/flow:audit`.
+   Une ligne par événement, ajoutée en fin de fichier par les commandes `/flow:*`, jamais réécrite. Forme : `- date · type · objet · étiquette : valeur · …` — quatre types, `porte`, `livraison`, `incident`, `version` ; jamais de « · » ni de retour à la ligne dans une case, un « ; » les remplace ; « ? » pour ce qu'on ne sait pas — on ne le remplit jamais : pour une panne, on ajoute plus tard une ligne pour le même objet, et la dernière fait foi. Lu par `/flow:audit`.
    ```
 
    Puis **enregistre et pousse cette ligne aussitôt** — un commit « journal : incident », seule exception à « ne conclus pas par un commit ». Une panne ne compte au bilan qu'une fois sa branche fusionnée : si tu dois t'arrêter sans correction, dis-le, et propose de livrer la branche telle quelle par `/flow:ship` — une panne connue et non réglée compte, c'est même celle qui compte le plus.
 3. **Reproduis d'abord par un test qui échoue**, sur le vrai chemin. Si tu n'y arrives pas avec ce que tu as, arrête-toi — raison 1 : il me faut le diagnostic, les journaux ou les gestes exacts — plutôt que de corriger au jugé. Sur un projet sans tests, pose l'infrastructure minimale toi-même, comme le fait `/flow:init-project` : la veille d'un spectacle, un détour ferait contourner le plugin.
 4. **Corrige, garde le test** — pour que la panne ne revienne pas sans être vue — et écris la ligne du changelog si le projet en a un.
-5. **Remplis les « ? »** de la ligne d'incident : la cause, et la leçon — la règle qui empêche que ça revienne sous une autre forme. Remplir une case vide n'est pas réécrire le journal.
+5. **Ajoute une seconde ligne d'incident pour le même objet**, mot pour mot le même `<quoi>`, avec la cause et la leçon — la règle qui empêche que ça revienne sous une autre forme. Jamais en modifiant la première : à la fusion, une ligne modifiée devient un doublon, une ligne ajoutée non ; c'est la dernière ligne d'un objet qui fait foi.
 
 Puis la porte, comme pour toute tâche.
 

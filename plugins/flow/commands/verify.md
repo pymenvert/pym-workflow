@@ -62,7 +62,7 @@ Puis le **Compte-rendu**, pour moi, sans terme non traduit, toujours dans cet or
 ```
 # Journal
 
-Une ligne par événement, ajoutée en fin de fichier par les commandes `/flow:*`, jamais réécrite. Forme : `- date · type · objet · étiquette : valeur · …` — quatre types, `porte`, `livraison`, `incident`, `version` ; jamais de « · » ni de retour à la ligne dans une case, un « ; » les remplace ; « ? » pour ce qu'on ne sait pas, à remplir plus tard. Lu par `/flow:audit`.
+Une ligne par événement, ajoutée en fin de fichier par les commandes `/flow:*`, jamais réécrite. Forme : `- date · type · objet · étiquette : valeur · …` — quatre types, `porte`, `livraison`, `incident`, `version` ; jamais de « · » ni de retour à la ligne dans une case, un « ; » les remplace ; « ? » pour ce qu'on ne sait pas — on ne le remplit jamais : pour une panne, on ajoute plus tard une ligne pour le même objet, et la dernière fait foi. Lu par `/flow:audit`.
 ```
 
 Puis la ligne :
@@ -71,7 +71,7 @@ Puis la ligne :
 - <AAAA-MM-JJ> · porte · <tâche> · checks : N verts, M rouges · bloquants : code-reviewer N, architect N · non vérifié : … · durée : N min · jetons : code-reviewer 175k, architect ?
 ```
 
-Les bloquants réels sont ceux que tu as retenus — corrigés, ou restés bloquants —, pas les suggestions. Un relecteur convoqué qui n'a rien trouvé vaut `0` ; un relecteur qui n'a pas pu regarder vaut `?` — jamais l'un pour l'autre ; un relecteur non convoqué n'est pas dans la case, et la case ne dit jamais « aucun ». Les rouges sont ceux du premier passage des checks. Les jetons sont ceux que l'outil des relecteurs rapporte, sinon `?` ; la durée, l'heure de fin moins celle du départ. L'en-tête fait foi sur la forme : ni « · » ni retour à la ligne dans une case — un « ; » les remplace —, « ? » pour ce qu'on ne sait pas, jamais « aucun ». Sur la branche par défaut, cette ligne s'écrit après le changement de branche, ou pas du tout.
+Les bloquants réels sont ceux que tu as retenus — corrigés, ou restés bloquants —, pas les suggestions. Un relecteur convoqué qui n'a rien trouvé vaut `0` ; un relecteur qui n'a pas pu regarder vaut `?` — jamais l'un pour l'autre ; un relecteur non convoqué n'est pas dans la case, et la case ne dit jamais « aucun ». Les rouges sont ceux du premier passage des checks. Les jetons sont ceux que l'outil des relecteurs rapporte, sinon `?` ; la durée, l'heure de fin moins celle du départ. L'en-tête fait foi sur la forme : ni « · » ni retour à la ligne dans une case — un « ; » les remplace —, « ? » pour ce qu'on ne sait pas, jamais « aucun » ; une ligne ne se réécrit jamais, on en ajoute une pour le même objet. Sur la branche par défaut, cette ligne s'écrit après le changement de branche, ou pas du tout.
 
 ## Arrêts et suite
 

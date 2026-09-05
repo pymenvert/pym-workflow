@@ -14,7 +14,7 @@ Livraison du travail en cours sur cette branche.
 
 4. **Secrets.** Vérifie qu'aucun secret, `.env`, jeton, clé ou identifiant ne part dans le commit. En cas de doute, montre-moi la ligne.
 
-5. **Ligne de journal, avant le commit.** Ajoute à `docs/journal.md`, par `cat >>` — jamais en réécrivant le fichier —, une ligne `livraison` : `- <AAAA-MM-JJ> · livraison · <tâche> · branche : <branche> · change : <ce que ça change, la première partie du Compte-rendu>`. L'en-tête fait foi sur la forme : ni « · » ni retour à la ligne dans une case — un « ; » les remplace —, « ? » pour ce qu'on ne sait pas, jamais « aucun ». Le fichier existe : la porte l'a créé. Le lien de la pull request n'y va pas : GitHub le garde, et l'écrire après coup coûterait un second commit et une CI de plus.
+5. **Ligne de journal, avant le commit.** Ajoute à `docs/journal.md`, par `cat >>` — jamais en réécrivant le fichier —, une ligne `livraison` : `- <AAAA-MM-JJ> · livraison · <tâche> · branche : <branche> · change : <ce que ça change, la première partie du Compte-rendu>`. L'en-tête fait foi sur la forme : ni « · » ni retour à la ligne dans une case — un « ; » les remplace —, « ? » pour ce qu'on ne sait pas, jamais « aucun » ; une ligne ne se réécrit jamais, on en ajoute une pour le même objet. Le fichier existe : la porte l'a créé. Le lien de la pull request n'y va pas : GitHub le garde, et l'écrire après coup coûterait un second commit et une CI de plus.
 
 6. **Commit.** Un commit atomique, dont le message explique **le pourquoi** — le quoi se lit dans le diff. Plusieurs commits uniquement si le travail couvre des changements réellement distincts.
 

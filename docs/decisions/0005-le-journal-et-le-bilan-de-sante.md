@@ -53,7 +53,8 @@ d'une case, ni « · » ni retour à la ligne — un « ; » les remplace. La da
 en fin de ligne avec son étiquette ; une étiquette inconnue est ignorée ; les
 types ne font que croître.** C'est la règle qui évite de migrer onze journaux au
 lot 4 ou au lot 8. Un champ inconnu s'écrit « ? » : une case vide, pas une valeur
-— la remplir n'est pas réécrire.
+— ~~la remplir n'est pas réécrire~~ (amendé le 5 septembre, voir plus bas : on
+ajoute une ligne, on ne remplit pas).
 
 **2. Quatre types.** `porte` (checks, bloquants réels par relecteur, non vérifié,
 durée, jetons) · `livraison` (branche, tâche, ce que ça change) · `incident`
@@ -62,7 +63,8 @@ convoqué vaut `N`, `0` ou `?` — « ? » quand il n'a pas pu regarder, jamais
 confondu avec 0 ; un relecteur non convoqué est absent de la case.
 
 **3. L'incident s'écrit au premier arrêt**, sur la branche `fix/` déjà créée,
-avec « ? » pour la cause et la leçon ; la correction remplit les « ? ». Le mode
+avec « ? » pour la cause et la leçon ; ~~la correction remplit les « ? »~~ (amendé
+le 5 septembre, voir plus bas : la correction ajoute une seconde ligne). Le mode
 incident se déclenche sur un critère tranché après lecture — un comportement qui
 existait a cessé, ou un plantage —, pas sur la forme de la phrase. Sur un projet
 sans tests, il pose l'infrastructure minimale lui-même, comme
@@ -109,6 +111,19 @@ juste. La version coûte un bilan à trois relecteurs, sauf confrontation.
 
 **Ce qu'on s'interdit.** Réécrire le journal · un séparateur dans une case · un
 nom de relecteur en dur dans un calcul · compter un « n'a pas pu » comme un 0.
+
+## Amendé le 5 septembre 2026, par le premier bilan de santé
+
+Le §1 disait qu'un « ? » se remplit ; le §3, que la correction remplit la ligne
+d'incident. Mesuré dans une copie : une ligne modifiée sur une branche pendant
+que la branche par défaut en ajoute une devient, à la fusion, **un doublon** —
+deux incidents comptés pour un, et une panne corrigée proposée pour toujours par
+le guide. La règle devient : **on n'édite jamais une ligne, on en ajoute une
+pour le même objet, et la dernière fait foi** ; l'audit compte les incidents par
+objet, à la date de leur première apparition. Et un bilan de santé neuf
+**remplace** le précédent au registre, ses « à corriger » non rayés remontant
+dans « Défauts constatés » : sans ça, le registre aurait regardé s'accumuler les
+relevés que ce fichier voulait en sortir.
 
 ## Ce que ces chiffres ne disent pas
 

@@ -38,8 +38,11 @@ COMPTE=0  # contrôles lancés — compté, jamais écrit en dur
 
 TMP=${TMPDIR:-/tmp}/verif-plugin-$$
 mkdir -p "$TMP" || exit 1
-# shellcheck disable=SC2064
-trap "rm -rf '$TMP'" EXIT HUP INT TERM
+# Les signaux nettoient PUIS SORTENT : une porte qui continue après un tuyau
+# coupé ou un Ctrl-C rend un verdict avec des rouges fantômes — mesuré au bilan
+# du 5 septembre 2026. Même discipline que le banc.
+trap 'rm -rf "$TMP"' EXIT
+trap 'rm -rf "$TMP"; exit 130' HUP INT TERM PIPE
 
 titre()  { SECTION=0; COMPTE=$((COMPTE + 1)); printf '\n%s\n' "$1"; }
 ok()     { printf '  ok      %s\n' "$1"; }
@@ -151,6 +154,14 @@ for f in "$COMMANDES"/*.md; do
         rate "$n ne commence pas par un frontmatter"
         continue
     fi
+    # Un en-tête jamais refermé passait : la plage « 2,/^---$/ » courait jusqu'au
+    # séparateur du bloc partagé, où « description: » se trouve encore — mesuré
+    # au bilan du 5 septembre 2026. Le symptôme sûr : un titre de section dans
+    # la plage. (Exiger la fermeture avant la première ligne vide rougirait un
+    # en-tête YAML légitime qui en contient une.)
+    if sansCR "$f" | sed -n '2,/^---$/p' | grep -q '^## '; then
+        rate "$n a un frontmatter jamais refermé — sans second « --- », Claude Code ne sait plus où finit l'en-tête"
+    fi
     sansCR "$f" | sed -n '2,/^---$/p' | grep -q '^description:[[:space:]]*[^[:space:]]' ||
         rate "$n n'a pas de ligne « description: » renseignée — la commande disparaîtrait de l'autocomplétion"
 done
@@ -180,6 +191,9 @@ for f in plugins/flow/agents/*.md; do
     fi
     # Même exigence que pour les commandes : sans « description: », Claude Code
     # ne sait plus quand convoquer l'agent. Le défaut est silencieux.
+    if sansCR "$f" | sed -n '2,/^---$/p' | grep -q '^## '; then
+        rate "$n a un frontmatter jamais refermé — sans second « --- », Claude Code ne sait plus où finit l'en-tête"
+    fi
     sansCR "$f" | sed -n '2,/^---$/p' | grep -q '^description:[[:space:]]*[^[:space:]]' ||
         rate "$n n'a pas de ligne « description: » renseignée — plus rien ne dit quand le convoquer"
 done
@@ -194,6 +208,16 @@ while read -r a; do
     [ -f "plugins/flow/agents/$a.md" ] ||
         rate "/flow:verify convoque l'agent « $a », dont le fichier n'existe pas"
 done < "$TMP/agents-attendus"
+# Une liste vide éteignait la boucle en silence : verify.md reformaté, un agent
+# supprimé, et « tous présents » — mesuré au bilan du 5 septembre 2026. Même
+# garde que le contrôle 12 avec NB_AG.
+[ -s "$TMP/agents-attendus" ] ||
+    rate "/flow:verify ne convoque plus aucun agent lisible (forme « - **\`nom\`** ») — un agent supprimé passerait inaperçu"
+# Et UNE seule ligne reformatée suffisait à faire disparaître son agent de la
+# liste — mesuré. Toute puce de la section 2 doit avoir la forme lisible.
+NB_ILLISIBLES=$(sansCR "$COMMANDES/verify.md" | sed -n '/^## 2\./,/^## 3\./p' | grep '^- ' | grep -vc '^- \*\*`[a-z][a-z-]*`\*\*')
+[ "$NB_ILLISIBLES" -eq 0 ] ||
+    rate "/flow:verify : $NB_ILLISIBLES ligne(s) de relecteur illisible(s) dans la section 2 (forme attendue « - **\`nom\`** ») — l'agent qu'elles nomment n'est plus contrôlé"
 
 fin "$(ls plugins/flow/agents/*.md 2>/dev/null | wc -l | tr -d ' ') agents, tous déclarés et tous présents"
 

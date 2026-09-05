@@ -49,20 +49,27 @@ Un audit qui commence par une opinion ne vaut rien. Mais ne refais pas la mesure
 Deux indicateurs, par une seule commande sur les cases étiquetées du journal — les noms des relecteurs viennent des lignes, jamais d'ici :
 
 ```
+if [ ! -f docs/journal.md ]; then echo "pas de journal : indicateurs sans objet"; else
 DEPUIS=$(git log -1 --format=%as "$(git describe --tags --abbrev=0 2>/dev/null)" 2>/dev/null || echo 0000-00-00)
 awk -F' · ' '
   { sub(/\r$/, "") }
-  !/^- / { next }
+  !/^- / { if ($0 ~ / · (porte|livraison|incident|version) · /) printf "ignorée, ligne %d : ne commence pas par « - »\n", NR; next }
   { d = $1; sub(/^- /, "", d) }
   $2 == "porte" { for (i = 4; i <= NF; i++) if ($i ~ /^bloquants : /) { s = $i; sub(/^bloquants : /, "", s); n = split(s, b, ", ")
-      for (j = 1; j <= n; j++) { split(b[j], c, " "); conv[c[1]]++; if (c[2] == "?") pas[c[1]]++; else bloq[c[1]] += c[2] } } }
-  $2 == "incident" && d >= depuis { inc++ }
+      for (j = 1; j <= n; j++) { nc = split(b[j], c, " ")
+        if (nc != 2) { printf "illisible, ligne %d : « %s »\n", NR, b[j]; continue }
+        if (c[2] == "?") { conv[c[1]]++; pas[c[1]]++ } else if (c[2] ~ /^[0-9]+$/) { conv[c[1]]++; bloq[c[1]] += c[2] }
+        else printf "illisible, ligne %d : « %s »\n", NR, b[j] } } }
+  $2 == "incident" { o = $3; dern[o] = d; if (!(o in ouv)) ouv[o] = 1
+      for (i = 4; i <= NF; i++) if ($i ~ /^cause : /) ouv[o] = ($i ~ /^cause : \?[[:space:]]*$/) }
   END { for (r in conv) printf "%s : %d bloquant(s) sur %d convocation(s), %d fois sans pouvoir regarder\n", r, bloq[r], conv[r], pas[r]
-        printf "incidents depuis %s : %d\n", depuis, inc }
+        for (o in dern) { if (dern[o] >= depuis) { inc++; if (ouv[o]) sans++ }; if (ouv[o]) tot++ }
+        printf "incidents depuis %s : %d, dont %d sans cause connue ; %d panne(s) ouverte(s) en tout\n", depuis, inc, sans, tot }
 ' depuis="$DEPUIS" docs/journal.md
+fi
 ```
 
-**Comment lire.** Le rendement d'un relecteur, c'est ses bloquants réels par convocation ; un « ? » est une fois où il n'a pas pu regarder, jamais un zéro. Un zéro ne se lit qu'avec les incidents de la même période : sur des diffs propres, zéro n'est pas « inutile ». Un relecteur à zéro sur dix convocations devient rare — convoqué à la version seulement —, on ne le supprime pas. Les incidents se comptent **par date** depuis la dernière étiquette, pas par position dans le fichier — au jour près : un incident noté le jour de l'étiquette compte pour la période suivante, dis-le si ça pèse. Seules les lignes qui commencent par « - » comptent : l'en-tête, jamais. Et ces chiffres sont déclarés par la porte qui accepte, corrige et compte : ils mesurent l'accord entre elle et ses relecteurs, pas la vérité.
+**Comment lire.** Le rendement d'un relecteur, c'est ses bloquants réels par convocation ; un « ? » est une fois où il n'a pas pu regarder, jamais un zéro. Un zéro ne se lit qu'avec les incidents de la même période : sur des diffs propres, zéro n'est pas « inutile ». Un relecteur à zéro sur dix convocations devient rare — convoqué à la version seulement —, on ne le supprime pas. Les incidents se comptent **par objet** — un `<quoi>` écrit deux fois est une panne, et sa dernière ligne fait foi sur la cause — et **par date de leur dernière ligne** depuis la dernière étiquette, pas par position dans le fichier : une panne d'avant qui revient après compte, une panne sans case « cause » est une panne sans cause. Au jour près : un incident noté le jour de l'étiquette compte pour la période suivante, dis-le si ça pèse. Deux lignes `porte` pour la même tâche sont deux convocations : une reprise après un rouge en est une, et on ne complète jamais une ligne `porte`. Seules les lignes qui commencent par « - » comptent : l'en-tête, jamais. Une case ou une ligne que la commande dit « illisible » ou « ignorée » n'est pas un zéro : c'est une ligne à corriger dans le journal, dis-la. Et ces chiffres sont déclarés par la porte qui accepte, corrige et compte : ils mesurent l'accord entre elle et ses relecteurs, pas la vérité.
 
 ## Qui il convoque
 
@@ -78,7 +85,7 @@ Trois sections, hiérarchisées :
 - **Dette assumable** — à noter, à supporter sciemment
 - **Ce que cet audit n'a pas pu voir** — obligatoire, en citant nommément les conditions réelles qui manquent
 
-Puis **écris ce qui est ouvert dans `docs/reste-a-faire.md`**, sous un titre daté « Bilan de santé du <date> » — à corriger, dette assumable. Ce bilan reste sous son titre jusqu'à l'étiquette suivante ; un « à corriger » réglé s'y **raye** (`~~…~~`), il ne s'efface pas avant la version suivante : c'est ce qui permet à `/flow:release` de ne pas te relancer pour rien. Ce qui s'est passé, c'est `/flow:release` qui l'écrit au journal, ligne `version`. Un audit qui ne survit pas à la conversation n'a servi à rien.
+Puis **écris ce qui est ouvert dans `docs/reste-a-faire.md`**, sous un titre daté « Bilan de santé du <date> » — à corriger, dette assumable. Ce bilan reste sous son titre jusqu'à l'étiquette suivante ; un « à corriger » réglé s'y **raye** (`~~…~~`), il ne s'efface pas avant la version suivante : c'est ce qui permet à `/flow:release` de ne pas te relancer pour rien. **Un bilan neuf remplace le précédent** : ses « à corriger » non rayés remontent dans « Défauts constatés », le reste disparaît — le registre ne garde que l'ouvert. Ce qui s'est passé, c'est `/flow:release` qui l'écrit au journal, ligne `version`. Un audit qui ne survit pas à la conversation n'a servi à rien.
 
 Et si l'audit dégage une leçon générale — pas un défaut, une règle —, propose-moi de l'ajouter au `CLAUDE.md` du projet. C'est ce qui évite de la réapprendre au prix fort.
 

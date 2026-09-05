@@ -14,7 +14,7 @@
 |---|---|---|
 | 0 | Ce plan, le cap dans la Boussole, le registre corrigé | livré avec la 0.14.1, le 4 septembre 2026 |
 | 1 | Le rythme enchaîné, la décision expliquée, les rapports « pour toi » ; `/flow:studio` seulement si le manque se constate | livré dans la 0.15.0 le 5 septembre 2026 (décision `0004`), à constater sur une app |
-| 2 | Le journal, le mode incident, l'audit redéfini en bilan de santé à la version | livré dans la 0.16.0 le 5 septembre 2026 (décision `0005`), à constater sur une app |
+| 2 | Le journal, le mode incident, l'audit redéfini en bilan de santé à la version | livré dans la 0.16.1 le 5 septembre 2026 (décision `0005` ; la 0.16.0 corrigée par son premier bilan de santé), à constater sur une app |
 | 3 | Le profil étendu, la fiche produit, la liste à faire | à faire |
 | 4 | L'expert sécurité `securite` et ses automates | à faire |
 | 5 | La conception d'interface avant le code | à faire |

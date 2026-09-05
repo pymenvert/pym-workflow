@@ -18,7 +18,7 @@ Quand le dépôt est privé, git doit savoir s'identifier sur la machine :
 - **Windows** — le gestionnaire d'identifiants installé par GitHub Desktop suffit. Rien à configurer.
 - **Ubuntu** — GitHub Desktop n'existe pas pour Linux. Installer `gh` (`sudo apt install gh`), puis lancer `gh auth login` et `gh auth setup-git`. Git réutilisera ces identifiants pour les dépôts privés, sans autre réglage.
 
-**La version de `gh` livrée par Ubuntu suffit.** Vérifié le 4 septembre 2026 sur la tour : paquet `noble/universe`, `gh` 2.45.0, et les cinq appels que le plugin utilise fonctionnent — `repo view`, `api`, `pr list`, `pr create`, `run list`. Depuis la version 0.12.0, plus aucune commande n'emploie de capacité apparue dans une version récente ; c'est l'objet de `docs/decisions/0002-visibilite-par-api-et-porte-du-plugin.md`.
+**La version de `gh` livrée par Ubuntu suffit.** Vérifié le 4 septembre 2026 sur la tour : paquet `noble/universe`, `gh` 2.45.0, et les cinq appels que le plugin utilisait alors fonctionnent — `repo view`, `api`, `pr list`, `pr create`, `run list`. Trois autres sont venus depuis — `pr checks`, `repo create`, `auth refresh` — et restent à constater sur la tour. Depuis la version 0.12.0, plus aucune commande n'emploie de capacité apparue dans une version récente ; c'est l'objet de `docs/decisions/0002-visibilite-par-api-et-porte-du-plugin.md`.
 
 ## Le cycle
 
@@ -115,7 +115,7 @@ Deux règles complètent l'ensemble : chaque arrêt commence par « **J'attends 
 
 ## Le journal — ce qui s'est passé, compté
 
-`docs/journal.md`, dans chaque projet : une ligne par événement, ajoutée par les commandes, jamais réécrite. Quatre types — `porte` (checks, bloquants réels par relecteur, non vérifié, durée, jetons), `livraison` (branche, ce que ça change), `incident` (quoi, cause, leçon), `version` (numéro, bilan). Tu n'as rien à taper : `/flow:verify`, `/flow:ship`, `/flow:new-feature` et `/flow:release` l'écrivent. `/flow:audit` le lit et en tire deux chiffres, par une seule commande : le rendement de chaque relecteur, et les incidents par version — le seul chiffre qui dit si la porte protège. Un relecteur à zéro sur dix portes devient rare ; on ne le supprime pas. Ces chiffres sont déclarés par la porte elle-même : ils mesurent son accord avec ses relecteurs, pas la vérité (`docs/decisions/0005-le-journal-et-le-bilan-de-sante.md`). Le registre `docs/reste-a-faire.md` ne garde plus que ce qui est ouvert.
+`docs/journal.md`, dans chaque projet : une ligne par événement, ajoutée par les commandes, jamais réécrite — une panne corrigée ajoute une ligne pour le même objet, elle n'en modifie pas. Quatre types — `porte` (checks, bloquants réels par relecteur, non vérifié, durée, jetons), `livraison` (branche, ce que ça change), `incident` (quoi, cause, leçon), `version` (numéro, bilan). Tu n'as rien à taper : `/flow:verify`, `/flow:ship`, `/flow:new-feature` et `/flow:release` l'écrivent. `/flow:audit` le lit et en tire deux chiffres, par une seule commande : le rendement de chaque relecteur, et les incidents par version — le seul chiffre qui dit si la porte protège. Un relecteur à zéro sur dix portes devient rare ; on ne le supprime pas. Ces chiffres sont déclarés par la porte elle-même : ils mesurent son accord avec ses relecteurs, pas la vérité (`docs/decisions/0005-le-journal-et-le-bilan-de-sante.md`). Le registre `docs/reste-a-faire.md` ne garde plus que ce qui est ouvert.
 
 ## Le profil projet — comment flow s'adapte
 
@@ -200,7 +200,7 @@ Les deux scripts forment ensemble la commande `test` du Profil projet — donc c
 
 ## Le cap
 
-Le plugin a un cap écrit : `docs/plan-studio.md`. Son tableau d'avancement, en tête, dit quel lot vient ensuite ; sa section 13 liste les choix qui reviennent à l'auteur. La règle qui va avec : aucun lot sur ce dépôt sans un item de ce plan ou une app réelle qui le justifie. Le lot 1 — le rythme enchaîné et la pédagogie — est dans la 0.15.0, le lot 2 — le journal, le mode incident, le bilan de santé — dans la 0.16.0 ; aucun des deux n'est « constaté » tant qu'une tâche réelle n'a pas traversé la chaîne.
+Le plugin a un cap écrit : `docs/plan-studio.md`. Son tableau d'avancement, en tête, dit quel lot vient ensuite ; sa section 13 liste les choix qui reviennent à l'auteur. La règle qui va avec : aucun lot sur ce dépôt sans un item de ce plan ou une app réelle qui le justifie. Le lot 1 — le rythme enchaîné et la pédagogie — est dans la 0.15.0, le lot 2 — le journal, le mode incident, le bilan de santé — dans la 0.16.1 ; aucun des deux n'est « constaté » tant qu'une tâche réelle n'a pas traversé la chaîne.
 
 ## Mettre à jour le workflow
 
