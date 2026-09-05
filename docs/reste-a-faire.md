@@ -7,7 +7,8 @@ vivent dans `docs/decisions/`, les cadrages dans `docs/specs/`. Ne rien
 dupliquer entre les trois.
 
 Dernière mise à jour : 4 septembre 2026, après la porte de la tâche
-« passe sur les quatre agents ».
+« passe sur les quatre agents », puis le soir même lors du plan studio
+(`docs/plan-studio.md`), qui a retiré un défaut déjà réglé.
 
 ---
 
@@ -57,23 +58,15 @@ est bornée et qu'aucune ne produit de faux vert :
    script ; interrompu par un tuyau fermé, il peut ne pas s'exécuter. Sans
    conséquence sur le verdict, mais ça encombre.
 
-### `/flow:audit` et l'agent `architect` se recouvrent
+### `/flow:guide` propose de concevoir un cadrage déjà réalisé
 
-`audit.md`:24 recopie presque mot pour mot la liste de mesures de
-`architect.md`:26-33, puis `audit.md`:40 lance `architect` pour refaire la même
-mesure — sur la commande la plus chère du lot. Et la question centrale existe en
-double avec **deux horizons contradictoires** : « dans six mois » côté audit,
-« dans trois mois » côté architecte.
-
-Reporté sciemment le 4 septembre. Les deux horizons se corrigent en un mot, mais
-la duplication de fond demande une **décision** : `/flow:audit` mesure lui-même,
-ou il délègue — il ne peut pas faire les deux. Ça mérite son propre cadrage, pas
-un coin d'un autre lot. Et le défaut ne facture que lorsque `/flow:audit` tourne,
-c'est-à-dire « rare, entre deux versions ».
-
-**Règle de tri appliquée ce jour, et qui vaut d'être retenue :** on prend dans un
-lot ouvert ce qui vit dans un fichier que le lot ouvre déjà **et** qui se corrige
-sans décision nouvelle. Ce point échoue au second critère.
+Il apparie cadrages et décisions par leurs noms de fichiers, sans lire leur
+contenu (`guide.md`:10 et :41). Un cadrage absorbé par une décision qui ne porte
+pas son nom, comme `audit-et-architect-en-double.md` par la `0003`, lui paraît
+donc sans décision, et il propose `/flow:design` dessus : constaté le 4 septembre
+2026 au soir. La mention « Réalisé » posée en tête du cadrage ne le corrige pas,
+puisqu'il ne l'ouvre pas. Correctif prévu au lot 3 de `docs/plan-studio.md` ;
+d'ici là, ne pas suivre cette proposition.
 
 ---
 
@@ -137,11 +130,47 @@ emploiera une capacité récente fera renaître le besoin intact.
 
 ## Relevés datés
 
+### 4 septembre 2026 — le plan studio (0.14.1)
+
+Lot de documentation : `docs/plan-studio.md` (le cap du plugin, douze lots, sept
+choix qui reviennent à l'auteur), le renvoi du README, la Boussole qui lit le
+tableau d'avancement, le cadrage audit/architect marqué réalisé, ce registre
+corrigé. Aucune commande ni agent modifié ; la version passe à 0.14.1 parce que
+le contrôle 6 l'exige dès qu'un fichier diffère de la branche par défaut.
+
+**Ce que la porte a trouvé.** Deux relecteurs, `code-reviewer` et `architect`
+en mode dérive (un fichier créé) ; cinq bloquants, tous corrigés avant la
+livraison : le registre affirmait un effet sur `/flow:guide` qui n'existe pas
+(il ne lit pas les cadrages) ; le plan disait « ajouter » à l'audit une
+délégation en place depuis la 0.14.0 ; un terme anglais non traduit ; la
+Boussole lisait le plan par un numéro de ligne (`head -40`), cassé à la première
+insertion, remplacé par une lecture des lignes du tableau par leur forme ; et le
+défaut du guide vivait dans le plan au lieu de ce registre. Retenu aussi de
+l'architecte : plus de numéros de version écrits d'avance dans le plan, un seul
+état par lot, `/flow:studio` seulement après un manque constaté, le modèle par
+agent après dix portes mesurées, et les conflits précis des lots futurs avec les
+contrôles 4, 8, 9 et 11, écrits dans le plan pour ne pas être découverts en
+route.
+
+**Coût, et une leçon.** Les deux relecteurs ont été coupés par la limite
+mensuelle d'utilisation au milieu de leur lecture, puis repris là où ils en
+étaient : environ 530 000 jetons pour la porte d'un lot de markdown, dont deux
+lectures interrompues. C'est le chiffre qui motive la section 4 du plan.
+
+**Non vérifié.** Rien n'a tourné sous Windows ; la Boussole modifiée n'a pas
+encore été exercée dans une conversation neuve.
+
 ### 4 septembre 2026 — un propriétaire par préoccupation (0.14.0)
 
 Conception attaquée par cinq angles, dix-huit objections passées à la réfutation
 adverse, **dix retenues** — dont trois qui ont démoli des pans entiers de la
 proposition initiale.
+
+**Ce lot règle aussi le recouvrement `/flow:audit` ↔ `architect`**, cadré dans
+`audit-et-architect-en-double.md` : le détail est dans la décision `0003`, pas
+ici. Ce registre l'a pourtant listé comme ouvert jusqu'au 4 septembre 2026 au
+soir, où le plan studio l'a retiré ; le défaut du guide qui en découle est dans
+les défauts constatés.
 
 **Ce qui est tombé, et pourquoi c'est le plus utile de ce lot :**
 
